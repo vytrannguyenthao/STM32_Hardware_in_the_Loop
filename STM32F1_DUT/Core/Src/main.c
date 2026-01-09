@@ -237,7 +237,7 @@ static void MX_SPI1_Init(void)
   SPI_InitStruct.CRCPoly = 10;
   LL_SPI_Init(SPI1, &SPI_InitStruct);
   /* USER CODE BEGIN SPI1_Init 2 */
-
+  LL_SPI_Enable(SPI1);
   /* USER CODE END SPI1_Init 2 */
 
 }
