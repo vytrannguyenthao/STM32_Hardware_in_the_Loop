@@ -1,0 +1,123 @@
+\chapter{KẾT QUẢ THỰC HIỆN}
+
+Chương này trình bày các kết quả đạt được sau quá trình thiết kế, xây dựng và triển khai hệ thống Hardware-in-the-Loop cho kiểm thử phần mềm nhúng. Các kết quả được phân tích theo ba thành phần chính của hệ thống bao gồm: phần mềm HIL, phần mềm DUT và phần mềm trên máy tính . Qua đó đánh giá mức độ đáp ứng yêu cầu thiết kế cũng như khả năng ứng dụng thực tế của hệ thống.
+
+\section{Kết quả thực hiện phần mềm HIL}
+
+Phần mềm HIL được triển khai trên nền tảng vi điều khiển và đóng vai trò mô phỏng các thiết bị ngoại vi để phục vụ cho quá trình kiểm thử DUT. Kết quả thực hiện cho thấy hệ thống HIL đã đáp ứng tốt các yêu cầu đề ra ban đầu.
+
+Trước hết, hệ điều hành thời gian thực FreeRTOS đã được tích hợp thành công vào phần mềm HIL. Việc sử dụng FreeRTOS cho phép hệ thống tổ chức các chức năng dưới dạng các task độc lập, giúp tăng tính linh hoạt và khả năng mở rộng của phần mềm. Các task chính bao gồm task giao tiếp với PC, task mô phỏng ngoại vi và task quản lý dữ liệu mô phỏng.
+
+Hệ thống HIL đã mô phỏng thành công các thiết bị ngoại vi phổ biến trong hệ thống nhúng. Ngoài ra, phần mềm HIL cho phép người dùng cấu hình linh hoạt các tham số giao tiếp thông qua các lệnh gửi từ PC. Điều này giúp quá trình kiểm thử trở nên thuận tiện hơn, không cần phải nạp lại firmware mỗi khi thay đổi kịch bản kiểm thử.
+
+Trong quá trình vận hành, hệ thống HIL duy trì kết nối ổn định với cả DUT và PC thông qua các giao thức ngoại vi. Các tín hiệu mô phỏng được truyền nhận chính xác và đúng thời gian, đáp ứng yêu cầu kiểm thử theo thời gian thực. Kết quả này chứng minh tính khả thi của việc sử dụng HIL như một công cụ hỗ trợ kiểm thử phần mềm nhúng.
+
+\section{Kết quả thực hiện phần mềm DUT}
+
+Phần mềm nhúng trên thiết bị cần kiểm thử (DUT) được xây dựng nhằm kiểm tra khả năng tương tác với hệ thống HIL và PC trong các điều kiện mô phỏng khác nhau.
+
+Tương tự như phần mềm HIL, hệ điều hành FreeRTOS cũng được tích hợp vào DUT để quản lý các chức năng chính của hệ thống. Các task được phân chia rõ ràng, bao gồm task giao tiếp với PC, task giao tiếp với HIL và task xử lý dữ liệu. Cách tiếp cận này giúp cải thiện khả năng đáp ứng thời gian thực và tăng tính ổn định của hệ thống.
+
+Kết quả thử nghiệm cho thấy DUT có thể giao tiếp ổn định với hệ thống HIL thông qua các giao thức UART, I2C và SPI. DUT nhận và xử lý chính xác các tín hiệu mô phỏng do HIL tạo ra, đồng thời phản hồi lại trạng thái hoạt động tương ứng. Việc giao tiếp với PC thông qua USB cũng diễn ra ổn định, cho phép gửi và nhận các lệnh cấu hình, điều khiển trong suốt quá trình kiểm thử.
+
+Nhìn chung, phần mềm DUT đã đáp ứng đầy đủ các yêu cầu thiết kế ban đầu, đồng thời cho thấy khả năng tích hợp tốt với hệ thống HIL trong môi trường kiểm thử.
+
+\section{Kết quả thực hiện phần mềm trên PC}
+
+Phần mềm trên máy tính được phát triển bằng ngôn ngữ Python, sử dụng thư viện Tkinter để xây dựng giao diện đồ họa người dùng. Phần mềm PC đóng vai trò trung tâm điều phối, cho phép người dùng cấu hình hệ thống, điều khiển mô phỏng và giám sát quá trình kiểm thử.
+
+Về mặt kiến trúc, phần mềm PC được chia thành các khối chức năng chính như sau:
+\begin{itemize}
+    \item Khối giao tiếp nối tiếp (Serial Terminal), đảm nhiệm việc kết nối và trao đổi dữ liệu với DUT và HIL.
+    \item Khối điều phối và thực thi kịch bản kiểm thử, cho phép tự động hóa quá trình kiểm thử theo các kịch bản định trước.
+    \item Khối giao diện dòng lệnh và giao diện đồ họa, hỗ trợ người dùng nhập lệnh và theo dõi kết quả.
+\end{itemize}
+
+Giao diện chính của phần mềm được tổ chức dưới dạng các tab riêng biệt nhằm tăng tính trực quan và thuận tiện trong quá trình sử dụng, bao gồm:
+\begin{itemize}
+    \item Tab DUT: dùng để giao tiếp trực tiếp và gửi lệnh đến firmware của DUT.
+    \item Tab HIL: cho phép cấu hình và điều khiển hệ thống HIL.
+    \item Tab PC Terminal: phục vụ điều phối kiểm thử, thực thi lệnh hệ thống và giám sát dữ liệu.
+\end{itemize}
+
+Mỗi tab đảm nhiệm một chức năng riêng, giúp người dùng dễ dàng chuyển đổi giữa các chế độ kiểm thử và theo dõi trạng thái hoạt động của toàn bộ hệ thống. Giao diện chính của phần mềm trên máy tính được minh họa trong Hình \ref{fig:PC_GUI}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/PC_GUI.png}
+    \caption{Giao diện chính của phần mềm trên máy tính}
+    \label{fig:PC_GUI}
+\end{figure}
+
+Ngoài việc cung cấp giao diện dòng lệnh cho phép thực thi các lệnh hệ thống và các lệnh tiện ích như xóa nội dung terminal hoặc làm sạch dữ liệu hiển thị, phần mềm PC còn hỗ trợ xây dựng và chạy các kịch bản kiểm thử tự động. Điều này góp phần nâng cao hiệu quả và tính lặp lại của quá trình kiểm thử phần mềm nhúng.
+
+\subsection{Kết quả mô phỏng SPI Flash}
+Phần mềm trên máy tính sẽ thực hiện 1 bài kiểm thử tự động để kiểm tra chức năng đọc/ghi dữ liệu của DUT với thiết bị SPI Flash mô phỏng trên hệ thống HIL. Các bước thực hiện bao gồm:
+\begin{itemize}
+    \item \textbf{Bước 1:} PC gửi lệnh đến \textbf{DUT} đọc ID của thiết bị SPI Flash (HIL đang mô phỏng W25Q128 với ID: 0xEF4018).\\
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_read_id.jpg}
+        \caption{DUT đọc ID của thiết bị SPI Flash mô phỏng trên HIL}
+        \label{fig:spi_read_id}
+    \end{figure}
+
+    \item \textbf{Bước 2:} PC gửi lệnh đến \textbf{HIL} để khởi tạo bộ nhớ từ địa chỉ 0 - 255 với giá trị tăng dần từ 0x00 đến 0xFF.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_hil_prepare_mem.jpg}
+        \caption{HIL khởi tạo bộ nhớ SPI Flash mô phỏng}
+        \label{fig:spi_hil_prepare_mem}
+    \end{figure}
+
+    \item \textbf{Bước 3:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 255 mà thiết bị SPI Flash mô phỏng trên HIL. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu gốc.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_read_256.jpg}
+        \caption{DUT đọc dữ liệu từ SPI Flash mô phỏng}
+        \label{fig:spi_read_256}
+    \end{figure}
+
+    \item \textbf{Bước 4:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT ghi giá trị vào SPI Flash mô phỏng từ địa chỉ 0 - 1023 với giá trị tăng dần từ 0x00 đến 0xFF lặp lại.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_write.jpg}
+        \caption{DUT ghi dữ liệu vào SPI Flash mô phỏng}
+        \label{fig:spi_write}
+    \end{figure}
+
+    \item \textbf{Bước 5:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu DUT vừa ghi vào.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_read_after_write.jpg}
+        \caption{DUT đọc dữ liệu sau khi ghi vào SPI Flash mô phỏng}
+        \label{fig:spi_read_after_write}
+    \end{figure}
+
+    \item \textbf{Bước 6:} PC gửi lệnh đến \textbf{DUT} xóa toàn bộ dữ liệu trên SPI Flash mô phỏng.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.65\textwidth]{image/spi_erase.jpg}
+        \caption{DUT xóa dữ liệu trên SPI Flash mô phỏng}
+        \label{fig:spi_erase}
+    \end{figure}
+
+    \item \textbf{Bước 7:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023 (toàn bộ giá trị đều là 0xFF sau khi xóa).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{image/spi_read_after_erase.jpg}
+        \caption{DUT đọc dữ liệu sau khi xóa trên SPI Flash mô phỏng}
+        \label{fig:spi_read_after_erase}
+    \end{figure}
+\end{itemize}
+
+Sau khi hoàn thành các bước kiểm thử, kết quả sẽ được hiển thị trên giao diện chính của phần mềm PC như Hình \ref{fig:spi_test_result}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/spi_result.jpg}
+    \caption{Kết quả kiểm thử SPI Flash trên phần mềm PC}
+    \label{fig:spi_test_result}
+\end{figure}
+Kết quả kiểm thử cho thấy DUT đã thực hiện chính xác các thao tác đọc, ghi và xóa dữ liệu trên thiết bị SPI Flash mô phỏng bởi hệ thống HIL. 
+Dữ liệu đọc được từ DUT hoàn toàn khớp với dữ liệu gốc đã được khởi tạo trên HIL, chứng tỏ tính đúng đắn của quá trình giao tiếp và xử lý dữ liệu giữa DUT và HIL.

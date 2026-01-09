@@ -1,0 +1,28 @@
+\begin{center}
+	{\fontsize{24pt}{24pt}\textbf{TÓM TẮT}}
+\end{center}
+
+Báo cáo trình bày việc thiết kế và xây dựng một hệ thống mô phỏng phần cứng trong vòng lặp nhằm phục vụ kiểm thử và đánh giá phần mềm nhúng cho thiết bị cần kiểm thử. Hệ thống cho phép mô phỏng các thiết bị ngoại vi và kịch bản giao tiếp phổ biến, từ đó hỗ trợ kiểm thử chức năng, đánh giá hành vi và độ ổn định của firmware DUT trong môi trường gần với thực tế. Nội dung báo cáo bao gồm:
+
+\textbf{Phần cứng của hệ thống HIL và DUT:}
+\begin{itemize}
+    \item Thiết kế hệ thống HIL đóng vai trò mô phỏng các thiết bị ngoại vi và môi trường hoạt động của DUT, hỗ trợ các giao thức giao tiếp phổ biến như UART, I2C và SPI.
+    \item Xây dựng bo DUT làm đối tượng kiểm thử, giao tiếp trực tiếp với HIL để nhận tín hiệu mô phỏng và phản hồi dữ liệu theo các kịch bản kiểm thử được thiết lập.
+    \item Hệ thống phần cứng cho phép mở rộng và cấu hình linh hoạt, phù hợp cho mục đích nghiên cứu và phát triển phần mềm nhúng.
+\end{itemize}
+
+\textbf{Firmware cho hệ thống HIL và DUT:}
+\begin{itemize}
+    \item Phát triển firmware cho cả HIL và DUT dựa trên hệ điều hành thời gian thực FreeRTOS, cho phép triển khai đa nhiệm và quản lý các tác vụ giao tiếp một cách hiệu quả.
+    \item Cài đặt các tác vụ xử lý giao tiếp UART, I2C, SPI; tác vụ tiếp nhận và xử lý lệnh từ máy tính; tác vụ mô phỏng thiết bị ngoại vi trên HIL và tác vụ xử lý tín hiệu trên DUT.
+    \item Firmware DUT thực hiện nhận dữ liệu mô phỏng từ HIL, xử lý và cập nhật trạng thái hệ thống theo đúng kịch bản kiểm thử, đảm bảo tính thời gian thực và độ ổn định trong quá trình vận hành.
+\end{itemize}
+
+\textbf{Phần mềm trên máy tính:}
+\begin{itemize}
+    \item Phát triển phần mềm trên máy tính bằng ngôn ngữ Python, sử dụng thư viện Tkinter để xây dựng giao diện đồ họa người dùng.
+    \item Phần mềm cung cấp các terminal giao tiếp nối tiếp độc lập cho DUT và HIL, cho phép cấu hình tham số truyền thông, gửi lệnh điều khiển và giám sát dữ liệu phản hồi.
+    \item Tích hợp khối điều phối kiểm thử cho phép xây dựng và thực thi các kịch bản kiểm thử tự động, hỗ trợ ghi nhận, theo dõi và đánh giá kết quả kiểm thử của DUT.
+\end{itemize}
+
+Kết quả đạt được cho thấy hệ thống HIL được xây dựng hoạt

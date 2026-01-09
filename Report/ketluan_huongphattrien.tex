@@ -1,0 +1,22 @@
+\chapter{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+
+\section{Kết luận}
+
+Trong khuôn khổ đồ án này, nhóm đã nghiên cứu, thiết kế và xây dựng thành công một hệ thống Hardware-in-the-Loop (HIL) phục vụ cho việc kiểm thử phần mềm nhúng. Hệ thống được triển khai theo kiến trúc gồm ba thành phần chính: phần mềm trên máy tính (PC), hệ thống HIL và thiết bị cần kiểm thử (DUT). Mỗi thành phần đảm nhiệm một vai trò riêng biệt nhưng phối hợp chặt chẽ với nhau trong toàn bộ quá trình kiểm thử.
+
+Về mặt kỹ thuật, hệ thống đã chứng minh được tính khả thi của việc áp dụng mô hình HIL trong lĩnh vực hệ thống nhúng. Phần mềm HIL và DUT đều được tích hợp hệ điều hành thời gian thực FreeRTOS, cho phép tổ chức chương trình theo mô hình đa nhiệm, nâng cao khả năng mở rộng và đảm bảo đáp ứng yêu cầu thời gian thực. Hệ thống HIL đã mô phỏng thành công các thiết bị ngoại vi phổ biến như UART, I2C và SPI, đồng thời cho phép cấu hình linh hoạt các tham số giao tiếp thông qua máy tính.
+
+Phần mềm trên PC được xây dựng với giao diện đồ họa trực quan, hỗ trợ cấu hình hệ thống, điều khiển mô phỏng và giám sát quá trình kiểm thử. Việc tổ chức giao diện theo các tab chức năng giúp người dùng dễ dàng thao tác và theo dõi trạng thái hoạt động của DUT và HIL.
+
+Kết quả thực nghiệm cho thấy hệ thống hoạt động ổn định, giao tiếp chính xác giữa các thành phần và đáp ứng tốt các yêu cầu thiết kế ban đầu. Qua đó, đồ án đã đạt được mục tiêu đề ra là xây dựng một nền tảng HIL cơ bản, có khả năng hỗ trợ kiểm thử và đánh giá phần mềm nhúng trong giai đoạn phát triển.
+
+\section{Hướng phát triển}
+
+Mặc dù đã đạt được các kết quả tích cực, hệ thống HIL trong đồ án vẫn còn nhiều tiềm năng để tiếp tục hoàn thiện và mở rộng trong tương lai. Một số hướng phát triển chính được đề xuất như sau:
+
+\begin{itemize}
+    \item Thứ nhất, hoàn thiện và nâng cấp phần cứng của hệ thống HIL. Việc thiết kế lại phần cứng theo hướng tối ưu hơn về độ ổn định, độ chính xác tín hiệu và khả năng mở rộng số lượng kênh giao tiếp sẽ giúp hệ thống đáp ứng tốt hơn các yêu cầu kiểm thử phức tạp trong thực tế.
+    \item Thứ hai, mở rộng khả năng mô phỏng bằng cách bổ sung thêm nhiều loại thiết bị và ngoại vi khác nhau. Ngoài các giao thức UART, I2C và SPI, hệ thống HIL có thể được phát triển để mô phỏng các cảm biến, bộ truyền động hoặc các giao thức truyền thông khác, nhằm tăng tính ứng dụng của hệ thống trong nhiều bài toán nhúng khác nhau.
+    \item Thứ ba, tích hợp chức năng logic analyzer vào hệ thống HIL. Việc bổ sung logic analyzer cho phép thu thập và phân tích chi tiết các tín hiệu đầu ra của DUT theo thời gian thực, từ đó đánh giá chính xác hơn hành vi của DUT trong các kịch bản kiểm thử khác nhau.
+\end{itemize}
+

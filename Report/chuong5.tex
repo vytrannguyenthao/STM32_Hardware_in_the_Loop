@@ -1,0 +1,48 @@
+\chapter{THIẾT KẾ VÀ THỰC HIỆN PHẦN MỀM NHÚNG CHO DUT}
+\section{Yêu cầu thiết kế}
+Các yêu cầu thiết kế chính cho phần mềm nhúng trên thiết bị cần kiểm thử (DUT) bao gồm:
+
+\begin{itemize}
+    \item DUT phải có khả năng giao tiếp USB với máy tính để nhận lệnh cấu hình và điều khiển mô phỏng.
+    \item DUT phải có khả năng giao tiếp với hệ thống HIL thông qua các giao thức ngoại vi phổ biến như UART, I2C, SPI,...
+    \item Phần mềm nhúng trên DUT phải có khả năng cấu hình linh hoạt các tham số giao tiếp như tốc độ truyền nhận, địa chỉ I2C, định dạng dữ liệu,...
+    \item DUT cần xử lý chính xác các tín hiệu đầu vào/đầu ra từ hệ thống HIL theo thời gian thực.
+\end{itemize}
+
+\section{Lưu đồ giải thuật tổng quát}
+Lưu đồ giải thuật tổng quát mô tả trình tự hoạt động của phần mềm nhúng trên DUT được trình bày trong Hình \ref{fig:DUT_overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{image/HIL_overview.png}
+    \caption{Lưu đồ giải thuật tổng quát cho hệ thống DUT}
+    \label{fig:DUT_overview}
+\end{figure}
+
+Về nguyên lý hoạt động, DUT và hệ thống HIL có nhiều điểm tương đồng trong giai đoạn khởi tạo và xử lý lệnh. Khi hệ thống khởi động, vi điều khiển trên DUT thực hiện cấu hình xung clock và khởi tạo các ngoại vi cần thiết cho quá trình giao tiếp với máy tính và hệ thống HIL, bao gồm USB, UART, I2C, SPI và các bộ định thời.
+
+Sau khi hoàn tất khởi tạo phần cứng, hệ thống tạo các task phục vụ cho việc xử lý lệnh điều khiển từ máy tính và giao tiếp với hệ thống HIL. Trong suốt quá trình vận hành, DUT liên tục nhận lệnh cấu hình và điều khiển từ máy tính, đồng thời thực hiện giao tiếp với HIL để nhận các tín hiệu mô phỏng tương ứng với các thiết bị ngoại vi.
+
+Dựa trên dữ liệu nhận được từ hệ thống HIL, DUT tiến hành xử lý và cập nhật trạng thái hoạt động nội bộ. Chu trình này được lặp lại liên tục, đảm bảo DUT luôn sẵn sàng đáp ứng các kịch bản kiểm thử khác nhau.
+
+Khác với hệ thống HIL, DUT không thực hiện mô phỏng thiết bị ngoại vi mà chỉ đóng vai trò là đối tượng tiếp nhận và xử lý tín hiệu mô phỏng, từ đó đánh giá tính đúng đắn và độ ổn định của firmware.
+
+\section{Lưu đồ giải thuật chi tiết}
+
+Để đảm bảo khả năng điều khiển và cấu hình linh hoạt từ máy tính, phần mềm nhúng trên DUT triển khai một task chuyên trách cho việc xử lý lệnh. Lưu đồ giải thuật của task này được minh họa trong Hình \ref{fig:DUT_CLI_task}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/DUT_CLI_task.png}
+    \caption{Lưu đồ giải thuật của task xử lý lệnh từ máy tính trên DUT}
+    \label{fig:DUT_CLI_task}
+\end{figure}
+
+Tương tự như HIL, task xử lý lệnh hoạt động theo cơ chế vòng lặp vô hạn và liên tục chờ dữ liệu từ máy tính thông qua giao tiếp USB. Khi nhận được một lệnh, hệ thống tiến hành phân tích cú pháp và xác định loại lệnh tương ứng.
+
+Đối với các lệnh cấu hình, DUT cập nhật các tham số giao tiếp như tốc độ truyền nhận, địa chỉ I2C và định dạng dữ liệu. Các thay đổi này được áp dụng trực tiếp nhằm đảm bảo hệ thống có thể nhanh chóng chuyển sang trạng thái kiểm thử mới.
+
+Trong trường hợp nhận được lệnh điều khiển, DUT thực hiện các thao tác giao tiếp tương ứng với hệ thống HIL để nhận dữ liệu mô phỏng từ các thiết bị ngoại vi. Dữ liệu này sau đó được xử lý bởi firmware của DUT nhằm kiểm tra tính đúng đắn của các chức năng đã được triển khai.
+
+Nếu lệnh nhận được không hợp lệ hoặc không được hỗ trợ, DUT sẽ gửi thông báo lỗi về máy tính để người dùng có thể điều chỉnh kịch bản kiểm thử. Cơ chế này giúp đảm bảo DUT luôn trong trạng thái sẵn sàng và dễ dàng mở rộng khi bổ sung các loại lệnh mới trong tương lai.
+

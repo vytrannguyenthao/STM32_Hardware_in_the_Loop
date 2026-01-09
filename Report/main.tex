@@ -1,0 +1,118 @@
+\documentclass[12pt, a4paper, fleqn]{extreport}
+\usepackage[utf8]{vietnam}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx, float}
+\usepackage[left=3cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{setspace}
+\usepackage{array, booktabs, subcaption}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning,shapes,arrows}
+\usepackage{tocloft} % Điều chỉnh spacing cho TOC/LOF/LOT
+\usepackage{indentfirst}
+\usepackage[hidelinks]{hyperref} % Hyperlink nên đặt ở cuối cùng
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{url}
+\setlength{\emergencystretch}{3em}
+
+
+% --- Font size & line spacing ---
+\renewcommand{\normalsize}{\fontsize{13}{19}\selectfont} % font 13pt, dòng 16pt
+\setstretch{1} % khoảng cách dòng
+
+% --- Header & Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textit{Đồ án 2}}
+\fancyhead[R]{\textit{GVHD: ThS. Bùi Quốc Bảo}}
+\fancyfoot[R]{Trang $\mid$ \thepage}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyhead[L]{\textit{Đồ án 2}}
+    \fancyhead[R]{\textit{GVHD: ThS. Bùi Quốc Bảo}}
+    \fancyfoot[R]{Trang $\mid$ \thepage}
+}
+
+\setlength{\headheight}{25pt}
+\setlength{\footskip}{20pt}
+\setlength{\parindent}{35pt}
+
+% --- Cấu hình lại khoảng cách cho hình ảnh/bảng ---
+% --- THÊM ĐOẠN NÀY VÀO ---
+\setlength{\intextsep}{0pt} % Chỉnh số này nhỏ lại nếu muốn gần hơn
+\setlength{\belowcaptionskip}{0pt}
+
+% --- TOC / LOF / LOT spacing ---
+\setlength{\cftbeforetoctitleskip}{0pt}  % khoảng cách trước tiêu đề TOC
+\setlength{\cftaftertoctitleskip}{10pt}  % khoảng cách sau tiêu đề TOC
+
+\setlength{\cftbeforeloftitleskip}{0pt}  % trước LOF
+\setlength{\cftafterloftitleskip}{10pt}  % sau LOF
+
+\setlength{\cftbeforelottitleskip}{0pt}  % trước LOT
+\setlength{\cftafterlottitleskip}{10pt}  % sau LOT
+
+% --- Chapter style ---
+\titleformat{\chapter}[block]
+{\normalfont\LARGE\bfseries\raggedright}
+{CHƯƠNG \thechapter}{1em}
+{\rule{\textwidth}{0.5pt}\vspace{0.4em}\\\raggedright}
+[\rule{\textwidth}{0.5pt}]
+\titlespacing*{\chapter}{0pt}{-10pt}{20pt} 
+
+\begin{document}
+
+% --- Trang bìa & lời cảm ơn ---
+\pagenumbering{gobble} 
+\input{titlepage}
+
+\cleardoublepage
+\pagenumbering{arabic}
+\input{loicamon}
+
+\cleardoublepage
+\input{tomtat}
+
+% --- TOC / LOF / LOT ---
+\cleardoublepage
+\tableofcontents
+\cleardoublepage
+\listoffigures
+\cleardoublepage
+\listoftables
+
+% --- Nội dung chương ---
+\cleardoublepage
+\input{chuong1}
+
+\newpage
+\input{chuong2}
+
+\newpage
+\input{chuong3}
+
+\newpage
+\input{chuong4}
+
+\newpage
+\input{chuong5}
+
+\newpage
+\input{chuong6}
+
+\newpage
+\input{chuong7}
+
+\newpage
+\input{ketluan_huongphattrien}
+
+\newpage
+\input{TLTK}
+
+\end{document}

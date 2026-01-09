@@ -1,0 +1,98 @@
+\chapter{THIẾT KẾ VÀ THỰC HIỆN PHẦN MỀM NHÚNG CHO HIL}
+\section{Yêu cầu thiết kế}
+Các yêu cầu thiết kế chính cho phần mềm nhúng trên hệ thống mô phỏng phần cứng trong HIL bao gồm:
+\begin{itemize}
+    \item HIL phải có khả năng giao tiếp USB với máy tính để nhận lệnh cấu hình và điều khiển mô phỏng.
+    \item HIL phải có khả năng giao tiếp với DUT thông qua các giao thức ngoại vi phổ biến như UART, I2C, SPI,...
+    \item Hệ thống HIL cần mô phỏng chính xác hành vi của các thiết bị ngoại vi, bao gồm việc tạo và xử lý tín hiệu đầu vào/đầu ra theo thời gian thực hoặc gần thời gian thực.
+    \item Phần mềm nhúng trên hệ thống HIL phải có khả năng cấu hình linh hoạt các tham số giao tiếp như tốc độ truyền nhận, địa chỉ I2C, định dạng dữ liệu,...
+    \item Hệ thống HIL cần hỗ trợ việc ghi nhận và phân tích dữ liệu giao tiếp để phục vụ mục đích debug và đánh giá hiệu suất của DUT.
+\end{itemize}
+
+\section{Lưu đồ giải thuật tổng quát của hệ thống HIL}
+
+Lưu đồ giải thuật tổng quát mô tả trình tự hoạt động chính của hệ thống HIL được trình bày trong Hình \ref{fig:HIL_overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{image/HIL_overview.png}
+    \caption{Lưu đồ giải thuật tổng quát của hệ thống HIL}
+    \label{fig:HIL_overview}
+\end{figure}
+
+Quá trình hoạt động của hệ thống HIL bắt đầu bằng giai đoạn khởi tạo. Trong giai đoạn này, vi điều khiển thực hiện cấu hình xung clock hệ thống và khởi tạo các ngoại vi cần thiết như USB, UART, I2C, SPI và các bộ định thời. Việc khởi tạo này đảm bảo các tài nguyên phần cứng sẵn sàng cho quá trình mô phỏng và giao tiếp.
+
+Sau khi hoàn tất khởi tạo, hệ thống tiến hành tạo các task phục vụ cho việc xử lý lệnh từ máy tính và mô phỏng thiết bị ngoại vi. Trong suốt quá trình vận hành, hệ thống HIL liên tục nhận các lệnh cấu hình và điều khiển mô phỏng từ máy tính, sau đó thực hiện các hành vi mô phỏng tương ứng và gửi tín hiệu đến DUT.
+
+Khi DUT phản hồi dữ liệu thông qua các giao thức ngoại vi, hệ thống HIL tiến hành thu thập, xử lý và cập nhật trạng thái mô phỏng. Chu trình này được lặp lại liên tục, đảm bảo hệ thống HIL hoạt động ổn định và đáp ứng kịp thời các yêu cầu kiểm thử firmware.
+
+\section{Lưu đồ giải thuật chi tiết của task xử lý lệnh}
+
+Để đảm bảo khả năng điều khiển linh hoạt từ máy tính, hệ thống HIL triển khai một task chuyên trách cho việc xử lý lệnh. Lưu đồ giải thuật của task này được minh họa trong Hình \ref{fig:HIL_CLI_task}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/HIL_CLI_task.png}
+    \caption{Lưu đồ giải thuật của task xử lý lệnh từ máy tính}
+    \label{fig:HIL_CLI_task}
+\end{figure}
+
+Task xử lý lệnh hoạt động theo cơ chế vòng lặp vô hạn, liên tục chờ dữ liệu từ máy tính thông qua giao tiếp USB. Khi nhận được một lệnh, hệ thống tiến hành phân tích cú pháp và xác định loại lệnh tương ứng.
+
+Đối với các lệnh cấu hình, hệ thống HIL cập nhật các tham số liên quan đến giao tiếp và mô phỏng, bao gồm tốc độ truyền, địa chỉ thiết bị, chế độ hoạt động và định dạng dữ liệu. Các thay đổi này được áp dụng ngay lập tức mà không cần khởi động lại hệ thống.
+
+Trong trường hợp nhận được lệnh điều khiển mô phỏng, hệ thống sẽ kích hoạt mô hình thiết bị ngoại vi tương ứng và thực hiện các thao tác mô phỏng cần thiết để trao đổi dữ liệu với DUT. Nếu lệnh không hợp lệ hoặc không được hỗ trợ, hệ thống gửi thông báo lỗi về máy tính để người dùng xử lý.
+
+Cơ chế này giúp hệ thống HIL luôn sẵn sàng đáp ứng các yêu cầu kiểm thử và nếu cần có thể mở rộng thêm các loại lệnh trong tương lai.
+
+\section{Lưu đồ giải thuật chi tiết mô phỏng thiết bị ngoại vi}
+\subsection{Mô phỏng thiết bị ngoại vi giao tiếp I2C}
+
+Hệ thống HIL hỗ trợ mô phỏng các thiết bị ngoại vi giao tiếp I2C nhằm phục vụ kiểm thử firmware của DUT. Trong phạm vi đề tài, hai thiết bị I2C được lựa chọn để mô phỏng là EEPROM và RTC, do đây là các thiết bị phổ biến trong nhiều hệ thống nhúng.
+
+Quy trình mô phỏng thiết bị I2C trong hệ thống HIL được trình bày trong Hình \ref{fig:I2C_device}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/I2C_device.png}
+    \caption{Quy trình mô phỏng thiết bị I2C trong hệ thống HIL}
+    \label{fig:I2C_device}
+\end{figure}
+
+Để khởi tạo một thiết bị I2C mô phỏng, hệ thống HIL cần nhận lệnh cấu hình từ máy tính, bao gồm loại thiết bị và địa chỉ I2C tương ứng. Do số lượng địa chỉ I2C phần cứng trên vi điều khiển bị giới hạn, các thiết bị I2C trong hệ thống HIL được quản lý hoàn toàn ở mức phần mềm.
+
+Khi nhận được yêu cầu khởi tạo, hệ thống kiểm tra xem địa chỉ I2C đã được sử dụng hay chưa. Nếu địa chỉ đã tồn tại trong danh sách quản lý, hệ thống từ chối khởi tạo và gửi thông báo lỗi về máy tính. Ngược lại, nếu địa chỉ hợp lệ, thiết bị mô phỏng được khởi tạo và lưu vào danh sách quản lý thiết bị I2C.
+
+Trong quá trình DUT giao tiếp trên bus I2C, hệ thống HIL giám sát địa chỉ truy cập và kích hoạt mô hình thiết bị tương ứng. Dữ liệu phản hồi được tạo ra dựa trên mô hình hành vi của thiết bị, đảm bảo tính tương đương với thiết bị thực.
+
+Đối với thiết bị EEPROM, hệ thống HIL mô phỏng bộ nhớ lưu trữ theo từng trang, trong đó dữ liệu ghi từ DUT được đệm tạm và chỉ được ghi chính thức vào vùng nhớ mô phỏng khi phiên giao tiếp I2C kết thúc. Cách tiếp cận này đảm bảo hành vi ghi dữ liệu tương đương với EEPROM thực, bao gồm cơ chế tự tăng địa chỉ và giới hạn kích thước trang.
+
+Đối với thiết bị RTC, hệ thống HIL mô phỏng tập thanh ghi thời gian theo chuẩn của DS1307 và sử dụng bộ định thời nội để cập nhật giá trị thời gian thực theo chu kỳ 1 giây. DUT có thể thực hiện các thao tác đọc và ghi để lấy hoặc thiết lập thời gian, trong đó dữ liệu được mã hóa theo định dạng BCD giống với thiết bị phần cứng thực tế.
+
+\subsection{Mô phỏng thiết bị ngoại vi giao tiếp SPI}
+
+Bên cạnh giao tiếp I2C, hệ thống HIL còn hỗ trợ mô phỏng các thiết bị ngoại vi sử dụng giao thức SPI nhằm kiểm thử các chức năng firmware của DUT liên quan đến bộ nhớ ngoài. Trong phạm vi đề tài, thiết bị SPI được lựa chọn để mô phỏng là bộ nhớ Flash W25Q, một linh kiện phổ biến trong các hệ thống nhúng dùng để lưu trữ chương trình và dữ liệu.
+
+Thiết bị Flash SPI được mô phỏng theo mô hình slave, trong đó hệ thống HIL đóng vai trò phản hồi các lệnh truy cập từ DUT thông qua bus SPI. Toàn bộ nội dung bộ nhớ Flash được mô phỏng bằng vùng nhớ RAM trong vi điều khiển của HIL, cho phép truy cập nhanh và linh hoạt trong quá trình kiểm thử.
+
+Quy trình mô phỏng thiết bị SPI trong hệ thống HIL được trình bày trong Hình~\ref{fig:SPI_flash}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{image/SPI_flash.png}
+    \caption{Quy trình mô phỏng bộ nhớ SPI flash trong hệ thống HIL}
+    \label{fig:SPI_flash}
+\end{figure}
+
+Quá trình mô phỏng SPI bắt đầu khi DUT kích hoạt tín hiệu Chip Select (NSS) ở mức thấp, báo hiệu một phiên giao tiếp SPI mới. Hệ thống HIL sử dụng ngắt ngoài để phát hiện sự kiện này và tiến hành khởi tạo lại các biến trạng thái nội bộ, đảm bảo mỗi transaction SPI được xử lý độc lập và chính xác.
+
+Byte dữ liệu đầu tiên được DUT truyền đến được xem là lệnh điều khiển (opcode). Dựa trên opcode nhận được, hệ thống HIL xác định loại lệnh tương ứng và chuyển sang trạng thái xử lý phù hợp. Trong phạm vi đề tài, các lệnh cơ bản của Flash SPI như đọc ID, đọc dữ liệu, ghi dữ liệu và xóa bộ nhớ được mô phỏng.
+
+Đối với lệnh đọc ID, hệ thống HIL phản hồi lần lượt các byte định danh thiết bị, cho phép DUT xác nhận đúng loại Flash đang được sử dụng. Với lệnh đọc dữ liệu, sau khi nhận đủ địa chỉ truy cập, hệ thống bắt đầu truyền dữ liệu từ bộ nhớ mô phỏng về DUT, đồng thời tự động tăng địa chỉ để mô phỏng cơ chế đọc liên tục của Flash thực.
+
+Trong trường hợp lệnh ghi dữ liệu, hệ thống HIL tiếp nhận dữ liệu từ DUT và lưu vào vùng nhớ mô phỏng tương ứng với địa chỉ đã chỉ định. Đối với lệnh xóa bộ nhớ, toàn bộ vùng nhớ mô phỏng được đưa về trạng thái mặc định, tương đương với quá trình xóa chip của Flash thực tế.
+
+Trong suốt quá trình giao tiếp SPI, hệ thống HIL gửi các byte dummy khi cần thiết nhằm duy trì xung clock và đảm bảo đồng bộ truyền nhận giữa master và slave. Cơ chế này giúp DUT hoạt động bình thường mà không cần thay đổi firmware khi chuyển từ thiết bị Flash thực sang Flash mô phỏng.
+
+Việc mô phỏng thiết bị SPI trong hệ thống HIL cho phép kiểm thử đầy đủ các chức năng liên quan đến bộ nhớ ngoài của DUT mà không cần sử dụng phần cứng Flash thật. Điều này giúp giảm chi phí phần cứng, đồng thời tăng tính linh hoạt và khả năng tự động hóa trong quá trình phát triển và kiểm thử firmware nhúng.
+

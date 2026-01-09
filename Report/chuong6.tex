@@ -1,0 +1,49 @@
+\chapter{THIẾT KẾ VÀ THỰC HIỆN PHẦN MỀM TRÊN MÁY TÍNH}
+
+Trong hệ thống Hardware-in-the-Loop, phần mềm chạy trên máy tính đóng vai trò là trung tâm điều phối, cho phép người dùng cấu hình hệ thống, điều khiển quá trình mô phỏng và theo dõi trạng thái hoạt động của cả HIL và DUT. Phần mềm này không trực tiếp tham gia vào việc mô phỏng phần cứng mà đóng vai trò giao diện tương tác, hỗ trợ xây dựng và thực thi các kịch bản kiểm thử một cách linh hoạt.
+
+Thông qua phần mềm trên máy tính, người dùng có thể gửi các lệnh cấu hình đến hệ thống HIL, điều khiển DUT thực hiện các thao tác giao tiếp với thiết bị ngoại vi mô phỏng, đồng thời thu thập dữ liệu phản hồi phục vụ cho việc đánh giá và debug firmware.
+
+\section{Yêu cầu thiết kế}
+
+Các yêu cầu thiết kế chính cho phần mềm trên máy tính bao gồm:
+
+\begin{itemize}
+    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa đơn giản, dễ sử dụng, cho phép người dùng thao tác trực tiếp với DUT và hệ thống HIL.
+    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp nối tiếp (serial), phục vụ việc điều khiển DUT và HIL song song.
+    \item Hệ thống phải cho phép gửi các lệnh cấu hình và điều khiển mô phỏng đến HIL, đồng thời nhận và hiển thị phản hồi từ DUT và HIL theo thời gian thực.
+    \item Phần mềm cần hỗ trợ xây dựng và thực thi các kịch bản kiểm thử tự động nhằm đánh giá hành vi firmware của DUT.
+    \item Dữ liệu giao tiếp phải được ghi nhận đầy đủ để phục vụ mục đích debug và đánh giá kết quả kiểm thử.
+\end{itemize}
+
+\section{Sơ đồ giao tiếp giữa PC, HIL và DUT}
+
+Sơ đồ giao tiếp tổng thể giữa phần mềm trên máy tính, hệ thống HIL và DUT được minh họa trong Hình \ref{fig:PC_HIL_DUT}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/PC_HIL_DUT.png}
+    \caption{Sơ đồ giao tiếp giữa PC, HIL và DUT}
+    \label{fig:PC_HIL_DUT}
+\end{figure}
+
+Phần mềm trên máy tính giao tiếp với hệ thống HIL và DUT thông qua giao tiếp USB (serial). Các lệnh cấu hình và điều khiển được gửi từ PC đến HIL hoặc DUT, trong khi dữ liệu phản hồi từ các thiết bị này được gửi ngược lại để hiển thị và phân tích.
+
+PC đóng vai trò điều khiển trung tâm, tự động thực hiện các bài kiểm thử bằng cách gửi các lệnh theo trình tự định sẵn đến hệ thống HIL. Sau khi nhận lệnh, HIL tiến hành cấu hình và chuẩn bị môi trường mô phỏng phần cứng tương ứng. Tiếp theo, PC gửi các lệnh điều khiển đến DUT, cho phép DUT giao tiếp trực tiếp với HIL, qua đó mô phỏng quá trình tương tác giữa DUT và các thiết bị ngoại vi trong điều kiện vận hành thực tế.
+
+Trong suốt quá trình kiểm thử, PC liên tục thu thập dữ liệu phản hồi từ cả DUT và HIL, tiến hành đánh giá kết quả kiểm thử và hiển thị thông tin cho người dùng. Toàn bộ quá trình này được tổ chức thành một vòng lặp, đảm bảo việc mô phỏng phần cứng và kiểm thử hệ thống được thực hiện một cách tự động, nhất quán và hiệu quả.
+
+\section{Lưu đồ giải thuật tổng quát của phần mềm trên máy tính}
+
+Lưu đồ giải thuật tổng quát mô tả hoạt động của phần mềm trên máy tính được trình bày trong Hình \ref{fig:PC_overview}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{image/PC_overview.png}
+    \caption{Lưu đồ giải thuật tổng quát cho phần mềm trên máy tính}
+    \label{fig:PC_overview}
+\end{figure}
+
+Sau khi khởi động, phần mềm tiến hành khởi tạo giao diện người dùng và các thành phần giao tiếp nối tiếp. Người dùng có thể lựa chọn cổng COM và tốc độ baud phù hợp để kết nối với DUT và HIL.
+
+Khi kết nối được thiết lập, phần mềm bắt đầu nhận dữ liệu phản hồi từ các thiết bị thông qua các luồng đọc riêng biệt. Người dùng có thể gửi lệnh thủ công hoặc kích hoạt các kịch bản kiểm thử tự động. Trong suốt quá trình vận hành, dữ liệu giao tiếp được hiển thị theo thời gian thực trên giao diện nhằm hỗ trợ theo dõi và debug.
