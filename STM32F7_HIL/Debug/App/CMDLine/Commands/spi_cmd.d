@@ -1,6 +1,6 @@
 App/CMDLine/Commands/spi_cmd.o: ../App/CMDLine/Commands/spi_cmd.c \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h \
  ../Core/Inc/main.h ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h \
  ../Core/Inc/stm32f7xx_hal_conf.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h \
@@ -42,18 +42,18 @@ App/CMDLine/Commands/spi_cmd.o: ../App/CMDLine/Commands/spi_cmd.c \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_gpio.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_dma.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_exti.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h:
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
@@ -96,13 +96,13 @@ D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdli
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_gpio.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_dma.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_exti.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:

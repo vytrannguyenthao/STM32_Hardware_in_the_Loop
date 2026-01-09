@@ -48,8 +48,8 @@ App/CMDLine/Shell_IO/USB_CDC.o: ../App/CMDLine/Shell_IO/USB_CDC.c \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h
 ../USB_DEVICE/App/usbd_cdc_if.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
@@ -100,5 +100,5 @@ App/CMDLine/Shell_IO/USB_CDC.o: ../App/CMDLine/Shell_IO/USB_CDC.c \
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h:

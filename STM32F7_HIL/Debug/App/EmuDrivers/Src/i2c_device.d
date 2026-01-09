@@ -1,5 +1,5 @@
 App/EmuDrivers/Src/i2c_device.o: ../App/EmuDrivers/Src/i2c_device.c \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_device.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_device.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h \
  ../Core/Inc/stm32f7xx_hal_conf.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h \
@@ -31,9 +31,9 @@ App/EmuDrivers/Src/i2c_device.o: ../App/EmuDrivers/Src/i2c_device.c \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_eeprom.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_device.h:
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_eeprom.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_device.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h:
@@ -65,5 +65,5 @@ D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_eeprom.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_eeprom.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h:

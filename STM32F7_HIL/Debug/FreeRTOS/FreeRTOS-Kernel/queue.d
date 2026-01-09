@@ -1,5 +1,5 @@
 FreeRTOS/FreeRTOS-Kernel/queue.o: ../FreeRTOS/FreeRTOS-Kernel/queue.c \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
  ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h \
  ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f746xx.h \
@@ -32,16 +32,16 @@ FreeRTOS/FreeRTOS-Kernel/queue.o: ../FreeRTOS/FreeRTOS-Kernel/queue.c \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/queue.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/queue.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h:
 ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f746xx.h:
@@ -74,12 +74,12 @@ D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kern
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/queue.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/queue.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:

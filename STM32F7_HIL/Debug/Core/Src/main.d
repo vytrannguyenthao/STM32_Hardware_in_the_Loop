@@ -43,15 +43,15 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../USB_DEVICE/App/usb_device.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../USB_DEVICE/Target/usbd_conf.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h \
  ../USB_DEVICE/App/usbd_cdc_if.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
@@ -59,10 +59,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h \
- D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h \
+ D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
@@ -108,15 +108,15 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../USB_DEVICE/App/usb_device.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:
 ../USB_DEVICE/Target/usbd_conf.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/projdefs.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/portable.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/deprecated_definitions.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/portable/GCC/ARM_CM7/r0p1/portmacro.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/mpu_wrappers.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/task.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/FreeRTOS/FreeRTOS-Kernel/include/list.h:
 ../USB_DEVICE/App/usbd_cdc_if.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
@@ -124,7 +124,7 @@ D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/FreeRTOS/FreeRTOS-Kern
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmd.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/CMDLine/Core/cmdline.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h:
-D:/STUDY/00_SCHOOL/DA/Software/STM32_HIL-main/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmd.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/CMDLine/Core/cmdline.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/w25q_slave.h:
+D:/STUDY/00_SCHOOL/DA/0_Project/STM32F7_HIL/App/EmuDrivers/Inc/i2c_rtc.h:

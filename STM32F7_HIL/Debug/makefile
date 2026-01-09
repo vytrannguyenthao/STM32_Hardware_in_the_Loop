@@ -71,8 +71,8 @@ all: main-build
 main-build: STM32F7_HIL.elf secondary-outputs
 
 # Tool invocations
-STM32F7_HIL.elf STM32F7_HIL.map: $(OBJS) $(USER_OBJS) D:\STUDY\00_SCHOOL\DA\Software\STM32_HIL-main\STM32F7_HIL\STM32F746NGHX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32F7_HIL.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\STUDY\00_SCHOOL\DA\Software\STM32_HIL-main\STM32F7_HIL\STM32F746NGHX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F7_HIL.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32F7_HIL.elf STM32F7_HIL.map: $(OBJS) $(USER_OBJS) D:\STUDY\00_SCHOOL\DA\0_Project\STM32F7_HIL\STM32F746NGHX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32F7_HIL.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\STUDY\00_SCHOOL\DA\0_Project\STM32F7_HIL\STM32F746NGHX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F7_HIL.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

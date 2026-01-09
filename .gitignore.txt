@@ -1,0 +1,31 @@
+# STM32CubeIDE
+.metadata/
+
+**/Debug/
+STM32F7_HIL/Debug/
+STM32F4_DUT/Debug/
+
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+*.siz
+
+STM32F7_HIL/.settings/
+STM32F7_HIL/.project
+STM32F7_HIL/.cproject
+
+STM32F4_DUT/.settings/
+STM32F4_DUT/.project
+STM32F4_DUT/.cproject
+
+# CubeMX
+*.ioc.autosave
+*.mxproject
+
+# OS
+Thumbs.db
+.DS_Store
