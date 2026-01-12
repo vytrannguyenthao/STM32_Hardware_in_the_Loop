@@ -10,22 +10,6 @@
 *.list
 *.siz
 
-STM32F7_HIL/.settings/
-STM32F7_HIL/.project
-STM32F7_HIL/.cproject
-
-STM32F4_HIL/.settings/
-STM32F4_HIL/.project
-STM32F4_HIL/.cproject
-
-STM32F4_DUT/.settings/
-STM32F4_DUT/.project
-STM32F4_DUT/.cproject
-
-STM32F1_DUT/.settings/
-STM32F1_DUT/.project
-STM32F1_DUT/.cproject
-
 # CubeMX
 *.ioc.autosave
 *.mxproject
