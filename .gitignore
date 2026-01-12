@@ -1,12 +1,6 @@
 # STM32CubeIDE
 .metadata/
 
-**/Debug/
-STM32F7_HIL/Debug/
-STM32F4_HIL/Debug/
-STM32F4_DUT/Debug/
-STM32F1_DUT/Debug/
-
 *.o
 *.d
 *.elf
