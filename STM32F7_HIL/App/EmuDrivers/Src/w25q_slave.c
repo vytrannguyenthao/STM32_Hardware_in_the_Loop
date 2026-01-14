@@ -109,7 +109,6 @@ void W25Q_Slave_IRQHandler(W25Q_Slave *dev, uint8_t rx_data) {
 			}
 			break;
 		default:
-			LL_SPI_TransmitData8(dev->spi, dummy);
 			break;
 		}
 	}
