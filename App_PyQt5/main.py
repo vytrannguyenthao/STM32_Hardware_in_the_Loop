@@ -18,9 +18,10 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 # SPI PARSER
 # ==================================================
 class SPIParser:
-    def __init__(self, emit_cb, log_cb):
+    def __init__(self, emit_cb, log_cb, clear_cb):
         self.emit_cb = emit_cb
         self.log_cb = log_cb
+        self.clear_cb = clear_cb
         self.active = False
         self.expected = 0
         self.buffer = []
@@ -33,6 +34,7 @@ class SPIParser:
                 self.expected = int(n)
                 self.buffer.clear()
                 self.active = True
+                self.clear_cb() # Clear table
                 return True
             except:
                 return True
@@ -62,19 +64,79 @@ class SPIParser:
         return False
 
 # ==================================================
+# I2C EEPROM PARSER
+# ==================================================
+class I2CParser:
+    def __init__(self, emit_cb, log_cb, clear_cb):
+        self.emit_cb = emit_cb
+        self.log_cb = log_cb
+        self.clear_cb = clear_cb
+        self.active = False
+        self.base_addr = 0
+        self.expected = 0
+        self.buffer = []
+
+    def feed(self, line):
+        # ==========================
+        # 1. detect echo command
+        # ==========================
+        if line.startswith("eeprom_read"):
+            try:
+                _, addr, n = line.split()
+                self.base_addr = int(addr, 16)
+                self.expected = int(n)
+                self.buffer.clear()
+                self.active = True
+                self.clear_cb() # Clear table
+                return True
+            except:
+                return True
+
+        # ==========================
+        # 2. info header
+        # ==========================
+        if self.active and line.startswith("EEPROM read"):
+            return True
+
+        # ==========================
+        # 3. data
+        # ==========================
+        if self.active:
+            for p in line.split():
+                try:
+                    self.buffer.append(int(p, 16))
+                except:
+                    pass
+
+            if len(self.buffer) >= self.expected:
+                for i, val in enumerate(self.buffer):
+                    addr = self.base_addr + i
+                    self.emit_cb(addr, val)
+
+                self.log_cb("[I2C] EEPROM read completed")
+                self.active = False
+
+            return True
+
+        return False
+
+# ==================================================
 # UART THREAD
 # ==================================================
 class UARTThread(QThread):
     log_signal = pyqtSignal(str)
     spi_data = pyqtSignal(int, int)
     i2c_data = pyqtSignal(int, int)
+    spi_clear = pyqtSignal()
+    i2c_clear = pyqtSignal()
 
     def __init__(self, name):
         super().__init__()
         self.name = name
         self.running = False
         self.ser = None
-        self.spi_parser = SPIParser(self.spi_data.emit, self.log_signal.emit)
+        self.spi_parser = SPIParser(self.spi_data.emit, self.log_signal.emit, self.spi_clear.emit)
+        self.i2c_parser = I2CParser(self.i2c_data.emit, self.log_signal.emit, self.i2c_clear.emit)
 
     def open(self, port, baud):
         self.port = port
@@ -117,6 +179,8 @@ class UARTThread(QThread):
 
         if self.spi_parser.feed(line):
             return
+        if self.i2c_parser.feed(line):
+            return
 
         # try:
         #     t, addr, val = line.split()
@@ -150,13 +214,16 @@ class MainWindow(QMainWindow):
         self.uart_dut.log_signal.connect(self.append_dut_log)
         self.uart_hil.log_signal.connect(self.append_hil_log)
         self.uart_dut.spi_data.connect(self.update_spi)
+        self.uart_dut.spi_clear.connect(self.clear_spi_table)
+
         self.uart_dut.i2c_data.connect(self.update_i2c)
+        self.uart_dut.i2c_clear.connect(self.clear_i2c_table)
 
         splitter.addWidget(self.build_left())
         splitter.addWidget(self.build_center())
         splitter.addWidget(self.build_right())
 
-        splitter.setSizes([200, 850, 600])
+        splitter.setSizes([350, 850, 600])
 
     # ==================================================
     # LEFT PANEL
@@ -225,8 +292,8 @@ class MainWindow(QMainWindow):
         w = QWidget()
         lay = QVBoxLayout(w)
 
-        self.spi_table = self.create_mem_table("SPI Data")
-        self.i2c_table = self.create_mem_table("I2C Data")
+        self.spi_table = self.create_mem_table("SPI Flash Data")
+        self.i2c_table = self.create_mem_table("I2C EEPROM Data")
 
         lay.addWidget(self.spi_table[0])
         lay.addWidget(self.i2c_table[0])
@@ -265,7 +332,7 @@ class MainWindow(QMainWindow):
         btn_clear = QPushButton("Clear")
         text = QTextEdit()
         text.setReadOnly(True)
-        text.setStyleSheet("background:white;font-family:Consolas;font-size:8pt;")
+        text.setStyleSheet("background:white;font-family:Consolas;font-size:9pt;")
 
         bottom = QHBoxLayout()
 
@@ -302,12 +369,12 @@ class MainWindow(QMainWindow):
     def update_spi(self, addr, val):
         if 0 <= addr < 1024:
             r, c = divmod(addr, 16)
-            self.spi_table[1].setItem(r, c, QTableWidgetItem(hex(val)))
+            self.spi_table[1].setItem(r, c, QTableWidgetItem(f"{val:02X}"))
 
     def update_i2c(self, addr, val):
         if 0 <= addr < 1024:
             r, c = divmod(addr, 16)
-            self.i2c_table[1].setItem(r, c, QTableWidgetItem(hex(val)))
+            self.i2c_table[1].setItem(r, c, QTableWidgetItem(f"{val:02X}"))
 
     def closeEvent(self, e):
         self.uart_dut.close()
@@ -315,6 +382,17 @@ class MainWindow(QMainWindow):
         self.uart_dut.wait()
         self.uart_hil.wait()
         e.accept()
+
+    # ==================================================
+    # CLEAR TABLE
+    # ==================================================
+    def clear_spi_table(self):
+        table = self.spi_table[1]
+        table.clearContents()
+
+    def clear_i2c_table(self):
+        table = self.i2c_table[1]
+        table.clearContents()
 
 
 # ==================================================
