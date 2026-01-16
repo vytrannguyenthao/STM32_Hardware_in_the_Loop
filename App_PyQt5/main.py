@@ -1,3 +1,4 @@
+from html import parser
 import sys
 import time
 import serial
@@ -12,7 +13,7 @@ from PyQt5.QtWidgets import (
     QComboBox, QCheckBox, QTabWidget
 )
 from PyQt5.QtGui import QIcon, QBrush, QColor
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 
 # ==================================================
 # SPI PARSER
@@ -691,30 +692,83 @@ class MainWindow(QMainWindow):
         self.pc_log_append("[DUT] Read & Verify -> ", newline=False)
         self.uart_dut.send("w25q_read 256")
 
-    def run_i2c_eeprom_test(self):   
-        self.pc_log_append("=== I2C EEPROM Test ===")
-        self.pc_log_append("[DUT] Read EEPROM -> ", newline=False)
-        self.uart_dut.send("eeprom_read 0x00 256")
+    def run_i2c_eeprom_test(self):
+        self.pc_log_append("=== I2C EEPROM TEST START ===")
+        self.i2c_devices = [0x50, 0x51]
+        self.i2c_dev_index = 0
+        self.i2c_step = 0
+        self.run_i2c_step()
+
+    def run_i2c_step(self):
+        if self.i2c_dev_index >= len(self.i2c_devices):
+            self.pc_log_append("=== I2C EEPROM TEST DONE ===")
+            self.run_next_test()
+            return
+
+        dev = self.i2c_devices[self.i2c_dev_index]
+
+        if self.i2c_step == 0:
+            self.pc_log_append(f"[HIL] Init EEPROM 0x{dev:02X}")
+            self.uart_hil.send(f"eeprom_init 0x{dev:02X} 1024 256")
+            QTimer.singleShot(200, self.run_i2c_step)
+
+        elif self.i2c_step == 1:
+            self.pc_log_append(f"[HIL] Active EEPROM 0x{dev:02X}")
+            self.uart_hil.send(f"i2c_dev_active 0x{dev:02X}")
+            QTimer.singleShot(200, self.run_i2c_step)
+
+        elif self.i2c_step == 2:
+            self.pc_log_append(f"[DUT] Init EEPROM 0x{dev:02X}")
+            self.uart_dut.send(f"eeprom_init 0x{dev:02X} 1024 256")
+            QTimer.singleShot(200, self.run_i2c_step)
+
+        elif self.i2c_step == 3:
+            self.pc_log_append(f"[DUT] Fill EEPROM 0x{dev:02X}")
+            self.uart_dut.send(f"eeprom_fill 256")
+            QTimer.singleShot(200, self.run_i2c_step)
+
+        elif self.i2c_step == 4:
+            self.pc_log_append(f"[DUT] Read EEPROM 0x{dev:02X}")
+            self.uart_dut.send(f"eeprom_read 0 256")
+
+        elif self.i2c_step == 5:
+            self.pc_log_append(f"[HIL] Deinit EEPROM 0x{dev:02X}")
+            self.uart_hil.send(f"eeprom_deinit 0x{dev:02X}")
+            self.i2c_dev_index += 1
+            self.i2c_step = -1
+            QTimer.singleShot(200, self.run_i2c_step)
+
+        self.i2c_step += 1
+
 
     def on_test_completed(self, test_type):
-        """Callback khi test hoàn thành, chuyển sang test tiếp theo"""
-        # Chỉ xử lý nếu đang chạy tests
         if not self.is_running_tests:
             return
-        
+
         if test_type == "i2c":
-            # Kiểm tra xem có fail không, nếu không có dữ liệu thì báo fail
-            if self.uart_dut.i2c_parser.buffer and len(self.uart_dut.i2c_parser.buffer) < self.uart_dut.i2c_parser.expected:
-                self.pc_log_append("FAIL")
-            elif not self.uart_dut.i2c_parser.buffer:
-                self.pc_log_append("FAIL")
-        
-        # Check if this was a prepare_mem test - add 5s delay before next test
-        if hasattr(self, 'current_test') and self.current_test and self.current_test.__name__ == 'spi_flash_test_prepare_mem':
+            parser = self.uart_dut.i2c_parser
+
+            if not parser.buffer:
+                self.pc_log_append("FAIL (no data)")
+            elif len(parser.buffer) != parser.expected:
+                self.pc_log_append("FAIL (size mismatch)")
+            else:
+                self.pc_log_append("PASS")
+
+            self.run_i2c_step()
+            return
+
+        # ===== SPI =====
+        if (
+            hasattr(self, 'current_test')
+            and self.current_test
+            and self.current_test.__name__ == 'spi_flash_test_prepare_mem'
+        ):
             self.pc_log_append("Wait 5s before next test...")
             self.run_next_test_delayed(5000)
         else:
             self.run_next_test()
+
 
 # ==================================================
 # MAIN
