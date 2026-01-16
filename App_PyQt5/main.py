@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QPushButton, QTextEdit, QLineEdit,
     QTableWidget, QTableWidgetItem,
     QHeaderView, QSplitter, QLabel,
-    QComboBox, QCheckBox
+    QComboBox, QCheckBox, QTabWidget
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -202,8 +202,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("HIL Simulation UI")
-        self.setWindowIcon(QIcon("img/logoBK.png"))
-        self.resize(1800, 950)
+        self.setWindowIcon(QIcon("App_PyQt5/img/logoBK.png"))
 
         splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(splitter)
@@ -213,6 +212,7 @@ class MainWindow(QMainWindow):
 
         self.uart_dut.log_signal.connect(self.append_dut_log)
         self.uart_hil.log_signal.connect(self.append_hil_log)
+
         self.uart_dut.spi_data.connect(self.update_spi)
         self.uart_dut.spi_clear.connect(self.clear_spi_table)
 
@@ -221,9 +221,8 @@ class MainWindow(QMainWindow):
 
         splitter.addWidget(self.build_left())
         splitter.addWidget(self.build_center())
-        splitter.addWidget(self.build_right())
 
-        splitter.setSizes([350, 850, 600])
+        splitter.setSizes([350, 1450])
 
     # ==================================================
     # LEFT PANEL
@@ -289,14 +288,67 @@ class MainWindow(QMainWindow):
     # CENTER PANEL
     # ==================================================
     def build_center(self):
+        tabs = QTabWidget()
+        tabs.addTab(self.build_memory_tab(), "Memory")
+        tabs.addTab(self.build_logic_tab(), "Logic Analyzer")
+        tabs.addTab(self.build_peripheral_tab(), "Peripherals")
+        return tabs
+
+    # ================= Memory Tab ====================
+    def build_memory_tab(self):
+        w = QWidget()
+
+        # ============ MAIN SPLITTER (LEFT | RIGHT) ============
+        main_splitter = QSplitter(Qt.Horizontal)
+
+        # ================= LEFT: MEMORY TABLES =================
+        left_splitter = QSplitter(Qt.Vertical)
+
+        self.spi_table = self.create_mem_table("SPI Flash")
+        self.i2c_table = self.create_mem_table("I2C EEPROM")
+
+        left_splitter.addWidget(self.spi_table[0])
+        left_splitter.addWidget(self.i2c_table[0])
+        left_splitter.setSizes([500, 500])
+
+        # ================= RIGHT: LOGS =================
+        right = QWidget()
+        right_lay = QVBoxLayout(right)
+
+        self.dut_log = self.create_log_box("DUT Log", self.uart_dut)
+        self.hil_log = self.create_log_box("HIL Log", self.uart_hil)
+
+        right_lay.addWidget(self.dut_log[0])
+        right_lay.addWidget(self.hil_log[0])
+
+        # ================= ASSEMBLE =================
+        main_splitter.addWidget(left_splitter)
+        main_splitter.addWidget(right)
+        main_splitter.setSizes([1100, 450])
+
+        layout = QVBoxLayout(w)
+        layout.addWidget(main_splitter)
+
+        return w
+
+    # ================= Logic Tab =====================
+    def build_logic_tab(self):
         w = QWidget()
         lay = QVBoxLayout(w)
+        lbl = QLabel("Logic Analyzer / Oscilloscope (Coming soon)")
+        lbl.setAlignment(Qt.AlignCenter)
+        lbl.setStyleSheet("font-size:18px;color:gray;")
+        lay.addWidget(lbl)
+        return w
 
-        self.spi_table = self.create_mem_table("SPI Flash Data")
-        self.i2c_table = self.create_mem_table("I2C EEPROM Data")
-
-        lay.addWidget(self.spi_table[0])
-        lay.addWidget(self.i2c_table[0])
+    # ================= Peripheral Tab ================
+    def build_peripheral_tab(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lbl = QLabel("Peripherals tab (Coming soon)")
+        lbl.setAlignment(Qt.AlignCenter)
+        lbl.setStyleSheet("font-size:18px;color:gray;")
+        lay.addWidget(lbl)
         return w
 
     def create_mem_table(self, title):
