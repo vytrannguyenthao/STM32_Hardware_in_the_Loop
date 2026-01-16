@@ -164,6 +164,27 @@ class SPIParser:
             if len(mismatches) > 5:
                 msg += f"\n  ... and {len(mismatches) - 5} more"
             self.pc_log_cb(msg)
+    
+    def reset(self):
+        """Reset all test parameters"""
+        self.active = False
+        self.expected = 0
+        self.buffer = []
+        self.wait_id = False
+        self.write_test_data = None
+        self.write_test_addr = 0
+        self.write_test_size = 0
+        self.write_test_pending = False
+
+    def set_prepare_mem_size(self, size):
+        """Set size for prepare_mem test (called from MainWindow)"""
+        self.prepare_write_test_data(size)
+
+    def set_erase_test_data(self):
+        """Set test data for erase chip test (1024 bytes of 0xFF)"""
+        self.write_test_data = [0xFF] * 1024
+        self.write_test_addr = 0
+        self.write_test_size = 1024
 
 # ==================================================
 # I2C EEPROM PARSER
@@ -234,6 +255,13 @@ class I2CParser:
             return True
 
         return False
+
+    def reset(self):
+        """Reset all test parameters"""
+        self.active = False
+        self.base_addr = 0
+        self.expected = 0
+        self.buffer = []
 
 # ==================================================
 # UART THREAD
@@ -645,6 +673,7 @@ class MainWindow(QMainWindow):
         if self.cb_spi.isChecked():
             self.test_queue.append(self.spi_flash_test_id)
             self.test_queue.append(self.spi_flash_test_prepare_mem)
+            self.test_queue.append(self.spi_flash_test_erase)
             self.test_queue.append(self.spi_flash_test_write)
             # self.test_queue.append(self.spi_flash_test_read)
 
@@ -672,12 +701,12 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(delay_ms, self.run_next_test)
 
     def spi_flash_test_id(self):
-        self.pc_log_append("=== SPI Flash Test: ID ===")
+        self.pc_log_append("=== SPI Flash Test ===")
         self.pc_log_append("[DUT] Read ID -> ", newline=False)
         self.uart_dut.send("w25q_ID")
 
     def spi_flash_test_write(self):
-        self.pc_log_append("=== SPI Flash Test: Write & Verify ===")
+        # self.pc_log_append("=== SPI Flash Test: Write & Verify ===")
         self.pc_log_append("[DUT] Write Test -> ", newline=False)
         self.uart_dut.send("w25q_write 1024")
         # After write complete, send read command
@@ -685,12 +714,25 @@ class MainWindow(QMainWindow):
         self.uart_dut.send("w25q_read 1024")
 
     def spi_flash_test_prepare_mem(self):
-        self.pc_log_append("=== SPI Flash Test: Prepare Memory ===")
+        # self.pc_log_append("=== SPI Flash Test: Prepare Memory ===")
         self.pc_log_append("[HIL] Prepare Memory -> ", newline=False)
+        # Prepare test data in DUT parser before sending command
+        self.uart_dut.spi_parser.set_prepare_mem_size(256)
         self.uart_hil.send("w25q_prepare_mem 256")
         # Wait a bit then read from DUT
+        time.sleep(0.5)
         self.pc_log_append("[DUT] Read & Verify -> ", newline=False)
         self.uart_dut.send("w25q_read 256")
+
+    def spi_flash_test_erase(self):
+        self.pc_log_append("[DUT] Erase Chip -> ", newline=False)
+        # Prepare test data: all 0xFF (erased state)
+        self.uart_dut.spi_parser.set_erase_test_data()
+        self.uart_dut.send("w25q_erasechip")
+        # Wait for erase to complete
+        time.sleep(0.5)
+        self.pc_log_append("[DUT] Read & Verify -> ", newline=False)
+        self.uart_dut.send("w25q_read 1024")
 
     def run_i2c_eeprom_test(self):
         self.pc_log_append("=== I2C EEPROM TEST START ===")
@@ -710,22 +752,22 @@ class MainWindow(QMainWindow):
         if self.i2c_step == 0:
             self.pc_log_append(f"[HIL] Init EEPROM 0x{dev:02X}")
             self.uart_hil.send(f"eeprom_init 0x{dev:02X} 1024 256")
-            QTimer.singleShot(200, self.run_i2c_step)
+            QTimer.singleShot(2000, self.run_i2c_step)
 
         elif self.i2c_step == 1:
             self.pc_log_append(f"[HIL] Active EEPROM 0x{dev:02X}")
             self.uart_hil.send(f"i2c_dev_active 0x{dev:02X}")
-            QTimer.singleShot(200, self.run_i2c_step)
+            QTimer.singleShot(2000, self.run_i2c_step)
 
         elif self.i2c_step == 2:
             self.pc_log_append(f"[DUT] Init EEPROM 0x{dev:02X}")
             self.uart_dut.send(f"eeprom_init 0x{dev:02X} 1024 256")
-            QTimer.singleShot(200, self.run_i2c_step)
+            QTimer.singleShot(2000, self.run_i2c_step)
 
         elif self.i2c_step == 3:
             self.pc_log_append(f"[DUT] Fill EEPROM 0x{dev:02X}")
-            self.uart_dut.send(f"eeprom_fill 256")
-            QTimer.singleShot(200, self.run_i2c_step)
+            self.uart_dut.send(f"eeprom_fill 0 256")
+            QTimer.singleShot(2000, self.run_i2c_step)
 
         elif self.i2c_step == 4:
             self.pc_log_append(f"[DUT] Read EEPROM 0x{dev:02X}")
@@ -736,7 +778,7 @@ class MainWindow(QMainWindow):
             self.uart_hil.send(f"eeprom_deinit 0x{dev:02X}")
             self.i2c_dev_index += 1
             self.i2c_step = -1
-            QTimer.singleShot(200, self.run_i2c_step)
+            QTimer.singleShot(2000, self.run_i2c_step)
 
         self.i2c_step += 1
 
@@ -755,16 +797,20 @@ class MainWindow(QMainWindow):
             else:
                 self.pc_log_append("PASS")
 
+            parser.reset()
             self.run_i2c_step()
             return
 
         # ===== SPI =====
+        # Reset SPI parser
+        self.uart_dut.spi_parser.reset()
+        
         if (
             hasattr(self, 'current_test')
             and self.current_test
-            and self.current_test.__name__ == 'spi_flash_test_prepare_mem'
+            and self.current_test.__name__ in ['spi_flash_test_prepare_mem', 'spi_flash_test_erase']
         ):
-            self.pc_log_append("Wait 5s before next test...")
+            # self.pc_log_append("Wait 5s before next test...")
             self.run_next_test_delayed(5000)
         else:
             self.run_next_test()
@@ -775,6 +821,20 @@ class MainWindow(QMainWindow):
 # ==================================================
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    # Global fixed font sizes for UI labels, buttons, groupboxes, etc.
+    app.setStyleSheet("""
+    QLabel, QPushButton, QGroupBox, QCheckBox, QComboBox, QTabWidget, QLineEdit {
+        font-size: 10pt;
+    }
+    QTableWidget, QHeaderView::section {
+        font-size: 9pt;
+    }
+    QTextEdit {
+        font-family: Consolas;
+        font-size: 8pt;
+    }
+    """)
+
     win = MainWindow()
     win.showMaximized()
     sys.exit(app.exec_())
