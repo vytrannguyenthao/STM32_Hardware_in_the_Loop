@@ -11,20 +11,32 @@ from PyQt5.QtWidgets import (
     QHeaderView, QSplitter, QLabel,
     QComboBox, QCheckBox, QTabWidget
 )
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QBrush, QColor
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 # ==================================================
 # SPI PARSER
 # ==================================================
 class SPIParser:
-    def __init__(self, emit_cb, log_cb, clear_cb):
+    def __init__(self, emit_cb, log_cb, clear_cb, pc_log_cb, test_complete_cb=None, highlight_error_cb=None):
         self.emit_cb = emit_cb
         self.log_cb = log_cb
         self.clear_cb = clear_cb
+        self.pc_log_cb = pc_log_cb
+        self.test_complete_cb = test_complete_cb
+        self.highlight_error_cb = highlight_error_cb
+
         self.active = False
         self.expected = 0
         self.buffer = []
+
+        self.wait_id = False # support for Read ID Flash
+        
+        # SPI Write Test
+        self.write_test_data = None  # Data chuẩn bị để test write
+        self.write_test_addr = 0
+        self.write_test_size = 0
+        self.write_test_pending = False  # Flag để theo dõi write test
 
     def feed(self, line):
         # echo command
@@ -38,9 +50,58 @@ class SPIParser:
                 return True
             except:
                 return True
+        elif line.startswith("w25q_write"):
+            try:
+                _, n = line.split()
+                addr = int(n)
+                # Prepare write test data
+                self.prepare_write_test_data(addr)
+                self.write_test_pending = True
+                return True
+            except:
+                return True
+        elif line.startswith("w25q_prepare_mem"):
+            try:
+                _, n = line.split()
+                addr = int(n)
+                # Prepare memory test data (same as write test)
+                self.prepare_write_test_data(addr)
+                self.pc_log_cb(f"Memory prepared at 0x{addr:04X}, size={self.write_test_size}")
+                return True
+            except:
+                return True
+        elif line.startswith("w25q_ID"):
+            self.wait_id = True
+            return True   # skip echo
 
         # info
         if self.active and line.startswith("Read"):
+            return True
+        
+        # Check for Invalid length
+        if self.write_test_pending and "invalid length" in line.lower():
+            self.pc_log_cb("FAIL (Invalid length)")
+            self.write_test_pending = False
+            if self.test_complete_cb:
+                self.test_complete_cb("spi")
+            return True
+        
+        if self.wait_id and line.startswith("W25Q ID:"):
+            try:
+                raw = line.split("0x")[1]
+                flash_id = raw[-6:].upper()
+
+                if flash_id == "EF4018":
+                    self.pc_log_cb(f"PASS (ID = {flash_id})")
+                else:
+                    self.pc_log_cb(f"FAIL (ID = {flash_id})")
+
+            except:
+                self.pc_log_cb("Flash ID PARSE ERROR")
+
+            self.wait_id = False
+            if self.test_complete_cb:
+                self.test_complete_cb("spi")
             return True
 
         # data
@@ -56,21 +117,62 @@ class SPIParser:
                 for addr, val in enumerate(self.buffer[:1024]):
                     self.emit_cb(addr, val)
 
-                self.log_cb("[SPI] Read completed")
+                # Compare with write test data if available
+                if self.write_test_data:
+                    self.compare_write_test()
+                    self.write_test_pending = False
+                
                 self.active = False
+                if self.test_complete_cb:
+                    self.test_complete_cb("spi")
 
             return True
 
         return False
+    
+    def prepare_write_test_data(self, addr):
+        """Prepare test data: 00 01 02 ... FF 00 01 ... repeat (flexible size)"""
+        self.write_test_data = [(i % 256) for i in range(addr)]
+        self.write_test_addr = addr
+        self.write_test_size = addr
+    
+    def compare_write_test(self):
+        """Compare received data with prepared write test data"""
+        if not self.write_test_data or len(self.buffer) != len(self.write_test_data):
+            self.pc_log_cb("FAIL (size mismatch)")
+            return
+        
+        # Compare data
+        mismatches = []
+        for i, (expected, received) in enumerate(zip(self.write_test_data, self.buffer)):
+            if expected != received:
+                mismatches.append((i, expected, received))
+        
+        if not mismatches:
+            self.pc_log_cb("PASS")
+        else:
+            # Highlight error cells
+            if self.highlight_error_cb:
+                for addr, exp, rcv in mismatches:
+                    self.highlight_error_cb(addr)
+            
+            # Show first few mismatches
+            msg = f"FAIL ({len(mismatches)} mismatches)"
+            for i, exp, rcv in mismatches[:5]:
+                msg += f"\n  [0x{i:04X}] expected 0x{exp:02X}, got 0x{rcv:02X}"
+            if len(mismatches) > 5:
+                msg += f"\n  ... and {len(mismatches) - 5} more"
+            self.pc_log_cb(msg)
 
 # ==================================================
 # I2C EEPROM PARSER
 # ==================================================
 class I2CParser:
-    def __init__(self, emit_cb, log_cb, clear_cb):
+    def __init__(self, emit_cb, log_cb, clear_cb, test_complete_cb=None):
         self.emit_cb = emit_cb
         self.log_cb = log_cb
         self.clear_cb = clear_cb
+        self.test_complete_cb = test_complete_cb
         self.active = False
         self.base_addr = 0
         self.expected = 0
@@ -93,13 +195,23 @@ class I2CParser:
                 return True
 
         # ==========================
-        # 2. info header
+        # 2. check for FAIL
+        # ==========================
+        if self.active and "FAIL" in line.upper():
+            self.log_cb("[I2C] EEPROM read FAILED")
+            self.active = False
+            if self.test_complete_cb:
+                self.test_complete_cb("i2c")
+            return True
+
+        # ==========================
+        # 3. info header
         # ==========================
         if self.active and line.startswith("EEPROM read"):
             return True
 
         # ==========================
-        # 3. data
+        # 4. data
         # ==========================
         if self.active:
             for p in line.split():
@@ -115,6 +227,8 @@ class I2CParser:
 
                 self.log_cb("[I2C] EEPROM read completed")
                 self.active = False
+                if self.test_complete_cb:
+                    self.test_complete_cb("i2c")
 
             return True
 
@@ -129,14 +243,16 @@ class UARTThread(QThread):
     i2c_data = pyqtSignal(int, int)
     spi_clear = pyqtSignal()
     i2c_clear = pyqtSignal()
+    pc_log_signal = pyqtSignal(str)
+    test_completed = pyqtSignal(str)  # Signal để thông báo test hoàn thành
 
     def __init__(self, name):
         super().__init__()
         self.name = name
         self.running = False
         self.ser = None
-        self.spi_parser = SPIParser(self.spi_data.emit, self.log_signal.emit, self.spi_clear.emit)
-        self.i2c_parser = I2CParser(self.i2c_data.emit, self.log_signal.emit, self.i2c_clear.emit)
+        self.spi_parser = SPIParser(self.spi_data.emit, self.log_signal.emit, self.spi_clear.emit, self.pc_log_signal.emit, self.test_completed.emit)
+        self.i2c_parser = I2CParser(self.i2c_data.emit, self.log_signal.emit, self.i2c_clear.emit, self.test_completed.emit)
 
     def open(self, port, baud):
         self.port = port
@@ -210,6 +326,11 @@ class MainWindow(QMainWindow):
         self.uart_dut = UARTThread("DUT")
         self.uart_hil = UARTThread("HIL")
 
+        # Initialize test queue
+        self.test_queue = []
+        self.current_test = None
+        self.is_running_tests = False  # Flag để theo dõi xem có đang chạy tests hay không
+
         self.uart_dut.log_signal.connect(self.append_dut_log)
         self.uart_hil.log_signal.connect(self.append_hil_log)
 
@@ -218,6 +339,12 @@ class MainWindow(QMainWindow):
 
         self.uart_dut.i2c_data.connect(self.update_i2c)
         self.uart_dut.i2c_clear.connect(self.clear_i2c_table)
+
+        self.uart_dut.pc_log_signal.connect(self.pc_log_append)
+        self.uart_dut.test_completed.connect(self.on_test_completed)
+        
+        # Set highlight callback for SPI parser
+        self.uart_dut.spi_parser.highlight_error_cb = self.highlight_spi_error
 
         splitter.addWidget(self.build_left())
         splitter.addWidget(self.build_center())
@@ -228,22 +355,64 @@ class MainWindow(QMainWindow):
     # LEFT PANEL
     # ==================================================
     def build_left(self):
-        w = QWidget()
-        lay = QVBoxLayout(w)
+        main_splitter = QSplitter(Qt.Vertical)
 
-        lay.addWidget(self.create_uart_control("DUT", self.uart_dut))
-        lay.addWidget(self.create_uart_control("HIL", self.uart_hil))
+        # ================= TOP: CONTROLS + TEST =================
+        top = QWidget()
+        top_lay = QVBoxLayout(top)
 
+        top_lay.addWidget(self.create_uart_control("DUT", self.uart_dut))
+        top_lay.addWidget(self.create_uart_control("HIL", self.uart_hil))
+
+        # ---------- Test cases ----------
         test_box = QGroupBox("Test Cases")
         tlay = QVBoxLayout(test_box)
-        tlay.addWidget(QCheckBox("SPI Flash Test"))
-        tlay.addWidget(QCheckBox("I2C EEPROM Test"))
-        tlay.addStretch()
-        tlay.addWidget(QPushButton("Run Selected Tests"))
 
-        lay.addWidget(test_box)
-        lay.addStretch()
-        return w
+        self.cb_spi = QCheckBox("SPI Flash Test")
+        self.cb_i2c = QCheckBox("I2C EEPROM Test")
+
+        btn_run = QPushButton("Run Selected Tests")
+        btn_run.clicked.connect(self.run_tests)
+
+        tlay.addWidget(self.cb_spi)
+        tlay.addWidget(self.cb_i2c)
+        tlay.addStretch()
+        tlay.addWidget(btn_run)
+
+        top_lay.addWidget(test_box)
+        top_lay.addStretch()
+
+        # ================= BOTTOM: PC LOG =================
+        bottom = QWidget()
+        bottom_lay = QVBoxLayout(bottom)
+
+        self.pc_log = self.create_pc_log_box("PC Test Log")
+        bottom_lay.addWidget(self.pc_log[0])
+
+        # ================= SPLIT =================
+        main_splitter.addWidget(top)
+        main_splitter.addWidget(bottom)
+        main_splitter.setSizes([300, 700])
+        return main_splitter
+    
+    def create_pc_log_box(self, title):
+        box = QGroupBox(title)
+        lay = QVBoxLayout(box)
+
+        text = QTextEdit()
+        text.setReadOnly(True)
+        text.setStyleSheet(
+            "background: white;"
+            "font-family:Consolas;"
+            "font-size:8pt;"
+        )
+
+        btn_clear = QPushButton("Clear")
+        btn_clear.clicked.connect(text.clear)
+
+        lay.addWidget(text)
+        lay.addWidget(btn_clear)
+        return box, text
 
     def create_uart_control(self, name, uart):
         box = QGroupBox(f"{name} UART")
@@ -324,7 +493,7 @@ class MainWindow(QMainWindow):
         # ================= ASSEMBLE =================
         main_splitter.addWidget(left_splitter)
         main_splitter.addWidget(right)
-        main_splitter.setSizes([1100, 450])
+        main_splitter.setSizes([900, 650])
 
         layout = QVBoxLayout(w)
         layout.addWidget(main_splitter)
@@ -384,7 +553,7 @@ class MainWindow(QMainWindow):
         btn_clear = QPushButton("Clear")
         text = QTextEdit()
         text.setReadOnly(True)
-        text.setStyleSheet("background:white;font-family:Consolas;font-size:9pt;")
+        text.setStyleSheet("background:white;font-family:Consolas;font-size:8pt;")
 
         bottom = QHBoxLayout()
 
@@ -418,6 +587,17 @@ class MainWindow(QMainWindow):
         self.hil_log[1].append(text)
         self.hil_log[1].moveCursor(self.hil_log[1].textCursor().End)
 
+    def pc_log_append(self, text, newline=True):
+        cursor = self.pc_log[1].textCursor()
+        cursor.movePosition(cursor.End)
+
+        if newline:
+            cursor.insertText(text + "\n")
+        else:
+            cursor.insertText(text)
+
+        self.pc_log[1].setTextCursor(cursor)
+
     def update_spi(self, addr, val):
         if 0 <= addr < 1024:
             r, c = divmod(addr, 16)
@@ -427,6 +607,14 @@ class MainWindow(QMainWindow):
         if 0 <= addr < 1024:
             r, c = divmod(addr, 16)
             self.i2c_table[1].setItem(r, c, QTableWidgetItem(f"{val:02X}"))
+
+    def highlight_spi_error(self, addr):
+        """Highlight SPI table cell with error in red"""
+        if 0 <= addr < 1024:
+            r, c = divmod(addr, 16)
+            item = self.spi_table[1].item(r, c)
+            if item:
+                item.setBackground(QBrush(QColor(255, 0, 0, 200)))  # Red with alpha
 
     def closeEvent(self, e):
         self.uart_dut.close()
@@ -446,6 +634,87 @@ class MainWindow(QMainWindow):
         table = self.i2c_table[1]
         table.clearContents()
 
+    # ==================================================
+    # TEST
+    # ==================================================
+    def run_tests(self):
+        self.test_queue = []
+        self.is_running_tests = True  # Set flag để indicate đang chạy tests
+
+        if self.cb_spi.isChecked():
+            self.test_queue.append(self.spi_flash_test_id)
+            self.test_queue.append(self.spi_flash_test_prepare_mem)
+            self.test_queue.append(self.spi_flash_test_write)
+            # self.test_queue.append(self.spi_flash_test_read)
+
+        if self.cb_i2c.isChecked():
+            self.test_queue.append(self.run_i2c_eeprom_test)
+
+        if not self.test_queue:
+            self.pc_log_append("No test selected")
+            self.is_running_tests = False
+            return
+        self.run_next_test()
+
+    def run_next_test(self):
+        if not self.test_queue:
+            self.pc_log_append("=== ALL TESTS DONE ===")
+            self.is_running_tests = False  # Reset flag khi tests kết thúc
+            return
+
+        self.current_test = self.test_queue.pop(0)
+        self.current_test()
+
+    def run_next_test_delayed(self, delay_ms=5000):
+        """Schedule next test after delay"""
+        from PyQt5.QtCore import QTimer
+        QTimer.singleShot(delay_ms, self.run_next_test)
+
+    def spi_flash_test_id(self):
+        self.pc_log_append("=== SPI Flash Test: ID ===")
+        self.pc_log_append("[DUT] Read ID -> ", newline=False)
+        self.uart_dut.send("w25q_ID")
+
+    def spi_flash_test_write(self):
+        self.pc_log_append("=== SPI Flash Test: Write & Verify ===")
+        self.pc_log_append("[DUT] Write Test -> ", newline=False)
+        self.uart_dut.send("w25q_write 1024")
+        # After write complete, send read command
+        self.pc_log_append("[DUT] Read Test -> ", newline=False)
+        self.uart_dut.send("w25q_read 1024")
+
+    def spi_flash_test_prepare_mem(self):
+        self.pc_log_append("=== SPI Flash Test: Prepare Memory ===")
+        self.pc_log_append("[HIL] Prepare Memory -> ", newline=False)
+        self.uart_hil.send("w25q_prepare_mem 256")
+        # Wait a bit then read from DUT
+        self.pc_log_append("[DUT] Read & Verify -> ", newline=False)
+        self.uart_dut.send("w25q_read 256")
+
+    def run_i2c_eeprom_test(self):   
+        self.pc_log_append("=== I2C EEPROM Test ===")
+        self.pc_log_append("[DUT] Read EEPROM -> ", newline=False)
+        self.uart_dut.send("eeprom_read 0x00 256")
+
+    def on_test_completed(self, test_type):
+        """Callback khi test hoàn thành, chuyển sang test tiếp theo"""
+        # Chỉ xử lý nếu đang chạy tests
+        if not self.is_running_tests:
+            return
+        
+        if test_type == "i2c":
+            # Kiểm tra xem có fail không, nếu không có dữ liệu thì báo fail
+            if self.uart_dut.i2c_parser.buffer and len(self.uart_dut.i2c_parser.buffer) < self.uart_dut.i2c_parser.expected:
+                self.pc_log_append("FAIL")
+            elif not self.uart_dut.i2c_parser.buffer:
+                self.pc_log_append("FAIL")
+        
+        # Check if this was a prepare_mem test - add 5s delay before next test
+        if hasattr(self, 'current_test') and self.current_test and self.current_test.__name__ == 'spi_flash_test_prepare_mem':
+            self.pc_log_append("Wait 5s before next test...")
+            self.run_next_test_delayed(5000)
+        else:
+            self.run_next_test()
 
 # ==================================================
 # MAIN
