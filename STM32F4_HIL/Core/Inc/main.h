@@ -69,6 +69,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define HIL_DEBUG_LED_Pin LL_GPIO_PIN_4
+#define HIL_DEBUG_LED_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
