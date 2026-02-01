@@ -13,6 +13,6 @@
 ../Core/Src/stm32f4xx_it.c:198:6:TIM3_IRQHandler	8	static
 ../Core/Src/stm32f4xx_it.c:212:6:I2C1_EV_IRQHandler	8	static
 ../Core/Src/stm32f4xx_it.c:226:6:I2C1_ER_IRQHandler	8	static
-../Core/Src/stm32f4xx_it.c:240:6:SPI1_IRQHandler	4	static
-../Core/Src/stm32f4xx_it.c:253:6:USART1_IRQHandler	16	static
+../Core/Src/stm32f4xx_it.c:240:6:USART1_IRQHandler	16	static
+../Core/Src/stm32f4xx_it.c:261:6:SPI3_IRQHandler	4	static
 ../Core/Src/stm32f4xx_it.c:274:6:OTG_FS_IRQHandler	8	static
