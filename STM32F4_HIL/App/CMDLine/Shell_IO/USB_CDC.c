@@ -42,7 +42,7 @@ void Console_Init(void) {
 }
 
 void Console_Write(const char *fmt, ...) {
-    static char buf[128];   // ❗ KHÔNG dùng stack
+    static char buf[128];
     va_list args;
     va_start(args, fmt);
     int len = vsnprintf(buf, sizeof(buf), fmt, args);
