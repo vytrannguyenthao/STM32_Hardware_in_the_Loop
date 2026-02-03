@@ -8,12 +8,8 @@
 #ifndef W25Q_SLAVE_W25Q_SLAVE_H_
 #define W25Q_SLAVE_W25Q_SLAVE_H_
 
-#include "stm32f4xx_ll_spi.h"
-#include "stm32f4xx_ll_dma.h"
-#include "stm32f4xx_ll_system.h"
-#include "stm32f4xx_ll_exti.h"
-#include "stm32f4xx_ll_gpio.h"
-#include "stm32f4xx_ll_exti.h"
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_spi.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include <string.h>

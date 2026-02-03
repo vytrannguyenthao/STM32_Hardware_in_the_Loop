@@ -121,7 +121,7 @@ int main(void)
 	  Error_Handler();
   }
 
-  CLI_Init();
+//  CLI_Init();
   W25Q_Slave_Init(&w25q);
   xTaskCreate(CLI_Task, "CLI", 2048, NULL, 1, NULL);
   xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);

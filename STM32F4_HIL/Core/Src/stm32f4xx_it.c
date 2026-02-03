@@ -241,15 +241,7 @@ void I2C1_ER_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	if (LL_SPI_IsActiveFlag_RXNE(SPI1))
-	{
-	  uint8_t rx_data = LL_SPI_ReceiveData8(SPI1);
-	  W25Q_Slave_IRQHandler(&w25q, rx_data);
-	}
-	if (LL_SPI_IsActiveFlag_OVR(SPI1))
-	{
-		LL_SPI_ClearFlag_OVR(SPI1);
-	}
+
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
 
