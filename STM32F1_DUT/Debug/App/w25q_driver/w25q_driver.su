@@ -13,5 +13,5 @@
 ../App/w25q_driver/w25q_driver.c:91:6:W25Q_page_program	32	static
 ../App/w25q_driver/w25q_driver.c:117:6:W25Q_write	32	static
 ../App/w25q_driver/w25q_driver.c:140:6:W25Q_read	32	static
-../App/w25q_driver/w25q_driver.c:163:6:W25Q_fast_read	32	static
-../App/w25q_driver/w25q_driver.c:184:6:W25Q_chip_erase	24	static
+../App/w25q_driver/w25q_driver.c:164:6:W25Q_fast_read	32	static
+../App/w25q_driver/w25q_driver.c:185:6:W25Q_chip_erase	24	static
