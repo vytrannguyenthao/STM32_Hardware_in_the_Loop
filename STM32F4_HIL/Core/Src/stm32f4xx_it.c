@@ -240,19 +240,34 @@ void I2C1_ER_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-	if (LL_SPI_IsActiveFlag_RXNE(SPI1))
-	{
-	  uint8_t rx_data = LL_SPI_ReceiveData8(SPI1);
-	  W25Q_Slave_IRQHandler(&w25q, rx_data);
-	}
-	if (LL_SPI_IsActiveFlag_OVR(SPI1))
-	{
-		LL_SPI_ClearFlag_OVR(SPI1);
-	}
+
   /* USER CODE END USART1_IRQn 0 */
   /* USER CODE BEGIN USART1_IRQn 1 */
 
   /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line[15:10] interrupts.
+  */
+void EXTI15_10_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
+    /* USER CODE BEGIN LL_EXTI_LINE_15 */
+    if (LL_GPIO_IsInputPinSet(GPIOA, LL_EXTI_LINE_15) == 0) {
+      // NSS falling → bắt đầu transaction mới
+      Reset_W25Q(&w25q);
+    }
+    /* USER CODE END LL_EXTI_LINE_15 */
+  }
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+
+  /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
 /**
@@ -261,7 +276,11 @@ void USART1_IRQHandler(void)
 void SPI3_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI3_IRQn 0 */
-
+  if (LL_SPI_IsActiveFlag_RXNE(SPI3))
+	{
+	  uint8_t rx_data = LL_SPI_ReceiveData8(SPI3);
+	  W25Q_Slave_IRQHandler(&w25q, rx_data);
+	}
   /* USER CODE END SPI3_IRQn 0 */
   /* USER CODE BEGIN SPI3_IRQn 1 */
 

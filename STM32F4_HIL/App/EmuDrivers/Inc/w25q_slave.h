@@ -50,5 +50,6 @@ extern W25Q_Slave w25q;
 void W25Q_Slave_Init(W25Q_Slave* dev);
 void W25Q_Slave_IRQHandler(W25Q_Slave* dev, uint8_t rx_data);
 void W25Q_PrepareData(W25Q_Slave *dev, uint32_t length);
+void Reset_W25Q (W25Q_Slave* dev);
 
 #endif /* W25Q_SLAVE_W25Q_SLAVE_H_ */
