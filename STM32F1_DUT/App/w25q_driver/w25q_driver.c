@@ -150,6 +150,7 @@ void W25Q_read(W25Q_t *config, uint32_t address,
 	SPI_TXRX_safe(config, address & 0xFF, &dummy);
 
 	for (uint32_t i = 0; i < size; i++) {
+		LL_mDelay(3);
 		SPI_TXRX_safe(config, 0xFF, &buffer[i]);
 	}
 
