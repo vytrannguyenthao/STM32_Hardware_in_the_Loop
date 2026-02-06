@@ -23,13 +23,17 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 App/CMDLine \
-App/UART \
+App/USB \
 App/i2c_eeprom_driver \
 App/w25q_driver \
 Core/Src \
 Core/Startup \
 Drivers/STM32F4xx_HAL_Driver/Src \
+Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
+Middlewares/ST/STM32_USB_Device_Library/Core/Src \
 ThirdParty/FreeRTOS \
 ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F \
 ThirdParty/FreeRTOS/portable/MemMang \
+USB_DEVICE/App \
+USB_DEVICE/Target \
 

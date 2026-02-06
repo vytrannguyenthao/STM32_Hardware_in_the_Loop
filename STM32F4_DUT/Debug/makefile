@@ -9,15 +9,19 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include USB_DEVICE/Target/subdir.mk
+-include USB_DEVICE/App/subdir.mk
 -include ThirdParty/FreeRTOS/portable/MemMang/subdir.mk
 -include ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F/subdir.mk
 -include ThirdParty/FreeRTOS/subdir.mk
+-include Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
+-include Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include App/w25q_driver/subdir.mk
 -include App/i2c_eeprom_driver/subdir.mk
--include App/UART/subdir.mk
+-include App/USB/subdir.mk
 -include App/CMDLine/subdir.mk
 -include objects.mk
 
@@ -67,8 +71,8 @@ all: main-build
 main-build: STM32F4_DUT.elf secondary-outputs
 
 # Tool invocations
-STM32F4_DUT.elf STM32F4_DUT.map: $(OBJS) $(USER_OBJS) D:\STUDY\00_SCHOOL\DA\0_Project\STM32F4_DUT\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32F4_DUT.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\STUDY\00_SCHOOL\DA\0_Project\STM32F4_DUT\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F4_DUT.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32F4_DUT.elf STM32F4_DUT.map: $(OBJS) $(USER_OBJS) D:\HCMUT\HK252\LVTN\STM32_Hardware_in_the_Loop\STM32F4_DUT\STM32F407VETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32F4_DUT.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\HCMUT\HK252\LVTN\STM32_Hardware_in_the_Loop\STM32F4_DUT\STM32F407VETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F4_DUT.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
