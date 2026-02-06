@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "cmdline.h"
-#include "uart.h"
 //*****************************************************************************
 //
 // Defines the maximum number of arguments that can be parsed.

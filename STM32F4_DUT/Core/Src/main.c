@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -98,10 +99,10 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	W25Q_Init(&W25Q);
-	CommandLine_Init(DUT_UART_CONSOLE_HANDLE);
+  xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
+	CommandLine_Init();
 	xTaskCreate(CommandLine_Task, "DUT Console", configMINIMAL_STACK_SIZE * 4, NULL, 2, NULL);
-	xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 	vTaskStartScheduler();
   /* USER CODE END 2 */
 

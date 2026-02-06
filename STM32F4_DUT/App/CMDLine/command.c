@@ -7,13 +7,13 @@
 
 #include "command.h"
 #include "cmdline.h"
-#include "uart.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_rcc.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "usb.h"
 #include "w25q_driver.h"
 
 
@@ -22,8 +22,6 @@
 #define NAME_SHELL "DUT:~ "
 #define KEY_ENTER '\r'       /* [enter] key */
 #define KEY_BACKSPACE '\x7f' /* [backspace] key */
-
-USART_TypeDef *UART_CMDLINE;
 
 typedef struct {
 	char commandBuffer[COMMAND_MAX_LENGTH];
@@ -43,9 +41,14 @@ void process_command(char rxData, CMDLine_Context *context);
 
 /* Private variable -----------------------------------------------------------*/
 
-const char *ErrorCode[6] = { "OK\r\n", "BAD_CMD\r\n",
-		"TOO_MANY_ARGS\r\n", "TOO_FEW_ARGS\r\n",
-		"INVALID_ARG\r\n", "CMD_OK_BUT_PENDING...\r\n" };
+const char *ErrorCode[6] = { 
+	"OK\r\n",
+	"BAD_CMD\r\n",
+	"TOO_MANY_ARGS\r\n",
+	"TOO_FEW_ARGS\r\n",
+	"INVALID_ARG\r\n",
+	"CMD_OK_BUT_PENDING...\r\n"
+};
 
 //extern SPI_HandleTypeDef hspi2;
 
@@ -79,141 +82,113 @@ void CommandLine_Task(void *pvParameters)
     }
 }
 
-void CommandLine_Init(USART_TypeDef *handle_uart) {
-	UART_CMDLINE = handle_uart;
+void CommandLine_Init(void) {
+	Console_Init();
 	memset((void*) s_commandBuffer, 0, sizeof(s_commandBuffer));
 	s_commandBufferIndex = 0;
-	UART_SendStringRing(UART_CMDLINE, "\n\n\rDUT FIRMWARE \r\n");
-	UART_Flush_RingRx(UART_CMDLINE);
+	Console_Write("\n\n\rDUT FIRMWARE \r\n");
 
-	char buffer[30];
-	snprintf(buffer, sizeof(buffer), "\r%s$ ", NAME_SHELL);
-	UART_SendStringRing(UART_CMDLINE, buffer);
+	Console_Write(NAME_SHELL);
 }
 
 static void CommandLine_Task_Update(void) {
 	char rxData;
-	if (IsDataAvailable(UART_CMDLINE)) {
-		rxData = UART_ReadRing(UART_CMDLINE);
+	if (Console_Available()) {
+		rxData = Console_Read();
 		if (rxData == 27) {
-			UART_SendStringRing(UART_CMDLINE, "\033[2J");
+			Console_Write("\033[2J\033[H");
+			Console_Write("\r\n");
+			Console_Write(NAME_SHELL);
 		} else {
-			UART_WriteRing(UART_CMDLINE, rxData);
+			// Echo ra terminal
+            char tmp[2] = {rxData, 0};
+            Console_Write(tmp);
 		}
 		process_command(rxData, &pContext);
 	}
 }
 
 void process_command(char rxData, CMDLine_Context *context) {
-	if (rxData == 27) {
-		char buffer[60];
-		snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-		UART_SendStringRing(UART_CMDLINE, buffer);
-		context->commandBufferIndex = 0;
-		context->commandBuffer[0] = '\0';
-	}
-
 	if (rxData == 0x2D) // '-' key (history up)
 	{
 		if (context->historyIndex > 0) {
 			context->historyIndex--;
 		}
-
 		// Load history command
 		if (context->historyIndex < context->historyCount) {
-			strcpy(context->commandBuffer,
-					context->commandHistory[context->historyIndex]);
+			strcpy(context->commandBuffer, context->commandHistory[context->historyIndex]);
 			context->commandBufferIndex = strlen(context->commandBuffer);
 		} else {
 			context->commandBuffer[0] = '\0';
 			context->commandBufferIndex = 0;
 		}
-
 		// Clear current line and display updated command
-		UART_SendStringRing(UART_CMDLINE, "\033[2K"); // Clear entire line
-		char buffer[60];
-		snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-		UART_SendStringRing(UART_CMDLINE, buffer);
-		UART_SendStringRing(UART_CMDLINE, context->commandBuffer); // Display updated command
+		Console_Write("\033[2K"); // Clear entire line
+		Console_Write("\r\n");
+		Console_Write(NAME_SHELL);
+		Console_Write(context->commandBuffer); // Display updated command
 		return;
 	} else if (rxData == 0x3D) // '=' key (history down)
 	{
 		if (context->historyIndex < context->historyCount) {
 			context->historyIndex++;
 		}
-
 		// Load history command
 		if (context->historyIndex < context->historyCount) {
-			strcpy(context->commandBuffer,
-					context->commandHistory[context->historyIndex]);
+			strcpy(context->commandBuffer, context->commandHistory[context->historyIndex]);
 			context->commandBufferIndex = strlen(context->commandBuffer);
 		} else {
 			context->commandBuffer[0] = '\0';
 			context->commandBufferIndex = 0;
 		}
-
 		// Clear current line and display updated command
-		UART_SendStringRing(UART_CMDLINE, "\033[2K"); // Clear entire line
-		char buffer[60];
-		snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-		UART_SendStringRing(UART_CMDLINE, buffer);
-		UART_SendStringRing(UART_CMDLINE, context->commandBuffer); // Display updated command
+		Console_Write("\033[2K"); // Clear entire line
+		Console_Write("\r\n");
+		Console_Write(NAME_SHELL);
+		Console_Write(context->commandBuffer); // Display updated command
 		return;
 	}
 
 	// Handle individual key presses
-	if (((rxData >= 32 && rxData <= 126) || rxData == KEY_ENTER
-			|| rxData == KEY_BACKSPACE) && rxData != 0x2D && rxData != 0x3D
-			&& rxData != 0x5C) {
+	if (((rxData >= 32 && rxData <= 126) || rxData == KEY_ENTER || rxData == KEY_BACKSPACE)
+		  && rxData != 0x2D && rxData != 0x3D && rxData != 0x5C) {
 		if (rxData == KEY_ENTER) {
 			if (context->commandBufferIndex > 0) {
 				context->commandBuffer[context->commandBufferIndex] = '\0';
 				// Save to history
-				if (context->historyCount == 0
-						|| strcmp(
-								context->commandHistory[context->historyCount
-										- 1], context->commandBuffer) != 0) {
+				if (context->historyCount == 0 || strcmp(context->commandHistory[context->historyCount-1], context->commandBuffer) != 0) {
 					if (context->historyCount < MAX_HISTORY) {
-						strcpy(context->commandHistory[context->historyCount],
-								context->commandBuffer);
+						strcpy(context->commandHistory[context->historyCount], context->commandBuffer);
 						context->historyCount++;
 					} else {
 						for (int i = 0; i < MAX_HISTORY - 1; i++) {
-							strcpy(context->commandHistory[i],
-									context->commandHistory[i + 1]);
+							strcpy(context->commandHistory[i], context->commandHistory[i + 1]);
 						}
-						strcpy(context->commandHistory[MAX_HISTORY - 1],
-								context->commandBuffer);
+						strcpy(context->commandHistory[MAX_HISTORY - 1], context->commandBuffer);
 					}
 				}
 				context->historyIndex = context->historyCount;
 
 				// Process command
 				int8_t ret_val = CmdLineProcess(context->commandBuffer);
-				if (ret_val == CMDLINE_NONE_RETURN) {
-				} else {
-					char buffer[60];
-					if (ret_val != CMDLINE_OK)
-					{
-						snprintf(buffer, sizeof(buffer), "\r\n");
-						UART_SendStringRing(UART_CMDLINE, buffer);
-						UART_SendStringRing(UART_CMDLINE, ErrorCode[ret_val]);
-					}
-					snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-					UART_SendStringRing(UART_CMDLINE, buffer);
-					context->commandBufferIndex = 0;
+				if (ret_val != CMDLINE_OK)
+				{
+					Console_Write("\r\n");
+					Console_Write(ErrorCode[ret_val]);
 				}
+				Console_Write("\r\n");
+				Console_Write(NAME_SHELL);
+				context->commandBufferIndex = 0;
 			} else {
-				char buffer[60];
-				snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-				UART_SendStringRing(UART_CMDLINE, buffer);
+				Console_Write("\r\n");
+				Console_Write(NAME_SHELL);
 			}
 		} else if (rxData == KEY_BACKSPACE) {
 			if (context->commandBufferIndex > 0) {
 				context->commandBufferIndex--;
 				context->commandBuffer[context->commandBufferIndex] = '\0';
 			} else {
-				UART_SendStringRing(UART_CMDLINE, " ");
+				Console_Write(" ");
 			}
 		} else {
 			if (context->commandBufferIndex < COMMAND_MAX_LENGTH - 1) {
@@ -221,11 +196,9 @@ void process_command(char rxData, CMDLine_Context *context) {
 				context->commandBuffer[context->commandBufferIndex] = '\0';
 			} else {
 				// Command too long
-				UART_SendStringRing(UART_CMDLINE,
-						"\r\nError: Command too long.");
-				char buffer[60];
-				snprintf(buffer, sizeof(buffer), "\r\n%s$ ", NAME_SHELL);
-				UART_SendStringRing(UART_CMDLINE, buffer);
+				Console_Write("\r\nError: Command too long.");
+				Console_Write("\r\n");
+				Console_Write(NAME_SHELL);
 				context->commandBufferIndex = 0;
 				context->commandBuffer[0] = '\0';
 			}
@@ -253,7 +226,7 @@ int Cmd_help(int argc, char *argv[]) {
 		int padding = (int) (maxCmdLength - cmdLength + 2);
 		snprintf(buffer, sizeof(buffer), "\r\n%s%*s %s", pEntry->pcCmd,
 				padding, "", pEntry->pcHelp);
-		UART_SendStringRing(UART_CMDLINE, buffer);
+		Console_Write(buffer);
 		pEntry++;
 	}
 	return (CMDLINE_OK);
@@ -261,7 +234,7 @@ int Cmd_help(int argc, char *argv[]) {
 
 int Cmd_Clear_CLI(int argc, char *argv[]) {
 	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
-	UART_SendStringRing(UART_CMDLINE, "\033[2J\033[H");
+	Console_Write("\033[2J\033[H");
 	return (CMDLINE_OK);
 }
 
@@ -271,7 +244,7 @@ int Cmd_ReadID_W25Q(int argc, char *argv[]) {
 	char buffer[30];
 	W25Q_read_id(&W25Q, id);
 	snprintf(buffer, sizeof(buffer), "\r\nW25Q ID: 0x%X%X%X%x\r\n", id[0], id[1], id[2], id[3]);
-	UART_SendStringRing(UART_CMDLINE, buffer);
+	Console_Write(buffer);
 	return (CMDLINE_OK);
 }
 
@@ -285,7 +258,7 @@ int Cmd_Write_W25Q(int argc, char *argv[]) {
     uint32_t length = atoi(argv[1]);  // số byte cần ghi
 
     if (length == 0 || length > 1024) {  // Giới hạn để tránh buffer quá lớn
-        UART_SendStringRing(UART_CMDLINE, "\r\nInvalid length\r\n");
+        Console_Write("\r\nInvalid length\r\n");
         return CMDLINE_OK;
     }
 
@@ -300,7 +273,7 @@ int Cmd_Write_W25Q(int argc, char *argv[]) {
 
     snprintf(buffer, sizeof(buffer), "\r\nWrite %lu bytes from addr [0 - %lu] to W25Q OK\r\n",
              (unsigned long)length, (unsigned long)(length - 1));
-    UART_SendStringRing(UART_CMDLINE, buffer);
+    Console_Write(buffer);
 
     return CMDLINE_OK;
 }
@@ -315,7 +288,7 @@ int Cmd_Read_W25Q(int argc, char *argv[]) {
 	uint32_t length = atoi(argv[1]);  // số byte cần đọc
 
 	if (length == 0 || length > 1024) {  // Giới hạn để tránh buffer quá lớn
-		UART_SendStringRing(UART_CMDLINE, "\r\nInvalid length\r\n");
+		Console_Write("\r\nInvalid length\r\n");
 		return CMDLINE_OK;
 	}
 
@@ -328,15 +301,15 @@ int Cmd_Read_W25Q(int argc, char *argv[]) {
 	// Hiển thị dữ liệu đọc được
 	snprintf(buffer, sizeof(buffer), "\r\nRead %lu bytes from addr [0 - %lu] from W25Q:\r\n",
 			 (unsigned long)length, (unsigned long)(length - 1));
-	UART_SendStringRing(UART_CMDLINE, buffer);
+	Console_Write(buffer);
 	for (uint32_t i = 0; i < length; i++) {
 		snprintf(buffer, sizeof(buffer), "0x%02X ", read_data[i]);
-		UART_SendStringRing(UART_CMDLINE, buffer);
+		Console_Write(buffer);
 		if ((i + 1) % 16 == 0) {
-			UART_SendStringRing(UART_CMDLINE, "\r\n");
+			Console_Write("\r\n");
 		}
 	}
-	UART_SendStringRing(UART_CMDLINE, "\r\n");
+	Console_Write("\r\n");
 
 	return CMDLINE_OK;
 }
@@ -349,7 +322,7 @@ int Cmd_EraseChip_W25Q(int argc, char *argv[]) {
 	// Xóa chip
 	W25Q_chip_erase(&W25Q);
 	snprintf(buffer, sizeof(buffer), "\r\nChip Erase OK\r\n");
-	UART_SendStringRing(UART_CMDLINE, buffer);
+	Console_Write(buffer);
 
 	return CMDLINE_OK;
 }
@@ -375,7 +348,7 @@ int Cmd_EEPROM_Init(int argc, char *argv[])
                     page,
                     I2C_MEMADD_SIZE_16BIT) != HAL_OK)
     {
-        UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM init FAIL\r\n");
+        Console_Write("\r\nEEPROM init FAIL\r\n");
         return CMDLINE_OK;
     }
 
@@ -383,7 +356,7 @@ int Cmd_EEPROM_Init(int argc, char *argv[])
     snprintf(buf, sizeof(buf),
              "\r\nEEPROM init OK: addr=0x%02X size=%d page=%d\r\n",
              addr7, size, page);
-    UART_SendStringRing(UART_CMDLINE, buf);
+    Console_Write(buf);
 
     return CMDLINE_OK;
 }
@@ -399,7 +372,7 @@ int Cmd_EEPROM_Write(int argc, char *argv[])
     static uint8_t buf[256];
 
     if (len == 0 || len > sizeof(buf)) {
-        UART_SendStringRing(UART_CMDLINE, "\r\nInvalid length\r\n");
+        Console_Write("\r\nInvalid length\r\n");
         return CMDLINE_OK;
     }
 
@@ -407,11 +380,11 @@ int Cmd_EEPROM_Write(int argc, char *argv[])
         buf[i] = i & 0xFF;
 
     if (EEPROM_Write(&EEPROM1, addr, buf, len) != HAL_OK) {
-        UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM write FAIL\r\n");
+        Console_Write("\r\nEEPROM write FAIL\r\n");
         return CMDLINE_OK;
     }
 
-    UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM write OK\r\n");
+    Console_Write("\r\nEEPROM write OK\r\n");
     return CMDLINE_OK;
 }
 
@@ -427,25 +400,25 @@ int Cmd_EEPROM_Read(int argc, char *argv[])
     char out[64];
 
     if (len == 0 || len > sizeof(buf)) {
-        UART_SendStringRing(UART_CMDLINE, "\r\nInvalid length\r\n");
+        Console_Write("\r\nInvalid length\r\n");
         return CMDLINE_OK;
     }
 
     if (EEPROM_Read(&EEPROM1, addr, buf, len) != HAL_OK) {
-        UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM read FAIL\r\n");
+        Console_Write("\r\nEEPROM read FAIL\r\n");
         return CMDLINE_OK;
     }
 
     snprintf(out, sizeof(out), "\r\nEEPROM read @0x%04X (%d bytes):\r\n", addr, len);
-    UART_SendStringRing(UART_CMDLINE, out);
+    Console_Write(out);
 
     for (uint16_t i = 0; i < len; i++) {
         snprintf(out, sizeof(out), "%02X ", buf[i]);
-        UART_SendStringRing(UART_CMDLINE, out);
+        Console_Write(out);
         if ((i + 1) % 16 == 0)
-            UART_SendStringRing(UART_CMDLINE, "\r\n");
+            Console_Write("\r\n");
     }
-    UART_SendStringRing(UART_CMDLINE, "\r\n");
+    Console_Write("\r\n");
 
     return CMDLINE_OK;
 }
@@ -459,11 +432,11 @@ int Cmd_EEPROM_Fill(int argc, char *argv[])
     uint16_t len  = atoi(argv[2]);
 
     if (EEPROM_Fill(&EEPROM1, addr, len) != HAL_OK) {
-        UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM fill FAIL\r\n");
+        Console_Write("\r\nEEPROM fill FAIL\r\n");
         return CMDLINE_OK;
     }
 
-    UART_SendStringRing(UART_CMDLINE, "\r\nEEPROM fill OK\r\n");
+    Console_Write("\r\nEEPROM fill OK\r\n");
     return CMDLINE_OK;
 }
 

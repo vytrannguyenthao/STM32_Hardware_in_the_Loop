@@ -42,15 +42,15 @@ void Console_Init(void) {
 }
 
 void Console_Write(const char *fmt, ...) {
-	char buf[128];
-	va_list args;
-	va_start(args, fmt);
-	int len = vsnprintf(buf, sizeof(buf), fmt, args);
-	va_end(args);
+    static char buf[128];
+    va_list args;
+    va_start(args, fmt);
+    int len = vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
 
-	if (len > 0) {
-		CDC_Transmit_FS((uint8_t*)buf, len);
-	}
+    if (len <= 0) return;
+
+    while (CDC_Transmit_FS((uint8_t*)buf, len) == USBD_BUSY);
 }
 
 bool Console_Available(void) {

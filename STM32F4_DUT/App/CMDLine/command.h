@@ -9,7 +9,6 @@
 #define CMDLINE_COMMAND_H_
 
 #include "cmdline.h"
-#include "uart.h"
 #include "main.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -19,11 +18,9 @@
 #define MAX_HISTORY 8
 #define MAX_CMD_LENGTH COMMAND_MAX_LENGTH
 
-extern USART_TypeDef *UART_CMDLINE;
-
 void CommandLine_Task(void *pvParameters);
 
-void CommandLine_Init(USART_TypeDef *handle_uart);
+void CommandLine_Init(void);
 void CommandLine_CreateTask(void);
 void Command_SendSplash(void);
 
