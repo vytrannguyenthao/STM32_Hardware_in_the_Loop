@@ -26,6 +26,7 @@
 #include "task.h"
 #include "command.h"
 #include "w25q_driver.h"
+#include "math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +45,14 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+DAC_HandleTypeDef hdac;
+DMA_HandleTypeDef hdma_dac1;
+
 I2C_HandleTypeDef hi2c1;
+
+SPI_HandleTypeDef hspi3;
+
+TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 
@@ -53,15 +61,27 @@ I2C_HandleTypeDef hi2c1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_SPI1_Init(void);
-static void MX_USART1_UART_Init(void);
+static void MX_SPI3_Init(void);
+static void MX_DAC_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 static void toggle_led(void *pvParameters);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+uint32_t sine_val[100];
+#define PI 3.1415926
+void calcsin (void)
+{
+	for (int i=0; i<100; i++)
+	{
+		sine_val[i] = ((sin(i*2*PI/100) + 1)*(4096/2));
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -94,10 +114,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
-  MX_SPI1_Init();
-  MX_USART1_UART_Init();
+  MX_USB_DEVICE_Init();
+  MX_SPI3_Init();
+  MX_DAC_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  calcsin();
 	W25Q_Init(&W25Q);
   xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
