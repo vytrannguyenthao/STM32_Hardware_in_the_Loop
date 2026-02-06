@@ -10,9 +10,9 @@
 #include "task.h"
 
 W25Q_t W25Q = {
-	.spi = SPI1,
-	.cs_port = GPIOA,
-	.cs_pin = LL_GPIO_PIN_4
+	.spi = SPI3,
+	.cs_port = GPIOD,
+	.cs_pin = LL_GPIO_PIN_0
 };
 
 /**
