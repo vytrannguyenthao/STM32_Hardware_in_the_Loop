@@ -9,7 +9,7 @@
 // Pin usages
 ///////////////////////////////////
 // Baseline mode -21 digital, 3 analog
-// GP0,1 is debug uart TX, RX (but rx not used) 
+// GP0,1 is debug uart TX, RX (but rx not used)
 // GP2-GP22 are digital inputs
 // GP23 controls power supply modes and is not a board I/O
 // GP24 is a power sense and not a board I/O
@@ -46,12 +46,12 @@
   #define BASE_MODE 1
   #define NUM_A_CHAN 3 // number of analog channels
   #define NUM_D_CHAN 21 // number of digital channels
-  //Note: GPIO_D_MASK is relative to the pins of the chip, whereas the 
-  //MEM_D_MASK is relative to the value written in memory, those may be different depending
-  //on how data is shifted from the GPIOs into memory.
+//Note: GPIO_D_MASK is relative to the pins of the chip, whereas the
+//MEM_D_MASK is relative to the value written in memory, those may be different depending
+//on how data is shifted from the GPIOs into memory.
   #define GPIO_D_MASK 0x7FFFFC  //Mask of bits for digital inputs
   #define UART_EN 1
-  //Since this mode has all digital inputs contigous, the upper mask isn't needed.
+//Since this mode has all digital inputs contigous, the upper mask isn't needed.
   #define MEM_D_MASK_L 0x007FFFFF  //lower mask of bits for digital inputs
   #define MEM_D_MASK_U 0x0  //upper mask of bits for digital inputs
   #define PIN_TEST_MASK 0x1C7FFFFE
@@ -59,7 +59,7 @@
 #elif PICO_MODE == 1  //Digital 26
   #define DIG_26_MODE 1
   #define NUM_A_CHAN 0 // number of analog channels
-  #define NUM_D_CHAN 26 // number of digital channels 
+  #define NUM_D_CHAN 26 // number of digital channels
   #define GPIO_D_MASK 0x1C7FFFFF  //Mask of bits for digital inputs
   #define MEM_D_MASK_L 0x007FFFFF  //lower mask of bits for digital inputs
   #define MEM_D_MASK_U 0x1C000000  //upper mask of bits for digital inputs
@@ -69,8 +69,8 @@
 //Note: The RP2040 only has GPIOs 0-29.
 //The RP2350 has GPIOs 30 and above, but only in the QFN-80 packeage.
 #elif PICO_MODE==2  //Digital 32
- // #define BASE_MODE 0
- // #define DIG_26_MODE 0
+// #define BASE_MODE 0
+// #define DIG_26_MODE 0
   #define DIG_32_MODE 1
   #define NUM_A_CHAN 0 // number of analog channels
   #define NUM_D_CHAN 32 // number of digital channels
@@ -89,8 +89,8 @@
 #ifdef PICO_RP2350
  #define DMA_BUF_SIZE 476000 //add the full 256KB increase
 #else
- #define DMA_BUF_SIZE 220000 
-#endif 
+ #define DMA_BUF_SIZE 220000
+#endif
 // The size of the buffer sent to the CDC serial
 // The TUD CDC buffer is only 256B so it doesn't help to have more than this.
 #define TX_BUF_SIZE 260
@@ -107,42 +107,42 @@
 // at least something goes across the link.
 #define TX_BUF_THRESH 20
 typedef enum  {IDLE = 0, //initial and ending condition, also cleanup variables used when not idle
-              STARTED = 1, //the host has sent a command to start sending samples
-              SENDING = 2, //the dma engines etc are configured and running
-              DMA_DONE = 3, //DMA engine has sent all expected loop and is disabled
-              SAMPLES_SENT = 4, //all samples have been sent to the host
-              ABORTED = 5 //an error , usually DMA buffer overflow, has occured
-            } dev_state;
+	       STARTED = 1, //the host has sent a command to start sending samples
+	       SENDING = 2, //the dma engines etc are configured and running
+	       DMA_DONE = 3, //DMA engine has sent all expected loop and is disabled
+	       SAMPLES_SENT = 4, //all samples have been sent to the host
+	       ABORTED = 5 //an error , usually DMA buffer overflow, has occured
+} dev_state;
 typedef struct
 {
-   uint32_t sample_rate;
-   uint32_t num_samples;
-   uint32_t a_mask, d_mask;
-   // number of samples for one of the 4 dma target arrays.  While this normally is related to the
-   //half buffer sizes, in the optimized sending mode the value is temporarily overrided to adjust
-   //the number of samples sent by the send_slice* functions.
-   uint32_t samples_per_half; 
-   uint8_t a_chan_cnt;        // count of enabled analog channels
-   uint8_t d_chan_cnt;        // count of enabled digital channels
-   uint8_t d_tx_bps;          // Digital Transmit bytes per slice
-   // Pins sampled by the PIO - 4,8,16 or 32
-   uint8_t pin_count;
-   uint8_t d_nps; // digital nibbles per slice from a PIO/DMA perspective.
-   uint32_t scnt; // number of samples sent
-   char cmdstrptr;
-   char cmdstr[20];                                             // used for parsing input
-   uint32_t d_size, a_size;                                     // size of each of the two data buffers for each of a& d
-   uint32_t dbuf0_start, dbuf1_start, abuf0_start, abuf1_start; // starting memory pointers of adc buffers
-   char rspstr[20];
-   // mark key control variables voltatile since multiple cores might access them
-   volatile dev_state state;
-   volatile bool cont;
-   //a "+" was received from the host telling us to stop
-   //this could be seen in continuous mode (host is stopping)
-   //or in fixed mode (after an abort or because the host felt like it)
-   //It is not a state machine state as it is somewhat asyncronous to the state
-   //and could interfere with the normal orderly progression through the FSM.
-   volatile bool usb_plus;
+	uint32_t sample_rate;
+	uint32_t num_samples;
+	uint32_t a_mask, d_mask;
+	// number of samples for one of the 4 dma target arrays.  While this normally is related to the
+	//half buffer sizes, in the optimized sending mode the value is temporarily overrided to adjust
+	//the number of samples sent by the send_slice* functions.
+	uint32_t samples_per_half;
+	uint8_t a_chan_cnt;   // count of enabled analog channels
+	uint8_t d_chan_cnt;   // count of enabled digital channels
+	uint8_t d_tx_bps;     // Digital Transmit bytes per slice
+	// Pins sampled by the PIO - 4,8,16 or 32
+	uint8_t pin_count;
+	uint8_t d_nps; // digital nibbles per slice from a PIO/DMA perspective.
+	uint32_t scnt; // number of samples sent
+	char cmdstrptr;
+	char cmdstr[20];                                        // used for parsing input
+	uint32_t d_size, a_size;                                // size of each of the two data buffers for each of a& d
+	uint32_t dbuf0_start, dbuf1_start, abuf0_start, abuf1_start; // starting memory pointers of adc buffers
+	char rspstr[20];
+	// mark key control variables voltatile since multiple cores might access them
+	volatile dev_state state;
+	volatile bool cont;
+	//a "+" was received from the host telling us to stop
+	//this could be seen in continuous mode (host is stopping)
+	//or in fixed mode (after an abort or because the host felt like it)
+	//It is not a state machine state as it is somewhat asyncronous to the state
+	//and could interfere with the normal orderly progression through the FSM.
+	volatile bool usb_plus;
 } sr_device_t;
 
 // Send to debug uart

@@ -125,7 +125,7 @@ void send_slice_init(sr_device_t *d,uint8_t *dbuf){
 		samp_remain=d->num_samples-d->scnt;
 		d->scnt+=samp_remain;
 		//Dprintf("SSIa sph %d scnt %d lval 0x%X rem %d ns %d\n\r",d->samples_per_half,d->scnt,lval,samp_remain,d->num_samples);
-	} else  {
+	} else {
 		d->scnt+=d->samples_per_half;
 		//Dprintf("SSIb sph %d scnt %d lval 0x%X rem %d ns %d\n\r",d->samples_per_half,d->scnt,lval,samp_remain,d->num_samples);
 	}
@@ -203,13 +203,13 @@ uint32_t send_slices_D4(sr_device_t *d,uint8_t *dbuf){
 		//We must make sure cword==lword and that all nibbles of cword are the same
 		if ((cword==lword)&&((cword>>4)==(cword&0x0FFFFFFF))) {
 			rlecnt+=8;
-		} else   {//if coarse rle didn't match
+		} else {  //if coarse rle didn't match
 			lword=cword;
 			for (int j=0; j<8; j++) { //process all 8 nibbles
 				nibcurr=cword&0xF;
 				if (nibcurr==niblast) {
 					rlecnt++;
-				} else   {
+				} else {
 					//If the value changes we must push all remaing rles to the txbuf
 					//chngcnt++;
 					//Send intermediate 8..632 RLEs
@@ -280,9 +280,9 @@ uint32_t  get_cval(uint8_t *dbuf){
 	uint32_t cval;
 	if (d_dma_bps==1) {
 		cval=dbuf[rxbufdidx];
-	} else if (d_dma_bps==2)   {
+	} else if (d_dma_bps==2) {
 		cval=(*((uint16_t *) (dbuf+rxbufdidx)));
-	} else  {
+	} else {
 		cval=(*((uint32_t *) (dbuf+rxbufdidx)));
 		//Mask off undefined channels
 	   #ifdef DIG_26_MODE
@@ -355,7 +355,7 @@ void __attribute__ ((noinline)) send_slices_1B(sr_device_t *d,uint8_t *dbuf){
 		cval=dbuf[rxbufdidx++];
 		if (cval==lval) {
 			rlecnt++;
-		} else     {
+		} else {
 //         Dprintf("SB n 0x%X o 0x%X rle %d ridx %d\n\r",cval,lval,rlecnt,rxbufdidx);
 			check_rle();
 			tx_d_samp(d,cval);
@@ -377,7 +377,7 @@ void __attribute__ ((noinline)) send_slices_2B(sr_device_t *d,uint8_t *dbuf){
 		rxbufdidx+=2;
 		if (cval==lval) {
 			rlecnt++;
-		} else     {
+		} else {
 			check_rle();
 			tx_d_samp(d,cval);
 			check_tx_buf(TX_BUF_THRESH);
@@ -405,7 +405,7 @@ void __attribute__ ((noinline)) send_slices_4B(sr_device_t *d,uint8_t *dbuf){
        #endif
 		if (cval==lval) {
 			rlecnt++;
-		} else     {
+		} else {
 			check_rle();
 			tx_d_samp(d,cval);
 			check_tx_buf(TX_BUF_THRESH);
@@ -454,7 +454,7 @@ void send_half(void){
 	//return immediately if not in a sending state
 	if ((dev.state==SENDING)||(dev.state==DMA_DONE)) {
 		sho_cnt++;
-	} else  {
+	} else {
 		return;
 	}
 	//We have a full DMA buffer, send it.
@@ -467,13 +467,13 @@ void send_half(void){
 		if (dev.a_mask) {
 			send_slices_analog(&dev,&(capture_buf[dbuf_start]),
 			                   &(capture_buf[abuf_start]));
-		} else if (d_dma_bps==0)                                                                          {
+		} else if (d_dma_bps==0) {
 			send_slices_D4(&dev,&(capture_buf[dbuf_start]));
-		} else if (d_dma_bps==1)                                                                                                                                                    {
+		} else if (d_dma_bps==1) {
 			send_slices_1B(&dev,&(capture_buf[dbuf_start]));
-		} else if (d_dma_bps==2)                                                                                                                                                                                                                              {
+		} else if (d_dma_bps==2) {
 			send_slices_2B(&dev,&(capture_buf[dbuf_start]));
-		} else                                                                                                                                                                                                                                                                                                       {
+		} else {
 			send_slices_4B(&dev,&(capture_buf[dbuf_start]));
 		}
 		num_halves++;
@@ -483,16 +483,16 @@ void send_half(void){
 		dev.state=SAMPLES_SENT;
 		//   Dprintf("SH_USB_PLUS_SS\n\r");
 		//At DMA_DONE transition to SAMPLES_SENT when all samples are sent
-	} else if (dev.state==DMA_DONE)   {
+	} else if (dev.state==DMA_DONE) {
 		if ((dev.scnt>=dev.num_samples) || (dev.cont==true)) {
 			dev.state=SAMPLES_SENT;
 			Dprintf("SH_SSENT %d %d\n\r",dev.scnt,dev.num_samples);
-		} else  {
+		} else {
 			//Even with dma disabled, we still might have one more half buffer to send
 			//so allow this loop to be called again for the remaining half buffer
 			if (dma_halves-num_halves==1) {
 				//Dprintf("ONEMORE\n\r");
-			} else  {
+			} else {
 				if (mask_xfer_err==false) {
 					//If we have more than one extra we have some kind of overflow/error/abort etc
 					//that isn't expected.
@@ -567,8 +567,8 @@ void dma_int_handler(){
 		//Dprintf("PRT %X\n",currintmask);
 	}
 
-//This 2nd overflow check says if dma_halves is more than one ahead of num_halves then we are starting to
-//overwrite a buffer we are sending. Note that it is after we increment dma_halves .
+	//This 2nd overflow check says if dma_halves is more than one ahead of num_halves then we are starting to
+	//overwrite a buffer we are sending. Note that it is after we increment dma_halves .
 	if ((mask_xfer_err==false)
 	    && (dma_halves-num_halves>1)) {
 		Dprintf("Int Overflow1 a %d b %d c %d d %d e %d halves %d %d masks %X %X %X \n\r",
@@ -857,7 +857,7 @@ int main(){
 			if (mask_xfer_err) {
 				channel_config_set_chain_to(&amcfg1,amaintchan1);
 				channel_config_set_chain_to(&pmcfg1,pmaintchan1);
-			} else  {
+			} else {
 				channel_config_set_chain_to(&amcfg1,admachan0);
 				channel_config_set_chain_to(&pmcfg1,pdmachan0);
 			}
@@ -928,7 +928,7 @@ int main(){
 					dev.state=ABORTED;
 					adc_aborting=true;
 					*adcdiv=0;
-				} else  {//adcdivint legal
+				} else { //adcdivint legal
 					*adcdiv=((adcdivint-1)<<8)|adc_frac_int;
 					Dprintf("adcdiv %u frac %d adcdivint %d\n\r",*adcdiv,adc_frac_int,adcdivint);
 					//This is needed to clear the AINSEL so that when the round robin arbiter starts
@@ -1087,9 +1087,9 @@ int main(){
 				irq_set_enabled(DMA_IRQ_0, true);
 				irq_set_exclusive_handler(DMA_IRQ_0, dma_int_handler);
 
-	  			#ifdef BASE_MODE
+				#ifdef BASE_MODE
 				adc_run(true); //enable free run sample mode
-	  			#endif
+				#endif
 				pio_sm_set_enabled(pio, piosm, true);
 			} //if ~adcaborting
 		}//if dev.sending and not started
@@ -1123,12 +1123,12 @@ int main(){
 				//Clear abort so we stop sending "!"
 				Dprintf("Plus ends abort\n\r");
 				dev.state==IDLE;
-			} else if (dev.state==IDLE)   {
+			} else if (dev.state==IDLE) {
 				Dprintf("Plus in idle ignored\n\r");
-			} else if (dev.state==STARTED)   {
+			} else if (dev.state==STARTED) {
 				Dprintf("Plus ends started");
 				dev.state==IDLE;
-			} else  {
+			} else {
 				Dprintf("usb_plus set\n\r");
 				dev.usb_plus=true;
 			}
