@@ -19,13 +19,6 @@
 
 #include "sr_device.h"
 
-//forced_test_mode is a special mode that puts the device into an active sampling
-//state out of reset.  It is used for a quick way to debug features without needed
-//pulseview or sigrok-cli to initiate a transfer.
-//The enable means we will start the mode once, the run indicates it is currently running.
-//To enable the feature, set forced_test_mode_en to true, but leave forced_test_mode_run false.
-bool forced_test_mode_en=false; //true;
-bool forced_test_mode_run=false;
 PIO pio = pio0;
 uint piosm=0;
 uint8_t *capture_buf;
@@ -804,29 +797,6 @@ int main(){
 			my_stdio_usb_out_chars(dev.rspstr,mylen);
 			send_resp=false;
 		}
-		//This testmode forces the device into a capture state without needing
-		//sigrok cli/pulseview to initiate it
-		//It must be placed immediately before the dev.sending/started check just below
-		if (forced_test_mode_en) {
-			dev.cont=false;
-			//These must start from 0 and go up.
-			dev.d_mask=0xF;
-			dev.a_mask=0x1;
-			//min 5khz sample rate
-			//TODO (ADC)-Need to add support for ADC clocking/overclocking
-			//- setting to 1MHZ seems to break if ADC is enabled .
-			//To do this likely requires a sysclk boost
-			dev.sample_rate=2000000;
-			dev.num_samples=2000000;
-			dev.scnt=0; //number of samples sent
-
-			//Clear this on first past
-			forced_test_mode_en=false;
-			forced_test_mode_run=true;
-			Dprintf("Enter forced test mode %d %X \n\r",dev.a_chan_cnt,dev.a_mask);
-			tx_init(&dev);
-
-		}
 		if (dev.state==STARTED) {
 			bool adc_aborting=false;
 			Dprintf("STRTING\n\r");
@@ -1177,8 +1147,8 @@ int main(){
 		//As an additional failsafe, a final bytecnt with a count of 0 is sent.
 		//In forced test mode we also don't get the usb plus, so the forced exit on abort covers that as well
 		if (dev.state==ABORTED) {
-			Dprintf("sending abort! ftm %d num_halves %d dma_halves %d sho cnt %d tx_cnt %d\n\r",
-			        forced_test_mode_run,num_halves,dma_halves,sho_cnt,tx_cnt);
+			Dprintf("sending abort! num_halves %d dma_halves %d sho cnt %d tx_cnt %d\n\r",
+			        num_halves,dma_halves,sho_cnt,tx_cnt);
 			sleep_ms(1000);
 			my_stdio_usb_out_chars("!!!",3);
 			sleep_ms(1000);
@@ -1207,9 +1177,6 @@ int main(){
 		//Since there are so many FSM arcs, it's safest to just continually clear state
 		//if we aren't sending
 		if (dev.state==IDLE) {
-			//forced_test_mode is really a one shot deal as there is no way to restart it.
-			//Exit the mode so that host accesses will work normally
-			forced_test_mode_run=false;
      #ifdef BASE_MODE
 			adc_run(false);
 			adc_fifo_drain();

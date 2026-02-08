@@ -143,13 +143,6 @@ typedef struct
    //It is not a state machine state as it is somewhat asyncronous to the state
    //and could interfere with the normal orderly progression through the FSM.
    volatile bool usb_plus;
-   /*Depracated trigger logic
-   //If HW trigger enabled, uncomment all usages
-   //volatile bool notfirst;  //Have we processed at least a first sample (so that lval is correct
-   //  volatile bool triggered;
-   //  uint32_t tlval; //last digital sample value - must keep it across multiple calls to slices for trigger
-   //  uint32_t lvl0mask,lvl1mask,risemask,fallmask,chgmask;
-   End depracated trigger logic*/
 } sr_device_t;
 
 // Send to debug uart

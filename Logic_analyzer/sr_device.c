@@ -41,17 +41,8 @@ void reset(sr_device_t *d)
    d->state==IDLE;
    d->cont = 0;
    d->scnt = 0;
-   // d->notfirst=false;
-   // Set triggered by default so that we don't check for HW triggers
-   // unless the driver sends a trigger command
-   // d->triggered=true;
-   // d->tlval=0;
-   // d->lvl0mask=0;
-   // d->lvl1mask=0;
-   // d->risemask=0;
-   // d->fallmask=0;
-   // d->chgmask=0;
 };
+
 // initial post reset state
 void init(sr_device_t *d)
 {
@@ -64,6 +55,7 @@ void init(sr_device_t *d)
    d->d_nps = 0;
    d->cmdstrptr = 0;
 }
+
 void tx_init(sr_device_t *d)
 {
    // A reset should have already been called to restart the device.
@@ -105,6 +97,7 @@ void tx_init(sr_device_t *d)
    d->d_tx_bps = (d->d_chan_cnt + 6) / 7;
    d->state=STARTED;
 }
+
 // Process incoming character stream
 // Return 1 if the device rspstr has a response to send to host
 // Be sure that rspstr does not have \n  or \r.
