@@ -313,7 +313,7 @@ int Cmd_Read_W25Q(int argc, char *argv[]) {
 			 (unsigned long)length, (unsigned long)(length - 1));
 	Console_Write(buffer);
 	for (uint32_t i = 0; i < length; i++) {
-		snprintf(buffer, sizeof(buffer), "0x%02X ", read_data[i]);
+		snprintf(buffer, sizeof(buffer), "%02X ", read_data[i]);
 		Console_Write(buffer);
 		if ((i + 1) % 16 == 0) {
 			Console_Write("\r\n");
