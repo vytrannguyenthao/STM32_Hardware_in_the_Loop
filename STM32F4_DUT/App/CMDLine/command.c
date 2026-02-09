@@ -73,6 +73,7 @@ tCmdLineEntry g_psCmdTable[] =
 		{ "w25q_read", Cmd_Read_W25Q, "Read data from W25Q at addr 0 to <size> | format: w25q_read <size>" },
 		{ "w25q_erasechip", Cmd_EraseChip_W25Q, "Erase entire W25Q chip | format: w25q_erasechip" },
 
+		{ "i2c_scan", 	  Cmd_I2C_Scan,     "Scan I2C device active on bus" },
 		{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
 		{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 		{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
@@ -446,6 +447,36 @@ int Cmd_EEPROM_Fill(int argc, char *argv[])
     }
 
     Console_Write("\r\nEEPROM fill OK\r\n");
+    return CMDLINE_OK;
+}
+
+int Cmd_I2C_Scan(int argc, char *argv[])
+{
+    (void)argc;
+    (void)argv;
+
+    char msg[64];
+    uint8_t found = 0;
+
+    Console_Write("\r\nScanning I2C bus...\r\n");
+
+    for (uint8_t addr = 1; addr < 127; addr++)
+    {
+        if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK)
+        {
+            sprintf(msg, "Found device at 0x%02X\r\n", addr);
+            Console_Write(msg);
+            found++;
+        }
+    }
+
+    if (found == 0)
+        Console_Write("No I2C device found\r\n");
+    else {
+        sprintf(msg, "Total: %d device(s)\r\n", found);
+        Console_Write(msg);
+    }
+
     return CMDLINE_OK;
 }
 
