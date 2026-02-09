@@ -115,13 +115,60 @@ void W25Q_PrepareData(W25Q_Slave *dev, uint32_t length)
 	}
 }
 
-// void EXTI15_10_IRQHandler(void)
-// {
-// 	if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
-// 		LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
-// 		if (LL_GPIO_IsInputPinSet(GPIOA, LL_EXTI_LINE_15) == 0) {
-// 			// NSS falling → bắt đầu transaction mới
-// 			Reset_W25Q(&w25q);
-// 		}
-// 	}
-// }
+// Khi bật nguồn cho DUT, SPI có thể sẽ bị nhiễu. Vì thế ta cần reset lại SPI
+void SPI3_Reset(void)
+{
+    // Disable SPI trước
+    LL_SPI_Disable(SPI3);
+
+    // DeInit SPI3
+    LL_SPI_DeInit(SPI3);
+
+    // Re-init SPI3 (cấu hình lại mode, NSS, baudrate…)
+	LL_SPI_InitTypeDef SPI_InitStruct = {0};
+
+	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	/* Peripheral clock enable */
+	LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_SPI3);
+
+	LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOC);
+	/**SPI3 GPIO Configuration
+	 PC10   ------> SPI3_SCK
+	PC11   ------> SPI3_MISO
+	PC12   ------> SPI3_MOSI
+	*/
+	GPIO_InitStruct.Pin = LL_GPIO_PIN_10|LL_GPIO_PIN_11|LL_GPIO_PIN_12;
+	GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+	GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
+	GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+	GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+	GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
+	LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+	/* SPI3 interrupt Init */
+	NVIC_SetPriority(SPI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),6, 0));
+	NVIC_EnableIRQ(SPI3_IRQn);
+
+	/* SPI3 parameter configuration*/
+	SPI_InitStruct.TransferDirection = LL_SPI_FULL_DUPLEX;
+	SPI_InitStruct.Mode = LL_SPI_MODE_SLAVE;
+	SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_8BIT;
+	SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
+	SPI_InitStruct.ClockPhase = LL_SPI_PHASE_2EDGE;
+	SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
+	SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
+	SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
+	SPI_InitStruct.CRCPoly = 10;
+	LL_SPI_Init(SPI3, &SPI_InitStruct);
+	LL_SPI_SetStandard(SPI3, LL_SPI_PROTOCOL_MOTOROLA);
+	
+	LL_SPI_Enable(SPI3);
+	LL_SPI_EnableIT_RXNE(SPI3);
+
+    // Reset state phần mềm
+    Reset_W25Q(&w25q);
+
+    // Preload dummy
+    LL_SPI_TransmitData8(SPI3, 0xFF);
+}
