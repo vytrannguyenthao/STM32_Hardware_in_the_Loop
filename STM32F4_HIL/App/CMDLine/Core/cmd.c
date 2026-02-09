@@ -10,9 +10,13 @@
 #include <stdio.h>
 #include "FreeRTOS.h"
 #include "task.h"
+#include <stm32f4xx_ll_gpio.h>
+#include <stdlib.h>
+#include "main.h"
 
 static int Cmd_help(int argc, char *argv[]);
 static int Cmd_Clear_CLI(int argc, char *argv[]);
+static int Cmd_Power_DUT(int argc, char *argv[]);
 
 typedef struct {
     char commandBuffer[COMMAND_MAX_LENGTH];
@@ -48,6 +52,22 @@ static int Cmd_help(int argc, char *argv[]) {
 
 static int Cmd_Clear_CLI(int argc, char *argv[]) {
     Console_Write("\033[2J\033[H"); // clear screen
+    return CMDLINE_OK;
+}
+
+static int Cmd_Power_DUT(int argc, char *argv[]) {
+    if (argc < 3)
+        return CMDLINE_TOO_FEW_ARGS;
+    if (argc > 3)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    uint32_t status = atoi(argv[1]);
+    if(status) {
+        // Power on DUT
+        LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+    } else {
+        LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+    }
     return CMDLINE_OK;
 }
 
@@ -146,6 +166,7 @@ void CLI_Init(void) {
     // Register commands
     CLI_RegisterCommand("help", Cmd_help, "Display list of available commands | format: help");
     CLI_RegisterCommand("cls", Cmd_Clear_CLI, "Clear Console | format: cls");
+    CLI_RegisterCommand("dut_power", Cmd_Power_DUT, "Power DUT on/off | format: dut_power <0|1>");
     Cmd_SPI_Register();
     Cmd_I2C_Register();
 }
