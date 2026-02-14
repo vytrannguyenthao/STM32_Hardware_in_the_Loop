@@ -12,6 +12,7 @@
 #include "task.h"
 #include <stm32f4xx_ll_gpio.h>
 #include <stdlib.h>
+#include "w25q_slave.h"
 #include "main.h"
 
 static int Cmd_help(int argc, char *argv[]);
@@ -65,6 +66,8 @@ static int Cmd_Power_DUT(int argc, char *argv[]) {
     if(status) {
         // Power on DUT
         LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
+        SPI3_Reset();
     } else {
         LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
     }
