@@ -16,6 +16,10 @@
 #include "usb.h"
 #include "w25q_driver.h"
 #include "sine_wave.h"
+#include "i2c_eeprom.h"
+
+extern I2C_HandleTypeDef hi2c1;
+static I2C_EEPROM_t EEPROM1;
 
 extern DAC_HandleTypeDef hdac;
 
@@ -332,11 +336,6 @@ int Cmd_EraseChip_W25Q(int argc, char *argv[]) {
 
 	return CMDLINE_OK;
 }
-
-#include "i2c_eeprom.h"
-
-extern I2C_HandleTypeDef hi2c1;
-static I2C_EEPROM_t EEPROM1;
 
 int Cmd_EEPROM_Init(int argc, char *argv[])
 {
