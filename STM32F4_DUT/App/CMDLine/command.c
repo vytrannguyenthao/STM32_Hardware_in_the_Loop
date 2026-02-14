@@ -1,9 +1,9 @@
 /*
-* command.c
-*
-*  Created on: Nov 21, 2024
-*      Author: Samy Ve
-*/
+ * command.c
+ *
+ *  Created on: Nov 21, 2024
+ *      Author: Samy Ve
+ */
 
 #include "command.h"
 #include "cmdline.h"
@@ -45,7 +45,7 @@ void process_command(char rxData, CMDLine_Context *context);
 
 /* Private variable -----------------------------------------------------------*/
 
-const char *ErrorCode[6] = { 
+const char *ErrorCode[6] = {
 	"OK\r\n",
 	"BAD_CMD\r\n",
 	"TOO_MANY_ARGS\r\n",
@@ -60,35 +60,35 @@ static char s_commandBuffer[COMMAND_MAX_LENGTH];
 static uint8_t s_commandBufferIndex = 0;
 
 tCmdLineEntry g_psCmdTable[] =
-		{
-		/* Command support */
-		{ "help", Cmd_help, "Display list of available commands | format: help" },
-		{ "cls", Cmd_Clear_CLI, "Clear Console | format: cls" },
+{
+	/* Command support */
+	{ "help", Cmd_help, "Display list of available commands | format: help" },
+	{ "cls", Cmd_Clear_CLI, "Clear Console | format: cls" },
 
-		{ "w25q_ID", Cmd_ReadID_W25Q, "Read ID W25Q | format: w25q_readID" },
-		{ "w25q_write", Cmd_Write_W25Q, "Write data to W25Q from addr 0 to <addr> | format: w25q_write <data>" },
-		{ "w25q_read", Cmd_Read_W25Q, "Read data from W25Q at addr 0 to <size> | format: w25q_read <size>" },
-		{ "w25q_erasechip", Cmd_EraseChip_W25Q, "Erase entire W25Q chip | format: w25q_erasechip" },
+	{ "w25q_ID", Cmd_ReadID_W25Q, "Read ID W25Q | format: w25q_readID" },
+	{ "w25q_write", Cmd_Write_W25Q, "Write data to W25Q from addr 0 to <addr> | format: w25q_write <data>" },
+	{ "w25q_read", Cmd_Read_W25Q, "Read data from W25Q at addr 0 to <size> | format: w25q_read <size>" },
+	{ "w25q_erasechip", Cmd_EraseChip_W25Q, "Erase entire W25Q chip | format: w25q_erasechip" },
 
-		{ "i2c_scan", 	  Cmd_I2C_Scan,     "Scan I2C device active on bus" },
-		{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
-		{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
-		{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
-		{ "eeprom_fill",  Cmd_EEPROM_Fill,  "eeprom_fill <addr> <len>" },
+	{ "i2c_scan",     Cmd_I2C_Scan,     "Scan I2C device active on bus" },
+	{ "eeprom_init",  Cmd_EEPROM_Init,  "eeprom_init <addr7bit> <size> <page>" },
+	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
+	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
+	{ "eeprom_fill",  Cmd_EEPROM_Fill,  "eeprom_fill <addr> <len>" },
 
-		{ "set_sine_freq",  Cmd_sine_set_freq,  "set sine wave frequency <freq>" },
-		{ "get_sine_freq",  Cmd_sine_get_freq,  "get sine wave frequency" },
-		{ "sine_wave",  Cmd_Sine_Wave,  "sine-wave <status>" },
+	{ "set_sine_freq",  Cmd_sine_set_freq,  "set sine wave frequency <freq>" },
+	{ "get_sine_freq",  Cmd_sine_get_freq,  "get sine wave frequency" },
+	{ "sine_wave",  Cmd_Sine_Wave,  "sine-wave <status>" },
 
-		{ 0, 0, 0 } };
+	{ 0, 0, 0 }
+};
 
 void CommandLine_Task(void *pvParameters)
 {
-    while (1)
-    {
-        CommandLine_Task_Update();   // gọi hàm xử lý CLI
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
+	while (1) {
+		CommandLine_Task_Update(); // gọi hàm xử lý CLI
+		vTaskDelay(pdMS_TO_TICKS(10));
+	}
 }
 
 void CommandLine_Init(void) {
@@ -110,16 +110,15 @@ static void CommandLine_Task_Update(void) {
 			Console_Write(NAME_SHELL);
 		} else {
 			// Echo ra terminal
-            char tmp[2] = {rxData, 0};
-            Console_Write(tmp);
+			char tmp[2] = {rxData, 0};
+			Console_Write(tmp);
 		}
 		process_command(rxData, &pContext);
 	}
 }
 
 void process_command(char rxData, CMDLine_Context *context) {
-	if (rxData == 0x2D) // '-' key (history up)
-	{
+	if (rxData == 0x2D) { // '-' key (history up)
 		if (context->historyIndex > 0) {
 			context->historyIndex--;
 		}
@@ -137,8 +136,7 @@ void process_command(char rxData, CMDLine_Context *context) {
 		Console_Write(NAME_SHELL);
 		Console_Write(context->commandBuffer); // Display updated command
 		return;
-	} else if (rxData == 0x3D) // '=' key (history down)
-	{
+	} else if (rxData == 0x3D) { // '=' key (history down)
 		if (context->historyIndex < context->historyCount) {
 			context->historyIndex++;
 		}
@@ -160,7 +158,7 @@ void process_command(char rxData, CMDLine_Context *context) {
 
 	// Handle individual key presses
 	if (((rxData >= 32 && rxData <= 126) || rxData == KEY_ENTER || rxData == KEY_BACKSPACE)
-		  && rxData != 0x2D && rxData != 0x3D && rxData != 0x5C) {
+	    && rxData != 0x2D && rxData != 0x3D && rxData != 0x5C) {
 		if (rxData == KEY_ENTER) {
 			if (context->commandBufferIndex > 0) {
 				context->commandBuffer[context->commandBufferIndex] = '\0';
@@ -180,8 +178,7 @@ void process_command(char rxData, CMDLine_Context *context) {
 
 				// Process command
 				int8_t ret_val = CmdLineProcess(context->commandBuffer);
-				if (ret_val != CMDLINE_OK)
-				{
+				if (ret_val != CMDLINE_OK) {
 					Console_Write("\r\n");
 					Console_Write(ErrorCode[ret_val]);
 				}
@@ -234,7 +231,7 @@ int Cmd_help(int argc, char *argv[]) {
 		size_t cmdLength = strlen(pEntry->pcCmd);
 		int padding = (int) (maxCmdLength - cmdLength + 2);
 		snprintf(buffer, sizeof(buffer), "\r\n%s%*s %s", pEntry->pcCmd,
-				padding, "", pEntry->pcHelp);
+		         padding, "", pEntry->pcHelp);
 		Console_Write(buffer);
 		pEntry++;
 	}
@@ -258,33 +255,33 @@ int Cmd_ReadID_W25Q(int argc, char *argv[]) {
 }
 
 int Cmd_Write_W25Q(int argc, char *argv[]) {
-    if (argc < 3)
-        return CMDLINE_TOO_FEW_ARGS;
-    if (argc > 3)
-        return CMDLINE_TOO_MANY_ARGS;
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
 
-    char buffer[64];
-    uint32_t length = atoi(argv[1]);  // số byte cần ghi
+	char buffer[64];
+	uint32_t length = atoi(argv[1]); // số byte cần ghi
 
-    if (length == 0 || length > 1024) {  // Giới hạn để tránh buffer quá lớn
-        Console_Write("\r\nInvalid length\r\n");
-        return CMDLINE_OK;
-    }
+	if (length == 0 || length > 1024) { // Giới hạn để tránh buffer quá lớn
+		Console_Write("\r\nInvalid length\r\n");
+		return CMDLINE_OK;
+	}
 
-    // Tạo buffer dữ liệu: 0, 1, 2, 3, ...
-    static uint8_t test_data[1024]; // đủ lớn
-    for (uint32_t i = 0; i < length; i++) {
-        test_data[i] = (uint8_t)(i & 0xFF);
-    }
+	// Tạo buffer dữ liệu: 0, 1, 2, 3, ...
+	static uint8_t test_data[1024]; // đủ lớn
+	for (uint32_t i = 0; i < length; i++) {
+		test_data[i] = (uint8_t)(i & 0xFF);
+	}
 
-    // Ghi vào flash
+	// Ghi vào flash
 	W25Q_write(&W25Q, 0x000000, length, test_data);
 
-    snprintf(buffer, sizeof(buffer), "\r\nWrite %lu bytes from addr [0 - %lu] to W25Q OK\r\n",
-             (unsigned long)length, (unsigned long)(length - 1));
-    Console_Write(buffer);
+	snprintf(buffer, sizeof(buffer), "\r\nWrite %lu bytes from addr [0 - %lu] to W25Q OK\r\n",
+	         (unsigned long)length, (unsigned long)(length - 1));
+	Console_Write(buffer);
 
-    return CMDLINE_OK;
+	return CMDLINE_OK;
 }
 
 int Cmd_Read_W25Q(int argc, char *argv[]) {
@@ -309,7 +306,7 @@ int Cmd_Read_W25Q(int argc, char *argv[]) {
 
 	// Hiển thị dữ liệu đọc được
 	snprintf(buffer, sizeof(buffer), "\r\nRead %lu bytes from addr [0 - %lu] from W25Q:\r\n",
-			 (unsigned long)length, (unsigned long)(length - 1));
+	         (unsigned long)length, (unsigned long)(length - 1));
 	Console_Write(buffer);
 	for (uint32_t i = 0; i < length; i++) {
 		snprintf(buffer, sizeof(buffer), "%02X ", read_data[i]);
@@ -343,158 +340,155 @@ static I2C_EEPROM_t EEPROM1;
 
 int Cmd_EEPROM_Init(int argc, char *argv[])
 {
-    if (argc > 5)
-        return CMDLINE_INVALID_ARG;
+	if (argc > 5)
+		return CMDLINE_INVALID_ARG;
 
-    uint8_t  addr7 = strtol(argv[1], NULL, 0);
-    uint16_t size  = atoi(argv[2]);
-    uint16_t page  = atoi(argv[3]);
+	uint8_t addr7 = strtol(argv[1], NULL, 0);
+	uint16_t size  = atoi(argv[2]);
+	uint16_t page  = atoi(argv[3]);
 
-    if (EEPROM_Init(&EEPROM1,
-                    &hi2c1,
-                    addr7,
-                    size,
-                    page,
-                    I2C_MEMADD_SIZE_16BIT) != HAL_OK)
-    {
-        Console_Write("\r\nEEPROM init FAIL\r\n");
-        return CMDLINE_OK;
-    }
+	if (EEPROM_Init(&EEPROM1,
+	                &hi2c1,
+	                addr7,
+	                size,
+	                page,
+	                I2C_MEMADD_SIZE_16BIT) != HAL_OK) {
+		Console_Write("\r\nEEPROM init FAIL\r\n");
+		return CMDLINE_OK;
+	}
 
-    char buf[64];
-    snprintf(buf, sizeof(buf),
-             "\r\nEEPROM init OK: addr=0x%02X size=%d page=%d\r\n",
-             addr7, size, page);
-    Console_Write(buf);
+	char buf[64];
+	snprintf(buf, sizeof(buf),
+	         "\r\nEEPROM init OK: addr=0x%02X size=%d page=%d\r\n",
+	         addr7, size, page);
+	Console_Write(buf);
 
-    return CMDLINE_OK;
+	return CMDLINE_OK;
 }
 
 int Cmd_EEPROM_Write(int argc, char *argv[])
 {
-    if (argc > 4)
-        return CMDLINE_INVALID_ARG;
+	if (argc > 4)
+		return CMDLINE_INVALID_ARG;
 
-    uint16_t addr = strtol(argv[1], NULL, 0);
-    uint16_t len  = atoi(argv[2]);
+	uint16_t addr = strtol(argv[1], NULL, 0);
+	uint16_t len  = atoi(argv[2]);
 
-    static uint8_t buf[256];
+	static uint8_t buf[256];
 
-    if (len == 0 || len > sizeof(buf)) {
-        Console_Write("\r\nInvalid length\r\n");
-        return CMDLINE_OK;
-    }
+	if (len == 0 || len > sizeof(buf)) {
+		Console_Write("\r\nInvalid length\r\n");
+		return CMDLINE_OK;
+	}
 
-    for (uint16_t i = 0; i < len; i++)
-        buf[i] = i & 0xFF;
+	for (uint16_t i = 0; i < len; i++)
+		buf[i] = i & 0xFF;
 
-    if (EEPROM_Write(&EEPROM1, addr, buf, len) != HAL_OK) {
-        Console_Write("\r\nEEPROM write FAIL\r\n");
-        return CMDLINE_OK;
-    }
+	if (EEPROM_Write(&EEPROM1, addr, buf, len) != HAL_OK) {
+		Console_Write("\r\nEEPROM write FAIL\r\n");
+		return CMDLINE_OK;
+	}
 
-    Console_Write("\r\nEEPROM write OK\r\n");
-    return CMDLINE_OK;
+	Console_Write("\r\nEEPROM write OK\r\n");
+	return CMDLINE_OK;
 }
 
 int Cmd_EEPROM_Read(int argc, char *argv[])
 {
-    if (argc > 4)
-        return CMDLINE_INVALID_ARG;
+	if (argc > 4)
+		return CMDLINE_INVALID_ARG;
 
-    uint16_t addr = strtol(argv[1], NULL, 0);
-    uint16_t len  = atoi(argv[2]);
+	uint16_t addr = strtol(argv[1], NULL, 0);
+	uint16_t len  = atoi(argv[2]);
 
-    static uint8_t buf[256];
-    char out[64];
+	static uint8_t buf[256];
+	char out[64];
 
-    if (len == 0 || len > sizeof(buf)) {
-        Console_Write("\r\nInvalid length\r\n");
-        return CMDLINE_OK;
-    }
+	if (len == 0 || len > sizeof(buf)) {
+		Console_Write("\r\nInvalid length\r\n");
+		return CMDLINE_OK;
+	}
 
-    if (EEPROM_Read(&EEPROM1, addr, buf, len) != HAL_OK) {
-        Console_Write("\r\nEEPROM read FAIL\r\n");
-        return CMDLINE_OK;
-    }
+	if (EEPROM_Read(&EEPROM1, addr, buf, len) != HAL_OK) {
+		Console_Write("\r\nEEPROM read FAIL\r\n");
+		return CMDLINE_OK;
+	}
 
-    snprintf(out, sizeof(out), "\r\nEEPROM read @0x%04X (%d bytes):\r\n", addr, len);
-    Console_Write(out);
+	snprintf(out, sizeof(out), "\r\nEEPROM read @0x%04X (%d bytes):\r\n", addr, len);
+	Console_Write(out);
 
-    for (uint16_t i = 0; i < len; i++) {
-        snprintf(out, sizeof(out), "%02X ", buf[i]);
-        Console_Write(out);
-        if ((i + 1) % 16 == 0)
-            Console_Write("\r\n");
-    }
-    Console_Write("\r\n");
+	for (uint16_t i = 0; i < len; i++) {
+		snprintf(out, sizeof(out), "%02X ", buf[i]);
+		Console_Write(out);
+		if ((i + 1) % 16 == 0)
+			Console_Write("\r\n");
+	}
+	Console_Write("\r\n");
 
-    return CMDLINE_OK;
+	return CMDLINE_OK;
 }
 
 int Cmd_EEPROM_Fill(int argc, char *argv[])
 {
-    if (argc > 4)
-        return CMDLINE_INVALID_ARG;
+	if (argc > 4)
+		return CMDLINE_INVALID_ARG;
 
-    uint16_t addr = strtol(argv[1], NULL, 0);
-    uint16_t len  = atoi(argv[2]);
+	uint16_t addr = strtol(argv[1], NULL, 0);
+	uint16_t len  = atoi(argv[2]);
 
-    if (EEPROM_Fill(&EEPROM1, addr, len) != HAL_OK) {
-        Console_Write("\r\nEEPROM fill FAIL\r\n");
-        return CMDLINE_OK;
-    }
+	if (EEPROM_Fill(&EEPROM1, addr, len) != HAL_OK) {
+		Console_Write("\r\nEEPROM fill FAIL\r\n");
+		return CMDLINE_OK;
+	}
 
-    Console_Write("\r\nEEPROM fill OK\r\n");
-    return CMDLINE_OK;
+	Console_Write("\r\nEEPROM fill OK\r\n");
+	return CMDLINE_OK;
 }
 
 int Cmd_I2C_Scan(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
+	(void)argc;
+	(void)argv;
 
-    char msg[64];
-    uint8_t found = 0;
+	char msg[64];
+	uint8_t found = 0;
 
-    Console_Write("\r\nScanning I2C bus...\r\n");
+	Console_Write("\r\nScanning I2C bus...\r\n");
 
-    for (uint8_t addr = 1; addr < 127; addr++)
-    {
-        if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK)
-        {
-            sprintf(msg, "Found device at 0x%02X\r\n", addr);
-            Console_Write(msg);
-            found++;
-        }
-    }
+	for (uint8_t addr = 1; addr < 127; addr++) {
+		if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK) {
+			sprintf(msg, "Found device at 0x%02X\r\n", addr);
+			Console_Write(msg);
+			found++;
+		}
+	}
 
-    if (found == 0)
-        Console_Write("No I2C device found\r\n");
-    else {
-        sprintf(msg, "Total: %d device(s)\r\n", found);
-        Console_Write(msg);
-    }
+	if (found == 0)
+		Console_Write("No I2C device found\r\n");
+	else {
+		sprintf(msg, "Total: %d device(s)\r\n", found);
+		Console_Write(msg);
+	}
 
-    return CMDLINE_OK;
+	return CMDLINE_OK;
 }
 
 int Cmd_sine_set_freq(int argc, char *argv[]) {
-    if (argc < 3) {
-        return CMDLINE_TOO_FEW_ARGS;
-    }
-    if (argc > 3) {
-        return CMDLINE_TOO_MANY_ARGS;
-    }
+	if (argc < 3) {
+		return CMDLINE_TOO_FEW_ARGS;
+	}
+	if (argc > 3) {
+		return CMDLINE_TOO_MANY_ARGS;
+	}
 
-    uint32_t freq = atoi(argv[1]);
-    if (freq == 0 || freq > 10000) {
-        Console_Write("\r\nInvalid frequency\r\n");
-        return CMDLINE_OK;
-    }
+	uint32_t freq = atoi(argv[1]);
+	if (freq == 0 || freq > 10000) {
+		Console_Write("\r\nInvalid frequency\r\n");
+		return CMDLINE_OK;
+	}
 
-    set_freq(freq);
-    return CMDLINE_OK;
+	set_freq(freq);
+	return CMDLINE_OK;
 }
 
 
@@ -510,28 +504,28 @@ int Cmd_sine_get_freq(int argc, char *argv[]) {
 }
 
 int Cmd_Sine_Wave(int argc, char *argv[]) {
-    if (argc < 3)
-        return CMDLINE_TOO_FEW_ARGS;
-    if (argc > 3)
-        return CMDLINE_TOO_MANY_ARGS;
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
 
-    if (!is_sine_wave_freq_set()) {
-        Console_Write("\r\nSine wave frequency is not set\r\n");
-        return CMDLINE_OK;
-    }
+	if (!is_sine_wave_freq_set()) {
+		Console_Write("\r\nSine wave frequency is not set\r\n");
+		return CMDLINE_OK;
+	}
 
-    uint32_t tmp = atoi(argv[1]);  // số byte cần ghi
+	uint32_t tmp = atoi(argv[1]); // số byte cần ghi
 
-    if (tmp == 1) {
-        start_sine_wave();
-        Console_Write("\r\nStart Sine Wave\r\n");
-        return CMDLINE_OK;
-    } else if (tmp == 0) {
-        stop_sine_wave();
-        Console_Write("\r\nStop Sine Wave\r\n");
-        return CMDLINE_OK;
-    } else {
-        Console_Write("\r\nInvalid argument\r\n");
-        return CMDLINE_OK;
-    }
+	if (tmp == 1) {
+		start_sine_wave();
+		Console_Write("\r\nStart Sine Wave\r\n");
+		return CMDLINE_OK;
+	} else if (tmp == 0) {
+		stop_sine_wave();
+		Console_Write("\r\nStop Sine Wave\r\n");
+		return CMDLINE_OK;
+	} else {
+		Console_Write("\r\nInvalid argument\r\n");
+		return CMDLINE_OK;
+	}
 }
