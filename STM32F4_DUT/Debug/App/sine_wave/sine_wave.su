@@ -1,0 +1,6 @@
+../App/sine_wave/sine_wave.c:34:6:calcsin	16	static
+../App/sine_wave/sine_wave.c:40:6:is_sine_wave_freq_set	4	static
+../App/sine_wave/sine_wave.c:44:6:set_freq	32	static
+../App/sine_wave/sine_wave.c:63:10:get_freq	4	static
+../App/sine_wave/sine_wave.c:67:6:stop_sine_wave	8	static
+../App/sine_wave/sine_wave.c:72:6:start_sine_wave	16	static

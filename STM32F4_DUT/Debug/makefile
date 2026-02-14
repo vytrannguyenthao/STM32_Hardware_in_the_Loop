@@ -20,6 +20,7 @@ RM := rm -rf
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
 -include App/w25q_driver/subdir.mk
+-include App/sine_wave/subdir.mk
 -include App/i2c_eeprom_driver/subdir.mk
 -include App/USB/subdir.mk
 -include App/CMDLine/subdir.mk

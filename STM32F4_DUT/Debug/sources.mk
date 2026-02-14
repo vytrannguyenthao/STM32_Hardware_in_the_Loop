@@ -25,6 +25,7 @@ SUBDIRS := \
 App/CMDLine \
 App/USB \
 App/i2c_eeprom_driver \
+App/sine_wave \
 App/w25q_driver \
 Core/Src \
 Core/Startup \
