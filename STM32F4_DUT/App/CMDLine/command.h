@@ -36,6 +36,8 @@ int Cmd_EEPROM_Write(int argc, char *argv[]);
 int Cmd_EEPROM_Read(int argc, char *argv[]);
 int Cmd_EEPROM_Fill(int argc, char *argv[]);
 int Cmd_I2C_Scan(int argc, char *argv[]);
+int Cmd_sine_set_freq(int argc, char *argv[]);
+int Cmd_sine_get_freq(int argc, char *argv[]);
 int Cmd_Sine_Wave(int argc, char *argv[]);
 
 #endif /* CMDLINE_COMMAND_H_ */

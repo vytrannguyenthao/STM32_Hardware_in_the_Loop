@@ -9,20 +9,17 @@
 #include "cmdline.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "stm32f4xx_hal_dac.h"
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_rcc.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "usb.h"
 #include "w25q_driver.h"
-#include "main.h"
+#include "sine_wave.h"
 
 extern DAC_HandleTypeDef hdac;
 
 extern TIM_HandleTypeDef htim2;
-
-extern uint32_t sine_val[100];
 
 // Add history
 // Add some utils to CommandLine
@@ -79,6 +76,8 @@ tCmdLineEntry g_psCmdTable[] =
 		{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
 		{ "eeprom_fill",  Cmd_EEPROM_Fill,  "eeprom_fill <addr> <len>" },
 
+		{ "set_sine_freq",  Cmd_sine_set_freq,  "set sine wave frequency <freq>" },
+		{ "get_sine_freq",  Cmd_sine_get_freq,  "get sine wave frequency" },
 		{ "sine_wave",  Cmd_Sine_Wave,  "sine-wave <status>" },
 
 		{ 0, 0, 0 } };
@@ -480,26 +479,59 @@ int Cmd_I2C_Scan(int argc, char *argv[])
     return CMDLINE_OK;
 }
 
+int Cmd_sine_set_freq(int argc, char *argv[]) {
+    if (argc < 3) {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    if (argc > 3) {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+
+    uint32_t freq = atoi(argv[1]);
+    if (freq == 0 || freq > 10000) {
+        Console_Write("\r\nInvalid frequency\r\n");
+        return CMDLINE_OK;
+    }
+
+    set_freq(freq);
+    return CMDLINE_OK;
+}
+
+
+int Cmd_sine_get_freq(int argc, char *argv[]) {
+	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+
+	if (!is_sine_wave_freq_set()) {
+		Console_Write("\r\nSine wave frequency is not set\r\n");
+		return CMDLINE_OK;
+	}
+	Console_Write("\r\nSine wave frequency is %u Hz\r\n", get_freq());
+	return (CMDLINE_OK);
+}
+
 int Cmd_Sine_Wave(int argc, char *argv[]) {
     if (argc < 3)
         return CMDLINE_TOO_FEW_ARGS;
     if (argc > 3)
         return CMDLINE_TOO_MANY_ARGS;
 
+    if (!is_sine_wave_freq_set()) {
+        Console_Write("\r\nSine wave frequency is not set\r\n");
+        return CMDLINE_OK;
+    }
+
     uint32_t tmp = atoi(argv[1]);  // số byte cần ghi
 
     if (tmp == 1) {
-		HAL_TIM_Base_Start(&htim2);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, sine_val, 100, DAC_ALIGN_12B_R);
-		Console_Write("\r\nStart Sine Wave on DAC Channel 1\r\n");
-		return CMDLINE_OK;
+        start_sine_wave();
+        Console_Write("\r\nStart Sine Wave\r\n");
+        return CMDLINE_OK;
     } else if (tmp == 0) {
-		HAL_TIM_Base_Stop(&htim2);
-		HAL_DAC_Stop_DMA(&hdac, DAC_CHANNEL_1);
-		Console_Write("\r\nStop Sine Wave on DAC Channel 1\r\n");
-		return CMDLINE_OK;
-	} else {
-		Console_Write("\r\nInvalid argument\r\n");
-		return CMDLINE_OK;
-	}
+        stop_sine_wave();
+        Console_Write("\r\nStop Sine Wave\r\n");
+        return CMDLINE_OK;
+    } else {
+        Console_Write("\r\nInvalid argument\r\n");
+        return CMDLINE_OK;
+    }
 }

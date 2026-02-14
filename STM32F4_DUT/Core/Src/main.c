@@ -26,7 +26,7 @@
 #include "task.h"
 #include "command.h"
 #include "w25q_driver.h"
-#include "math.h"
+#include "sine_wave.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,16 +70,6 @@ static void toggle_led(void *pvParameters);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-uint32_t sine_val[100];
-#define PI 3.1415926
-void calcsin (void)
-{
-	for (int i=0; i<100; i++)
-	{
-		sine_val[i] = ((sin(i*2*PI/100) + 1)*(4096/2));
-	}
-}
 
 /* USER CODE END 0 */
 
