@@ -12,6 +12,6 @@
 ../Core/Src/main.c:311:13:MX_TIM2_Init	4
 ../Core/Src/main.c:354:13:MX_DMA_Init	1
 ../Core/Src/main.c:372:13:MX_GPIO_Init	1
-../Core/Src/main.c:412:13:toggle_led	1
-../Core/Src/main.c:429:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:446:6:Error_Handler	1
+../Core/Src/main.c:423:13:toggle_led	1
+../Core/Src/main.c:440:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:457:6:Error_Handler	1
