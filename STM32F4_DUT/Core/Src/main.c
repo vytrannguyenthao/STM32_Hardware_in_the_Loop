@@ -109,6 +109,8 @@ int main(void)
   MX_DAC_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+  LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_15); // Set POWER STATUS PIN
+
   calcsin();
 	W25Q_Init(&W25Q);
   xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
