@@ -1,2 +1,3 @@
 ../App/CMDLine/Commands/spi_cmd.c:13:12:Cmd_Prepare_W25Q	24	static
-../App/CMDLine/Commands/spi_cmd.c:32:6:Cmd_SPI_Register	8	static
+../App/CMDLine/Commands/spi_cmd.c:32:12:Cmd_Reset_SPI	16	static
+../App/CMDLine/Commands/spi_cmd.c:41:6:Cmd_SPI_Register	8	static

@@ -23,6 +23,6 @@
 ../Core/Src/main.c:329:13:MX_TIM3_Init	4
 ../Core/Src/main.c:374:13:MX_USART1_UART_Init	1
 ../Core/Src/main.c:429:13:MX_GPIO_Init	1
-../Core/Src/main.c:479:13:toggle_led	1
-../Core/Src/main.c:496:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:513:6:Error_Handler	1
+../Core/Src/main.c:497:13:toggle_led	1
+../Core/Src/main.c:514:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:531:6:Error_Handler	1
