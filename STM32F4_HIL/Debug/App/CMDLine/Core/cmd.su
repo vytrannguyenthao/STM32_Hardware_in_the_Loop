@@ -1,10 +1,12 @@
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_gpio.h:800:26:LL_GPIO_IsInputPinSet	16	static
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_gpio.h:881:22:LL_GPIO_SetOutputPin	16	static
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_gpio.h:910:22:LL_GPIO_ResetOutputPin	16	static
 ../App/CMDLine/Core/cmd.c:43:12:Cmd_help	160	static
 ../App/CMDLine/Core/cmd.c:54:12:Cmd_Clear_CLI	16	static
 ../App/CMDLine/Core/cmd.c:59:12:Cmd_Power_DUT	24	static
-../App/CMDLine/Core/cmd.c:79:6:CLI_RegisterCommand	24	static
-../App/CMDLine/Core/cmd.c:89:13:process_command	24	static
-../App/CMDLine/Core/cmd.c:128:13:CLI_Task_Update	16	static
-../App/CMDLine/Core/cmd.c:154:6:CLI_Task	16	static
-../App/CMDLine/Core/cmd.c:161:6:CLI_Init	8	static
+../App/CMDLine/Core/cmd.c:95:12:Cmd_Power_Status	16	static
+../App/CMDLine/Core/cmd.c:112:6:CLI_RegisterCommand	24	static
+../App/CMDLine/Core/cmd.c:122:13:process_command	24	static
+../App/CMDLine/Core/cmd.c:161:13:CLI_Task_Update	16	static
+../App/CMDLine/Core/cmd.c:187:6:CLI_Task	16	static
+../App/CMDLine/Core/cmd.c:194:6:CLI_Init	8	static

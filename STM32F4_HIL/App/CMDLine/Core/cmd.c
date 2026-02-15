@@ -68,9 +68,42 @@ static int Cmd_Power_DUT(int argc, char *argv[]) {
         LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
         vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
         SPI3_Reset();
+
+        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
+            // DUT đã bật (logic HIGH)
+        	Console_Write("DUT is powered ON\r\n");
+        } else {
+            // DUT không bật được (logic LOW)
+        	Console_Write("Failed to power ON DUT\r\n");
+        }
     } else {
         LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+
+        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
+
+        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
+            // DUT đã bật (logic HIGH)
+        	Console_Write("Failed to power OFF DUT\r\n");
+        } else {
+            // DUT không bật được (logic LOW)
+        	Console_Write("DUT is powered OFF\r\n");
+        }
     }
+    return CMDLINE_OK;
+}
+
+static int Cmd_Power_Status(int argc, char *argv[]) {
+    if (argc > 2)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
+        // DUT đã bật (logic HIGH)
+        Console_Write("DUT ON\r\n");
+    } else {
+        // DUT không bật được (logic LOW)
+        Console_Write("DUT OFF\r\n");
+    }
+
     return CMDLINE_OK;
 }
 
@@ -170,6 +203,7 @@ void CLI_Init(void) {
     CLI_RegisterCommand("help", Cmd_help, "Display list of available commands | format: help");
     CLI_RegisterCommand("cls", Cmd_Clear_CLI, "Clear Console | format: cls");
     CLI_RegisterCommand("dut_power", Cmd_Power_DUT, "Power DUT on/off | format: dut_power <0|1>");
+    CLI_RegisterCommand("dut_power_status", Cmd_Power_Status, "Check DUT power status | format: dut_power_status");
     Cmd_SPI_Register();
     Cmd_I2C_Register();
 }
