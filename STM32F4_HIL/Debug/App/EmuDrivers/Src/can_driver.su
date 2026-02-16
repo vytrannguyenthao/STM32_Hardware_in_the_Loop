@@ -1,0 +1,4 @@
+../App/EmuDrivers/Src/can_driver.c:24:6:CAN_Init	56	static
+../App/EmuDrivers/Src/can_driver.c:48:6:CAN_Send	16	static
+../App/EmuDrivers/Src/can_driver.c:57:6:CAN_SendBuffer	272	static
+../App/EmuDrivers/Src/can_driver.c:70:6:HAL_CAN_RxFifo0MsgPendingCallback	24	static

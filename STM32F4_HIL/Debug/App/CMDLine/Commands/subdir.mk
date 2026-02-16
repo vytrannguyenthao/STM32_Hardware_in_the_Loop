@@ -5,14 +5,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../App/CMDLine/Commands/can_cmd.c \
 ../App/CMDLine/Commands/i2c_cmd.c \
 ../App/CMDLine/Commands/spi_cmd.c 
 
 OBJS += \
+./App/CMDLine/Commands/can_cmd.o \
 ./App/CMDLine/Commands/i2c_cmd.o \
 ./App/CMDLine/Commands/spi_cmd.o 
 
 C_DEPS += \
+./App/CMDLine/Commands/can_cmd.d \
 ./App/CMDLine/Commands/i2c_cmd.d \
 ./App/CMDLine/Commands/spi_cmd.d 
 
@@ -24,7 +27,7 @@ App/CMDLine/Commands/%.o App/CMDLine/Commands/%.su App/CMDLine/Commands/%.cyclo:
 clean: clean-App-2f-CMDLine-2f-Commands
 
 clean-App-2f-CMDLine-2f-Commands:
-	-$(RM) ./App/CMDLine/Commands/i2c_cmd.cyclo ./App/CMDLine/Commands/i2c_cmd.d ./App/CMDLine/Commands/i2c_cmd.o ./App/CMDLine/Commands/i2c_cmd.su ./App/CMDLine/Commands/spi_cmd.cyclo ./App/CMDLine/Commands/spi_cmd.d ./App/CMDLine/Commands/spi_cmd.o ./App/CMDLine/Commands/spi_cmd.su
+	-$(RM) ./App/CMDLine/Commands/can_cmd.cyclo ./App/CMDLine/Commands/can_cmd.d ./App/CMDLine/Commands/can_cmd.o ./App/CMDLine/Commands/can_cmd.su ./App/CMDLine/Commands/i2c_cmd.cyclo ./App/CMDLine/Commands/i2c_cmd.d ./App/CMDLine/Commands/i2c_cmd.o ./App/CMDLine/Commands/i2c_cmd.su ./App/CMDLine/Commands/spi_cmd.cyclo ./App/CMDLine/Commands/spi_cmd.d ./App/CMDLine/Commands/spi_cmd.o ./App/CMDLine/Commands/spi_cmd.su
 
 .PHONY: clean-App-2f-CMDLine-2f-Commands
 

@@ -5,18 +5,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../App/EmuDrivers/Src/can_driver.c \
 ../App/EmuDrivers/Src/i2c_device.c \
 ../App/EmuDrivers/Src/i2c_eeprom.c \
 ../App/EmuDrivers/Src/i2c_rtc.c \
 ../App/EmuDrivers/Src/w25q_slave.c 
 
 OBJS += \
+./App/EmuDrivers/Src/can_driver.o \
 ./App/EmuDrivers/Src/i2c_device.o \
 ./App/EmuDrivers/Src/i2c_eeprom.o \
 ./App/EmuDrivers/Src/i2c_rtc.o \
 ./App/EmuDrivers/Src/w25q_slave.o 
 
 C_DEPS += \
+./App/EmuDrivers/Src/can_driver.d \
 ./App/EmuDrivers/Src/i2c_device.d \
 ./App/EmuDrivers/Src/i2c_eeprom.d \
 ./App/EmuDrivers/Src/i2c_rtc.d \
@@ -30,7 +33,7 @@ App/EmuDrivers/Src/%.o App/EmuDrivers/Src/%.su App/EmuDrivers/Src/%.cyclo: ../Ap
 clean: clean-App-2f-EmuDrivers-2f-Src
 
 clean-App-2f-EmuDrivers-2f-Src:
-	-$(RM) ./App/EmuDrivers/Src/i2c_device.cyclo ./App/EmuDrivers/Src/i2c_device.d ./App/EmuDrivers/Src/i2c_device.o ./App/EmuDrivers/Src/i2c_device.su ./App/EmuDrivers/Src/i2c_eeprom.cyclo ./App/EmuDrivers/Src/i2c_eeprom.d ./App/EmuDrivers/Src/i2c_eeprom.o ./App/EmuDrivers/Src/i2c_eeprom.su ./App/EmuDrivers/Src/i2c_rtc.cyclo ./App/EmuDrivers/Src/i2c_rtc.d ./App/EmuDrivers/Src/i2c_rtc.o ./App/EmuDrivers/Src/i2c_rtc.su ./App/EmuDrivers/Src/w25q_slave.cyclo ./App/EmuDrivers/Src/w25q_slave.d ./App/EmuDrivers/Src/w25q_slave.o ./App/EmuDrivers/Src/w25q_slave.su
+	-$(RM) ./App/EmuDrivers/Src/can_driver.cyclo ./App/EmuDrivers/Src/can_driver.d ./App/EmuDrivers/Src/can_driver.o ./App/EmuDrivers/Src/can_driver.su ./App/EmuDrivers/Src/i2c_device.cyclo ./App/EmuDrivers/Src/i2c_device.d ./App/EmuDrivers/Src/i2c_device.o ./App/EmuDrivers/Src/i2c_device.su ./App/EmuDrivers/Src/i2c_eeprom.cyclo ./App/EmuDrivers/Src/i2c_eeprom.d ./App/EmuDrivers/Src/i2c_eeprom.o ./App/EmuDrivers/Src/i2c_eeprom.su ./App/EmuDrivers/Src/i2c_rtc.cyclo ./App/EmuDrivers/Src/i2c_rtc.d ./App/EmuDrivers/Src/i2c_rtc.o ./App/EmuDrivers/Src/i2c_rtc.su ./App/EmuDrivers/Src/w25q_slave.cyclo ./App/EmuDrivers/Src/w25q_slave.d ./App/EmuDrivers/Src/w25q_slave.o ./App/EmuDrivers/Src/w25q_slave.su
 
 .PHONY: clean-App-2f-EmuDrivers-2f-Src
 
