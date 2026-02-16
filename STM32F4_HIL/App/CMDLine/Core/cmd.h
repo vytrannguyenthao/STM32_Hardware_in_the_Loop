@@ -40,5 +40,6 @@ uint8_t CDC_ReceiveCallback (uint8_t* Buf, uint32_t *Len);
 void CLI_RegisterCommand(const char *cmd, int (*handler)(int, char **), const char *help);
 void Cmd_SPI_Register(void);
 void Cmd_I2C_Register(void);
+void Cmd_CAN_Register(void);
 
 #endif /* CMDLINE_COMMAND_H_ */

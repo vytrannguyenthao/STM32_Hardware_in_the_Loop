@@ -206,5 +206,6 @@ void CLI_Init(void) {
     CLI_RegisterCommand("dut_power_status", Cmd_Power_Status, "Check DUT power status | format: dut_power_status");
     Cmd_SPI_Register();
     Cmd_I2C_Register();
+    Cmd_CAN_Register();
 }
 

@@ -32,6 +32,7 @@
 #include "cmd.h"
 #include "w25q_slave.h"
 #include "i2c_rtc.h"
+#include "can_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -123,6 +124,7 @@ int main(void)
 	  Error_Handler();
   }
 
+  CAN_Init();
   CLI_Init();
   W25Q_Slave_Init(&w25q);
   xTaskCreate(CLI_Task, "CLI", 2048, NULL, 1, NULL);
