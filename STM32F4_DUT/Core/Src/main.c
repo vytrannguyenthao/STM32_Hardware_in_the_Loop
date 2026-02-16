@@ -27,6 +27,7 @@
 #include "command.h"
 #include "w25q_driver.h"
 #include "sine_wave.h"
+#include "can_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -116,6 +117,8 @@ int main(void)
   LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_15); // Set POWER STATUS PIN
 
   calcsin();
+
+  CAN_Init();
 	W25Q_Init(&W25Q);
   xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
