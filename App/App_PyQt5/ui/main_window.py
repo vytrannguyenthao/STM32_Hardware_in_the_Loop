@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
 
         self.uart_dut = UARTThread("DUT")
         self.uart_hil = UARTThread("HIL")
+        self.uart_logic = UARTThread("LOGIC")
 
         self.test_queue = []
         self.current_test = None
@@ -32,7 +33,7 @@ class MainWindow(QMainWindow):
 
         # Setup Tabs (Need to be created first so we can connect signals to them)
         self.memory_tab = MemoryTab(self.uart_dut, self.uart_hil)
-        self.logic_tab = LogicTab()
+        self.logic_tab = LogicTab(self.uart_logic)
         self.peripheral_tab = PeripheralTab()
 
         # Connect Signals -> Tabs
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow):
         lay_com = QVBoxLayout(tab_com)
         lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut))
         lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil))
+        lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic))
         lay_com.addStretch()  
 
         # TAB 2: TEST
@@ -160,8 +162,10 @@ class MainWindow(QMainWindow):
     def closeEvent(self, e):
         self.uart_dut.close()
         self.uart_hil.close()
+        self.uart_logic.close()
         self.uart_dut.wait()
         self.uart_hil.wait()
+        self.uart_logic.wait()
         e.accept()
 
     # ==================== TEST LOGIC ====================
