@@ -41,5 +41,6 @@ void CLI_RegisterCommand(const char *cmd, int (*handler)(int, char **), const ch
 void Cmd_SPI_Register(void);
 void Cmd_I2C_Register(void);
 void Cmd_CAN_Register(void);
+void Cmd_UART_Register(void);
 
 #endif /* CMDLINE_COMMAND_H_ */
