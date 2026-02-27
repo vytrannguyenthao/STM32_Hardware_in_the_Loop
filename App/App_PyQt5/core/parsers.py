@@ -191,3 +191,24 @@ class I2CParser:
         self.base_addr = 0
         self.expected = 0
         self.buffer = []
+
+class UARTParser:
+    def __init__(self, byte_cb, log_cb=None):
+        self.byte_cb = byte_cb
+        self.log_cb = log_cb
+
+    def feed(self, line):
+        parsed = False
+        parts = line.strip().split()
+
+        for p in parts:
+            if len(p) == 2:
+                try:
+                    val = int(p, 16)
+                    if 0 <= val <= 255:
+                        self.byte_cb(val)
+                        parsed = True
+                except ValueError:
+                    continue
+
+        return parsed

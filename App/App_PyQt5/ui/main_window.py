@@ -49,6 +49,10 @@ class MainWindow(QMainWindow):
         self.uart_dut.pc_log_signal.connect(self.pc_log_append)
         self.uart_dut.test_completed.connect(self.on_test_completed)
 
+        # Connect UART byte signals to handlers
+        self.uart_dut.pc_log_signal.connect(self.handle_dut_uart_byte)
+        self.uart_hil.pc_log_signal.connect(self.handle_hil_uart_byte)
+
         # Build Main View
         splitter.addWidget(self.build_left())
         splitter.addWidget(self.build_center())
@@ -74,11 +78,13 @@ class MainWindow(QMainWindow):
         tlay = QVBoxLayout(test_box)
         self.cb_spi = QCheckBox("SPI Flash Test")
         self.cb_i2c = QCheckBox("I2C EEPROM Test")
+        self.cb_uart = QCheckBox("UART Test")
         btn_run = QPushButton("Run Selected Tests")
         btn_run.clicked.connect(self.run_tests)
 
         tlay.addWidget(self.cb_spi)
         tlay.addWidget(self.cb_i2c)
+        tlay.addWidget(self.cb_uart)
         tlay.addStretch()
         tlay.addWidget(btn_run)
 
@@ -183,6 +189,9 @@ class MainWindow(QMainWindow):
         if self.cb_i2c.isChecked():
             self.test_queue.append(self.run_i2c_eeprom_test)
 
+        if self.cb_uart.isChecked():
+            self.test_queue.append(self.run_uart_test)
+
         if not self.test_queue:
             self.pc_log_append("No test selected")
             self.is_running_tests = False
@@ -269,9 +278,79 @@ class MainWindow(QMainWindow):
 
         self.i2c_step += 1
 
+    def run_uart_test(self):
+        self.pc_log_append("=== UART TEST START ===")
+        self.uart_test_step = 0
+        self.hil_buffer = []
+        self.dut_buffer = []
+        QTimer.singleShot(10, self.run_uart_step)
+
+    def run_uart_step(self):
+
+        # ================= STEP 0: INIT =================
+        if self.uart_test_step == 0:
+            self.pc_log_append("=== DUT → HIL ===")
+            self.hil_buffer.clear()
+            self.uart_dut.send("uart_init")
+            self.uart_hil.send("uart_init")
+            QTimer.singleShot(500, self.run_uart_step)
+
+        # ================= STEP 1: DUT DUMP =================
+        elif self.uart_test_step == 1:
+            self.uart_dut.send("uart_dump")
+            QTimer.singleShot(2000, self.run_uart_step)
+
+        # ================= STEP 2: HIL RX =================
+        elif self.uart_test_step == 2:
+            self.uart_hil.send("uart_rx")
+            QTimer.singleShot(2000, self.run_uart_step)
+
+        # ================= STEP 3: CHECK DUT → HIL =================
+        elif self.uart_test_step == 3:
+            expected = list(range(256))
+            if self.hil_buffer == expected:
+                self.pc_log_append("UART TX PASS")
+            else:
+                self.pc_log_append(f"UART TX FAIL (got {len(self.hil_buffer)})")
+            QTimer.singleShot(200, self.run_uart_step)
+
+        # ================= STEP 4: HIL → DUT START =================
+        elif self.uart_test_step == 4:
+            self.pc_log_append("=== HIL → DUT ===")
+            self.dut_buffer.clear()
+            self.uart_hil.send("uart_dump")
+            QTimer.singleShot(2000, self.run_uart_step)
+
+        # ================= STEP 5: DUT RX =================
+        elif self.uart_test_step == 5:
+            self.uart_dut.send("uart_rx")
+            QTimer.singleShot(2000, self.run_uart_step)
+
+        # ================= STEP 6: CHECK HIL → DUT =================
+        elif self.uart_test_step == 6:
+            expected = list(range(256))
+            if self.dut_buffer == expected:
+                self.pc_log_append("UART RX PASS")
+            else:
+                self.pc_log_append(f"UART RX FAIL (got {len(self.dut_buffer)})")
+            QTimer.singleShot(200, self.run_uart_step)
+
+        # ================= DONE =================
+        elif self.uart_test_step == 7:
+            self.pc_log_append("=== UART TEST DONE ===")
+            self.run_next_test()
+            return
+        
+        self.uart_test_step += 1
+
     def on_test_completed(self, test_type):
         if not self.is_running_tests: return
 
+        if test_type == "uart":
+            self.pc_log_append("PASS")
+            self.run_next_test()
+            return
+        
         if test_type == "i2c":
             parser = self.uart_dut.i2c_parser
             if not parser.buffer: self.pc_log_append("FAIL (no data)")
@@ -287,3 +366,24 @@ class MainWindow(QMainWindow):
             self.run_next_test_delayed(5000)
         else:
             self.run_next_test()
+
+    def handle_hil_uart_byte(self, text):
+        text = text.strip()
+
+        if text.startswith("UART_BYTE:"):
+            try:
+                val = int(text.split(":")[1])
+                self.hil_buffer.append(val)
+            except:
+                pass
+
+    def handle_dut_uart_byte(self, text):
+        text = text.strip()
+
+        if text.startswith("UART_BYTE:"):
+            try:
+                val = int(text.split(":")[1])
+                self.dut_buffer.append(val)
+            except:
+                pass
+    
