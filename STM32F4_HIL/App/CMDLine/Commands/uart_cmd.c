@@ -45,7 +45,7 @@ static int Cmd_UART_Receive(int argc, char *argv[])
 {
     if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
 
-    uint8_t buf[128];
+    uint8_t buf[256];
     uint16_t len;
 
     Console_Write("UART RX DATA:\r\n");
