@@ -562,8 +562,6 @@ int Cmd_UART_Dump_Buffer(int argc, char *argv[])
 
     UART_Send(buf, 256);
 
-    Console_Write("UART TX 256 bytes DONE\r\n");
-
     return CMDLINE_OK;
 }
 
@@ -571,10 +569,8 @@ int Cmd_UART_Receive(int argc, char *argv[])
 {
     if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
 
-    uint8_t buf[128];
+    uint8_t buf[256];
     uint16_t len;
-
-    Console_Write("UART RX DATA:\r\n");
 
     while ((len = UART_Read(buf, sizeof(buf))) > 0)
     {
@@ -608,5 +604,6 @@ int Cmd_UART_Send_String(int argc, char *argv[])
 
     return CMDLINE_OK;
 }
+
 
 
