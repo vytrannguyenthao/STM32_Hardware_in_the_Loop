@@ -27,6 +27,7 @@ App/USB \
 App/can_driver \
 App/i2c_eeprom_driver \
 App/sine_wave \
+App/uart_driver \
 App/w25q_driver \
 Core/Src \
 Core/Startup \

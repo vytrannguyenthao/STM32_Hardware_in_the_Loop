@@ -39,5 +39,9 @@ int Cmd_I2C_Scan(int argc, char *argv[]);
 int Cmd_sine_set_freq(int argc, char *argv[]);
 int Cmd_sine_get_freq(int argc, char *argv[]);
 int Cmd_Sine_Wave(int argc, char *argv[]);
+int Cmd_UART_Init(int argc, char *argv[]);
+int Cmd_UART_Dump_Buffer(int argc, char *argv[]);
+int Cmd_UART_Receive(int argc, char *argv[]);
+int Cmd_UART_Send_String(int argc, char *argv[]);
 
 #endif /* CMDLINE_COMMAND_H_ */
