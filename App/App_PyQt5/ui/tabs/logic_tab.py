@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QPushB
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor
 import pyqtgraph as pg
+import time
 
 # ==================================================
 # CLASS TẠO LABEL KÊNH BẰNG THUẦN PYTHON (KHÔNG HTML)
@@ -109,6 +110,7 @@ class LogicTab(QWidget):
         }
 
         self.plots = {}
+        self.curves = {} # [UPDATE] Chuẩn bị sẵn dictionary chứa đường vẽ đồ thị
         self.v_lines = []
         p0 = None
 
@@ -147,6 +149,10 @@ class LogicTab(QWidget):
             if i % 2 == 0 and ch.startswith('D'):
                 p.getViewBox().setBackgroundColor('#F7F7F7')
 
+            # [UPDATE] Khởi tạo sẵn đường nét để xóa/vẽ data
+            curve = p.plot(pen=pg.mkPen(color=colors[ch], width=1.5))
+            self.curves[ch] = curve
+
             v_line = pg.InfiniteLine(angle=90, movable=False, pen=pg.mkPen(color='#444444', width=1, style=Qt.DashLine))
             p.addItem(v_line)
             self.v_lines.append(v_line)
@@ -171,14 +177,89 @@ class LogicTab(QWidget):
                 break 
 
     # ==================================================
-    # SỰ KIỆN NÚT BẤM
+    # [UPDATE] HÀM HỖ TRỢ XỬ LÝ LỆNH START/STOP
+    # ==================================================
+    def parse_number_value(self, text, multipliers):
+        """Chuyển đổi text combobox ('1 M', '100 kHz') thành số thực tế"""
+        text = text.replace(" ", "").upper()
+        for suffix, mult in multipliers.items():
+            if suffix in text:
+                return int(float(text.replace(suffix, "")) * mult)
+        return int(text)
+
+    def reset_plots_to_zero(self):
+        """Xóa hết dữ liệu cũ và ép trục thời gian về lại mốc 0"""
+        for ch in self.curves:
+            self.curves[ch].setData([], []) 
+        
+        if 'D0' in self.plots:
+            self.plots['D0'].setXRange(0, 100, padding=0)
+
+    # ==================================================
+    # SỰ KIỆN NÚT BẤM (GỬI LỆNH)
     # ==================================================
     def toggle_start_stop(self):
+        if getattr(self.uart_logic, 'ser', None) is None or not self.uart_logic.ser.is_open:
+            print("[LOGIC] Cổng COM chưa được kết nối!")
+            return
+
         if not self.is_running:
             self.is_running = True
             self.btn_start.setText(" STOP")
-            self.btn_start.setIcon(self.create_led_icon("#4CAF50"))
+            self.btn_start.setIcon(self.create_led_icon("#4CAF50")) 
+
+            rate = self.parse_number_value(self.cb_rate.currentText(), {"KHZ": 1000, "MHZ": 1000000})
+            samples = self.parse_number_value(self.cb_samples.currentText(), {"K": 1000, "M": 1000000, "G": 1000000000})
+
+            self.reset_plots_to_zero()
+
+            try:
+                # GỬI CHẬM TỪNG BƯỚC ĐỂ PICO KỊP XỬ LÝ (GIỐNG PUTTY)
+                
+                # 1. Reset state
+                self.uart_logic.ser.write(b"*")
+                time.sleep(0.01) # Nghỉ 50ms cho Pico reset DMA
+                
+                # 2. Setup kênh
+                self.uart_logic.ser.write(b"A10\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D10\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D11\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D12\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D13\n")
+                time.sleep(0.01)
+                
+                # 3. Setup tham số
+                self.uart_logic.ser.write(f"R{rate}\n".encode('ascii'))
+                time.sleep(0.01)
+                self.uart_logic.ser.write(f"L{samples}\n".encode('ascii'))
+                time.sleep(0.01)
+                
+                # Để test tạm thời tránh Python bị kẹt `readline()`, 
+                # bạn phải XÓA/FLUSH buffer RX cũ trước khi ra lệnh START
+                self.uart_logic.ser.reset_input_buffer()
+                
+                # 4. Gửi lệnh chốt (Bắn Data)
+                self.uart_logic.ser.write(b"F\n")
+
+                print(f"[LOGIC] Bắt đầu: Setup {samples} samples @ {rate} Hz")
+            except Exception as e:
+                print(f"[LOGIC] Lỗi gửi lệnh START: {e}")
+                self.is_running = False
+                self.btn_start.setText(" START")
+                self.btn_start.setIcon(self.create_led_icon("gray"))
+
         else:
             self.is_running = False
             self.btn_start.setText(" START")
             self.btn_start.setIcon(self.create_led_icon("gray"))
+            
+            try:
+                self.uart_logic.ser.write(b"+")
+                print("[LOGIC] Đã gửi lệnh STOP.")
+            except Exception as e:
+                print(f"[LOGIC] Lỗi gửi lệnh STOP: {e}")
+

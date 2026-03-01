@@ -40,9 +40,17 @@ class UARTThread(QThread):
 
             while self.running:
                 if self.ser.in_waiting:
-                    line = self.ser.readline().decode(errors="ignore").strip()
-                    if line:
-                        self.handle_line(line)
+                    if self.name == "LOGIC":
+                        # Với cổng LOGIC: Đọc kiểu nhị phân (Binary) và xả đi càng nhanh càng tốt
+                        # Không dùng readline() vì data mã hóa RLE không có \n, sẽ làm treo app
+                        raw_data = self.ser.read(self.ser.in_waiting)
+                        # Tạm thời chưa cần in ra hay decode, cứ đọc để xả buffer cho Pico khỏi tràn
+                        # print(f"Received {len(raw_data)} bytes") 
+                    else:
+                        # Với DUT và HIL thì giữ nguyên đọc từng dòng Text
+                        line = self.ser.readline().decode(errors="ignore").strip()
+                        if line:
+                            self.handle_line(line)
                 time.sleep(0.01)
         except Exception as e:
             self.log_signal.emit(f"[{self.name}] ERROR: {e}")
