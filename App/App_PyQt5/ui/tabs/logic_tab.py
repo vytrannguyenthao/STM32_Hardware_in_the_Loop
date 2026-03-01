@@ -73,7 +73,7 @@ class LogicTab(QWidget):
 
         # --- CẤU HÌNH SAMPLES ---
         self.cb_samples = QComboBox()
-        self.cb_samples.addItems(["1 K", "10 K", "100 K", "1 M", "10 M"])
+        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "3 M", "10 M", "50 M", "100 M", "500 M", "1 G"])
         self.cb_samples.setCurrentText("1 M")
 
         layout.addWidget(QLabel("Samples:"))
@@ -82,7 +82,7 @@ class LogicTab(QWidget):
         
         # --- CẤU HÌNH SAMPLE RATE ---
         self.cb_rate = QComboBox()
-        self.cb_rate.addItems(["10 kHz", "100 kHz", "1 MHz", "10 MHz", "24 MHz"])
+        self.cb_rate.addItems(["10 kHz", "100 kHz", "150 kHz", "200 kHz", "250 kHz", "300 kHz"])
         self.cb_rate.setCurrentText("100 kHz")
 
         layout.addWidget(QLabel("Sample Rate:"))
