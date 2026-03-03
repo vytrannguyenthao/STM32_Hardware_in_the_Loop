@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         # Connect Signals -> Tabs
         self.uart_dut.log_signal.connect(self.memory_tab.append_dut_log)
         self.uart_hil.log_signal.connect(self.memory_tab.append_hil_log)
+        self.uart_logic.data_signal.connect(self.logic_tab.process_raw_data)
         self.uart_dut.spi_data.connect(self.memory_tab.update_spi)
         self.uart_dut.spi_clear.connect(self.memory_tab.clear_spi_table)
         self.uart_dut.i2c_data.connect(self.memory_tab.update_i2c)

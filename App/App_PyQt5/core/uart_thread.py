@@ -7,6 +7,7 @@ from core.parsers import SPIParser, I2CParser, UARTParser
 
 class UARTThread(QThread):
     log_signal = pyqtSignal(str)
+    data_signal = pyqtSignal(bytes)
     spi_data = pyqtSignal(int, int)
     i2c_data = pyqtSignal(int, int)
     uart_data = pyqtSignal(int, int)
@@ -41,17 +42,15 @@ class UARTThread(QThread):
             while self.running:
                 if self.ser.in_waiting:
                     if self.name == "LOGIC":
-                        # Với cổng LOGIC: Đọc kiểu nhị phân (Binary) và xả đi càng nhanh càng tốt
-                        # Không dùng readline() vì data mã hóa RLE không có \n, sẽ làm treo app
                         raw_data = self.ser.read(self.ser.in_waiting)
-                        # Tạm thời chưa cần in ra hay decode, cứ đọc để xả buffer cho Pico khỏi tràn
-                        # print(f"Received {len(raw_data)} bytes") 
+                        if raw_data:
+                            # 1. Bắn data thô ra cho UI vẽ (Gửi qua signal mới)
+                            self.data_signal.emit(raw_data)
                     else:
-                        # Với DUT và HIL thì giữ nguyên đọc từng dòng Text
                         line = self.ser.readline().decode(errors="ignore").strip()
                         if line:
                             self.handle_line(line)
-                time.sleep(0.01)
+                time.sleep(0.0001)
         except Exception as e:
             self.log_signal.emit(f"[{self.name}] ERROR: {e}")
         finally:

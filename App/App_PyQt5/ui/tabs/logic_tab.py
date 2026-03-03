@@ -1,9 +1,10 @@
 # File: ui/tabs/logic_tab.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel, QComboBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor
 import pyqtgraph as pg
 import time
+import numpy as np
 
 # ==================================================
 # CLASS TẠO LABEL KÊNH BẰNG THUẦN PYTHON (KHÔNG HTML)
@@ -36,6 +37,17 @@ class LogicTab(QWidget):
         
         self.uart_logic = uart_logic
         self.is_running = False
+
+        # --- BỘ ĐỆM VÀ QUẢN LÝ DỮ LIỆU ---
+        self.raw_buffer = bytearray()
+        self.leftover_byte = bytearray() # Lưu byte bị kẹt lại chưa có cặp
+        self.current_idx = 0 # Con trỏ mảng hiện tại
+        
+        self.current_sample_rate = 100000
+        self.expected_samples = 0
+        
+        self.plot_timer = QTimer()
+        self.plot_timer.timeout.connect(self.update_plots)
 
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.build_control_panel())
@@ -74,7 +86,7 @@ class LogicTab(QWidget):
 
         # --- CẤU HÌNH SAMPLES ---
         self.cb_samples = QComboBox()
-        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "3 M", "10 M", "50 M", "100 M", "500 M", "1 G"])
+        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "3 M", "10 M", "50 M", "100 M"])
         self.cb_samples.setCurrentText("1 M")
 
         layout.addWidget(QLabel("Samples:"))
@@ -121,6 +133,13 @@ class LogicTab(QWidget):
 
             # 2. Biểu đồ (Plot)
             p = self.plot_widget.addPlot(col=1)
+            
+            # ==========================================
+            # TỐI ƯU HÓA PYQTGRAPH CHO LOGIC ANALYZER
+            # ==========================================
+            p.setClipToView(True) # Chỉ vẽ những điểm nằm trong khung hình hiện tại
+            p.setDownsampling(auto=True, mode='peak') # Ghép điểm ảnh, loại bỏ lag
+            
             p.getViewBox().setBorder(pg.mkPen(color='#CCCCCC', width=1))
 
             p.hideButtons()
@@ -177,6 +196,79 @@ class LogicTab(QWidget):
                 break 
 
     # ==================================================
+    # TIẾP NHẬN VÀ XỬ LÝ DỮ LIỆU TỐI ƯU HÓA (O(N))
+    # ==================================================
+    def process_raw_data(self, data: bytes):
+        if self.is_running:
+            self.raw_buffer.extend(data)
+
+    def update_plots(self):
+        # Nếu không có data mới, thoát sớm để rảnh CPU
+        if len(self.raw_buffer) == 0 and len(self.leftover_byte) == 0:
+            return
+
+        # Nối data cũ bị lẻ nhịp trước vào đầu chuỗi mới
+        chunk = self.leftover_byte + self.raw_buffer[:]
+        self.raw_buffer.clear()
+
+        valid_data = np.frombuffer(chunk, dtype=np.uint8)
+        valid_data = valid_data[valid_data >= 0x80] # Loại rác
+
+        if len(valid_data) == 0:
+            self.leftover_byte.clear()
+            return
+
+        # CỰC KỲ QUAN TRỌNG: Xử lý byte bị lẻ cặp (tránh lệch Digital/Analog)
+        if len(valid_data) % 2 != 0:
+            self.leftover_byte = bytearray([valid_data[-1]])
+            valid_data = valid_data[:-1]
+        else:
+            self.leftover_byte.clear()
+
+        if len(valid_data) == 0:
+            return
+
+        # Tách cặp và tính số lượng
+        digital_bytes = valid_data[0::2]
+        analog_bytes = valid_data[1::2]
+        n_samples = len(digital_bytes)
+
+        # Chặn không cho mảng phình to hơn số Sample User đã chọn
+        if self.current_idx + n_samples > self.expected_samples:
+            n_samples = self.expected_samples - self.current_idx
+            digital_bytes = digital_bytes[:n_samples]
+            analog_bytes = analog_bytes[:n_samples]
+
+        start_i = self.current_idx
+        end_i = start_i + n_samples
+
+        # Đổ dữ liệu vào đúng vị trí của Mảng đã cấp phát sẵn (Nhanh gấp 100 lần list thường)
+        self.d0_arr[start_i:end_i] = digital_bytes & 1
+        self.d1_arr[start_i:end_i] = (digital_bytes >> 1) & 1
+        self.d2_arr[start_i:end_i] = (digital_bytes >> 2) & 1
+        self.d3_arr[start_i:end_i] = (digital_bytes >> 3) & 1
+        self.a0_arr[start_i:end_i] = (analog_bytes & 0x7F) * (3.3 / 127.0)
+
+        # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
+        self.curves['D0'].setData(self.time_arr[:end_i], self.d0_arr[:end_i])
+        self.curves['D1'].setData(self.time_arr[:end_i], self.d1_arr[:end_i])
+        self.curves['D2'].setData(self.time_arr[:end_i], self.d2_arr[:end_i])
+        self.curves['D3'].setData(self.time_arr[:end_i], self.d3_arr[:end_i])
+        self.curves['A0'].setData(self.time_arr[:end_i], self.a0_arr[:end_i])
+
+        self.current_idx = end_i
+
+        # Tự động trượt thanh ngắm
+        if end_i > 0:
+            current_time = self.time_arr[end_i - 1]
+            self.plots['D0'].setXRange(0, max(current_time, 0.0001), padding=0)
+
+        # Kiểm tra hoàn thành
+        if self.current_idx >= self.expected_samples:
+            print(f"[LOGIC] Đã bắt đủ {self.current_idx} mẫu. Tự động Dừng.")
+            self.toggle_start_stop()
+
+    # ==================================================
     # [UPDATE] HÀM HỖ TRỢ XỬ LÝ LỆNH START/STOP
     # ==================================================
     def parse_number_value(self, text, multipliers):
@@ -211,11 +303,29 @@ class LogicTab(QWidget):
             rate = self.parse_number_value(self.cb_rate.currentText(), {"KHZ": 1000, "MHZ": 1000000})
             samples = self.parse_number_value(self.cb_samples.currentText(), {"K": 1000, "M": 1000000, "G": 1000000000})
 
+            # RESET BIẾN TRẠNG THÁI
+            self.current_sample_rate = rate
+            self.expected_samples = samples
+            self.raw_buffer.clear()
+            self.leftover_byte.clear()
+            self.current_idx = 0
             self.reset_plots_to_zero()
+            
+            # ------------------------------------------------
+            # TIỀN CẤP PHÁT BỘ NHỚ (NGUYÊN LÝ VÀNG CHỐNG LAG)
+            # ------------------------------------------------
+            self.d0_arr = np.zeros(samples, dtype=np.int8)
+            self.d1_arr = np.zeros(samples, dtype=np.int8)
+            self.d2_arr = np.zeros(samples, dtype=np.int8)
+            self.d3_arr = np.zeros(samples, dtype=np.int8)
+            self.a0_arr = np.zeros(samples, dtype=np.float32)
+            
+            dt = 1.0 / rate
+            self.time_arr = np.arange(samples) * dt
+            
+            self.plot_timer.start(100) 
 
             try:
-                # GỬI CHẬM TỪNG BƯỚC ĐỂ PICO KỊP XỬ LÝ (GIỐNG PUTTY)
-                
                 # 1. Reset state
                 self.uart_logic.ser.write(b"*")
                 time.sleep(0.01) # Nghỉ 50ms cho Pico reset DMA
@@ -251,11 +361,15 @@ class LogicTab(QWidget):
                 self.is_running = False
                 self.btn_start.setText(" START")
                 self.btn_start.setIcon(self.create_led_icon("gray"))
+                self.plot_timer.stop()
 
         else:
             self.is_running = False
             self.btn_start.setText(" START")
             self.btn_start.setIcon(self.create_led_icon("gray"))
+            
+            self.plot_timer.stop()
+            self.update_plots() 
             
             try:
                 self.uart_logic.ser.write(b"+")
