@@ -121,6 +121,7 @@ int main(void)
   LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_15); // Set POWER STATUS PIN
 
   calcsin();
+  calc_triangle();
 
   CAN_Init();
 	W25Q_Init(&W25Q);

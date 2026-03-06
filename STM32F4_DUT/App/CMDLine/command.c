@@ -80,9 +80,10 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
 	{ "eeprom_fill",  Cmd_EEPROM_Fill,  "eeprom_fill <addr> <len>" },
 
-	{ "set_sine_freq",  Cmd_sine_set_freq,  "set sine wave frequency <freq>" },
-	{ "get_sine_freq",  Cmd_sine_get_freq,  "get sine wave frequency" },
+	{ "set_freq",  Cmd_set_freq,  "set sine wave frequency <freq>" },
+	{ "get_freq",  Cmd_get_freq,  "get sine wave frequency" },
 	{ "sine_wave",  Cmd_Sine_Wave,  "sine-wave <status>" },
+	{ "triangle_wave",  Cmd_Triangle_Wave,  "triangle-wave <status>" },
 
     { "uart_init",      Cmd_UART_Init,           "Initialize UART RX interrupt" },
     { "uart_dump",      Cmd_UART_Dump_Buffer,    "Transmit 256 incremental bytes" },
@@ -477,7 +478,7 @@ int Cmd_I2C_Scan(int argc, char *argv[])
 	return CMDLINE_OK;
 }
 
-int Cmd_sine_set_freq(int argc, char *argv[]) {
+int Cmd_set_freq(int argc, char *argv[]) {
 	if (argc < 3) {
 		return CMDLINE_TOO_FEW_ARGS;
 	}
@@ -490,16 +491,16 @@ int Cmd_sine_set_freq(int argc, char *argv[]) {
 		Console_Write("\r\nInvalid frequency\r\n");
 		return CMDLINE_OK;
 	}
-
+	set_flag_freq_set(true);
 	set_freq(freq);
 	return CMDLINE_OK;
 }
 
 
-int Cmd_sine_get_freq(int argc, char *argv[]) {
+int Cmd_get_freq(int argc, char *argv[]) {
 	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
 
-	if (!is_sine_wave_freq_set()) {
+	if (!is_freq_set()) {
 		Console_Write("\r\nSine wave frequency is not set\r\n");
 		return CMDLINE_OK;
 	}
@@ -513,20 +514,61 @@ int Cmd_Sine_Wave(int argc, char *argv[]) {
 	if (argc > 3)
 		return CMDLINE_TOO_MANY_ARGS;
 
-	if (!is_sine_wave_freq_set()) {
-		Console_Write("\r\nSine wave frequency is not set\r\n");
+	if (!is_freq_set()) {
+		Console_Write("\r\nFrequency is not set\r\n");
 		return CMDLINE_OK;
 	}
 
 	uint32_t tmp = atoi(argv[1]); // số byte cần ghi
 
 	if (tmp == 1) {
-		start_sine_wave();
+		if (is_triangle_wave_on()) {
+			Console_Write("\r\nTriangle wave is already on\r\n");
+			return CMDLINE_OK;
+		}
+		set_flag_sine_wave_on(true);
+		start_gen_wave(SINE_WAVE);
 		Console_Write("\r\nStart Sine Wave\r\n");
 		return CMDLINE_OK;
 	} else if (tmp == 0) {
-		stop_sine_wave();
+		set_flag_sine_wave_on(false);
+		set_flag_freq_set(false);
+		stop_gen_wave();
 		Console_Write("\r\nStop Sine Wave\r\n");
+		return CMDLINE_OK;
+	} else {
+		Console_Write("\r\nInvalid argument\r\n");
+		return CMDLINE_OK;
+	}
+}
+
+int Cmd_Triangle_Wave(int argc, char *argv[]) {
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	if (!is_freq_set()) {
+		Console_Write("\r\nFrequency is not set\r\n");
+		return CMDLINE_OK;
+	}
+
+	uint32_t tmp = atoi(argv[1]); // số byte cần ghi
+
+	if (tmp == 1) {
+		if (is_sine_wave_on()) {
+			Console_Write("\r\nSine wave is already on\r\n");
+			return CMDLINE_OK;
+		}
+		set_flag_triangle_wave_on(true);
+		start_gen_wave(TRIANGLE_WAVE);
+		Console_Write("\r\nStart Triangle Wave\r\n");
+		return CMDLINE_OK;
+	} else if (tmp == 0) {
+		set_flag_triangle_wave_on(false);
+		set_flag_freq_set(false);
+		stop_gen_wave();
+		Console_Write("\r\nStop Triangle Wave\r\n");
 		return CMDLINE_OK;
 	} else {
 		Console_Write("\r\nInvalid argument\r\n");
