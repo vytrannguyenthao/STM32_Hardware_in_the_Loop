@@ -10,7 +10,7 @@
 
 #define PI 3.1415926
 #define SAMPLES_NUM 100
-#define DAC_MAX 4096
+#define DAC_MAX 4000
 #define APB2_CLK 60000000
 
 extern DAC_HandleTypeDef hdac;
