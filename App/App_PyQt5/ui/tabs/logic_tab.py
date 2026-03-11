@@ -46,6 +46,10 @@ class LogicTab(QWidget):
         self.current_sample_rate = 100000
         self.expected_samples = 0
         
+        # Mảng dữ liệu thời gian và điện áp (cần cho việc tính toán vị trí chuột)
+        self.time_arr = np.array([])
+        self.a0_arr = np.array([])
+
         self.plot_timer = QTimer()
         self.plot_timer.timeout.connect(self.update_plots)
 
@@ -151,6 +155,11 @@ class LogicTab(QWidget):
                 p.setYRange(-0.2, 1.2, padding=0)
             else:
                 p.setYRange(0, 3.5, padding=0)
+                # --- [UPDATE CẬP NHẬT TOOLTIP ĐIỆN ÁP] ---
+                # Tạo một TextItem gắn vào kênh A0 để hiển thị điện áp
+                self.a0_voltage_label = pg.TextItem(text="", color='#4682B4', fill='#FFFFFF', anchor=(0, 1))
+                p.addItem(self.a0_voltage_label)
+                # -----------------------------------------
 
             if i == 0:
                 p0 = p
@@ -191,8 +200,27 @@ class LogicTab(QWidget):
         for ch, p in self.plots.items():
             if p.sceneBoundingRect().contains(pos):
                 mousePoint = p.vb.mapSceneToView(pos)
+                mouse_x = mousePoint.x()
+                
+                # Cập nhật vị trí đường nét đứt cho tất cả các kênh
                 for v_line in self.v_lines:
-                    v_line.setPos(mousePoint.x())
+                    v_line.setPos(mouse_x)
+                
+                # --- [UPDATE CẬP NHẬT TOOLTIP ĐIỆN ÁP] ---
+                # Nếu đã có dữ liệu trong mảng A0
+                if hasattr(self, 'a0_arr') and len(self.a0_arr) > 0 and self.current_idx > 0:
+                    # Tính toán index của mảng dựa trên tọa độ X (thời gian) và Sample Rate
+                    idx = int(mouse_x * self.current_sample_rate)
+                    
+                    # Ràng buộc index nằm trong phạm vi dữ liệu đã thu thập
+                    if 0 <= idx < self.current_idx:
+                        voltage = self.a0_arr[idx]
+                        self.a0_voltage_label.setText(f"{voltage:.2f} V")
+                        # Gắn label nằm ngay cạnh đường gióng (dịch lên một chút so với đáy đồ thị)
+                        self.a0_voltage_label.setPos(mouse_x, 0.2)
+                    else:
+                        self.a0_voltage_label.setText("") # Ẩn chữ nếu trỏ ra ngoài vùng có dữ liệu
+                # -----------------------------------------
                 break 
 
     # ==================================================
@@ -286,10 +314,11 @@ class LogicTab(QWidget):
         
         if 'D0' in self.plots:
             self.plots['D0'].setXRange(0, 100, padding=0)
+            
+        # Reset text điện áp
+        if hasattr(self, 'a0_voltage_label'):
+            self.a0_voltage_label.setText("")
 
-    # ==================================================
-    # SỰ KIỆN NÚT BẤM (GỬI LỆNH)
-    # ==================================================
     def toggle_start_stop(self):
         if getattr(self.uart_logic, 'ser', None) is None or not self.uart_logic.ser.is_open:
             print("[LOGIC] Cổng COM chưa được kết nối!")
