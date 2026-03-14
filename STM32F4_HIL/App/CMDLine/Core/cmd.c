@@ -42,9 +42,21 @@ static int g_cmdCount = 0;
 /*----------------- DEFAUTL COMMAND FUNCTIONS -----------------*/
 static int Cmd_help(int argc, char *argv[]) {
     tCmdLineEntry *pEntry = &g_psCmdTable[0];
-    while(pEntry->pcCmd) {
-        char buffer[128];
-        snprintf(buffer, sizeof(buffer), "%s - %s\r\n", pEntry->pcCmd, pEntry->pcHelp);
+    size_t maxCmdLength = 0;
+	while (pEntry->pcCmd) {
+		size_t cmdLength = strlen(pEntry->pcCmd);
+		if (cmdLength > maxCmdLength) {
+			maxCmdLength = cmdLength;
+		}
+		pEntry++;
+	}
+	pEntry = &g_psCmdTable[0];
+	while (pEntry->pcCmd) {
+		char buffer[256];
+		size_t cmdLength = strlen(pEntry->pcCmd);
+		int padding = (int) (maxCmdLength - cmdLength + 2);
+		snprintf(buffer, sizeof(buffer), "\r\n%s%*s %s", pEntry->pcCmd,
+		         padding, "", pEntry->pcHelp);
         Console_Write(buffer);
         pEntry++;
     }
