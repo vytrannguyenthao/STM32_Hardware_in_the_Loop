@@ -129,6 +129,8 @@ int main(void)
   if (HAL_I2C_EnableListen_IT(&hi2c1) != HAL_OK) {
 	  Error_Handler();
   }
+  HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 0); // Khởi tạo DAC ở mức 0V
 
   CAN_Init();
   CLI_Init();

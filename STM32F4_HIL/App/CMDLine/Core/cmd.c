@@ -15,6 +15,8 @@
 #include "w25q_slave.h"
 #include "main.h"
 
+extern DAC_HandleTypeDef hdac;
+
 static int Cmd_help(int argc, char *argv[]);
 static int Cmd_Clear_CLI(int argc, char *argv[]);
 static int Cmd_Power_DUT(int argc, char *argv[]);
@@ -57,9 +59,9 @@ static int Cmd_help(int argc, char *argv[]) {
 		int padding = (int) (maxCmdLength - cmdLength + 2);
 		snprintf(buffer, sizeof(buffer), "\r\n%s%*s %s", pEntry->pcCmd,
 		         padding, "", pEntry->pcHelp);
-        Console_Write(buffer);
-        pEntry++;
-    }
+		Console_Write(buffer);
+		pEntry++;
+	}
     return CMDLINE_OK;
 }
 
@@ -101,6 +103,38 @@ static int Cmd_Power_DUT(int argc, char *argv[]) {
         	Console_Write("DUT is powered OFF\r\n");
         }
     }
+    return CMDLINE_OK;
+}
+
+static int Cmd_DAC_Set_Voltage(int argc, char *argv[]) {
+    if (argc < 3) {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    if (argc > 3) {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+
+    char *input = argv[1];
+    char *dot_pos = strchr(input, '.');
+
+    // Nếu có dấu chấm, kiểm tra phần thập phân
+    if (dot_pos != NULL) {
+        // dot_pos + 1 là vị trí chữ số đầu tiên sau dấu chấm
+        // strlen(dot_pos + 1) sẽ trả về số lượng chữ số sau dấu chấm
+        if (strlen(dot_pos + 1) > 1) {
+            Console_Write("Error: Only 1 decimal place allowed (e.g., 1.2)\r\n");
+            return CMDLINE_OK;
+        }
+    }
+
+    float voltage = atof(input);
+    if (voltage < 0.0f || voltage > 3.3f) {
+        Console_Write("Error: Voltage out of range (0.0 - 3.3)\r\n");
+        return CMDLINE_OK;
+    }
+
+    uint32_t dac_value = (uint32_t)((voltage / 3.3f) * 4096);
+    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
     return CMDLINE_OK;
 }
 
@@ -216,6 +250,7 @@ void CLI_Init(void) {
     CLI_RegisterCommand("cls", Cmd_Clear_CLI, "Clear Console | format: cls");
     CLI_RegisterCommand("dut_power", Cmd_Power_DUT, "Power DUT on/off | format: dut_power <0|1>");
     CLI_RegisterCommand("dut_power_status", Cmd_Power_Status, "Check DUT power status | format: dut_power_status");
+    CLI_RegisterCommand("dac_set_voltage", Cmd_DAC_Set_Voltage, "Set DAC voltage | format: dac_set_voltage <X.Y> (0.0-3.3V)");
     Cmd_SPI_Register();
     Cmd_I2C_Register();
     Cmd_CAN_Register();
