@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
         return box, text
 
     def create_uart_control(self, name, uart):
-        box = QGroupBox(f"{name} UART")
+        box = QGroupBox(f"{name} Serial Port")
         lay = QVBoxLayout(box)
         cb_port = QComboBox()
         cb_baud = QComboBox()
