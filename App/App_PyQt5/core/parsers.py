@@ -74,9 +74,9 @@ class SPIParser:
 
         if self.active:
             for p in line.split():
-                if p.startswith("0x"):
+                if len(p) == 2:
                     try: self.buffer.append(int(p, 16))
-                    except: pass
+                    except ValueError: pass
 
             if len(self.buffer) >= self.expected:
                 for addr, val in enumerate(self.buffer[:1024]):
