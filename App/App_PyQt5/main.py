@@ -12,7 +12,7 @@ if __name__ == "__main__":
         font-size: 10pt;
     }
     QTableWidget, QHeaderView::section {
-        font-size: 9pt;
+        font-size: 10pt;
     }
     QTextEdit {
         font-family: Consolas;

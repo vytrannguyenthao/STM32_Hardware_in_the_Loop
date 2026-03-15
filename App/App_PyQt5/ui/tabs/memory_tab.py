@@ -55,7 +55,7 @@ class MemoryTab(QWidget):
         lay = QVBoxLayout(box)
         text = QTextEdit()
         text.setReadOnly(True)
-        text.setStyleSheet("background:white;font-family:Consolas;font-size:8pt;")
+        text.setStyleSheet("background:white;font-family:Consolas;font-size:9pt;")
 
         bottom = QHBoxLayout()
         input_line = QLineEdit()
