@@ -44,5 +44,6 @@ int Cmd_UART_Init(int argc, char *argv[]);
 int Cmd_UART_Dump_Buffer(int argc, char *argv[]);
 int Cmd_UART_Receive(int argc, char *argv[]);
 int Cmd_UART_Send_String(int argc, char *argv[]);
+int Cmd_ADC_Read(int argc, char *argv[]);
 
 #endif /* CMDLINE_COMMAND_H_ */

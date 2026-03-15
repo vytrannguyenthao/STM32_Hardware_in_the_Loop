@@ -11,6 +11,7 @@
 #include "task.h"
 #include "stm32f4xx_ll_gpio.h"
 #include "stm32f4xx_ll_rcc.h"
+#include "stm32f4xx_hal_adc.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "usb.h"
@@ -22,6 +23,8 @@ extern I2C_HandleTypeDef hi2c1;
 static I2C_EEPROM_t EEPROM1;
 
 extern DAC_HandleTypeDef hdac;
+
+extern ADC_HandleTypeDef hadc1;
 
 extern TIM_HandleTypeDef htim2;
 
@@ -89,6 +92,8 @@ tCmdLineEntry g_psCmdTable[] =
     { "uart_dump",      Cmd_UART_Dump_Buffer,    "Transmit 256 incremental bytes" },
     { "uart_rx",        Cmd_UART_Receive, 		 "Received UART data" },
     { "uart_tx",        Cmd_UART_Send_String,    "uart_send <text>" },
+
+	{ "adc_read",       Cmd_ADC_Read,            "Read ADC value | format: adc_read" },
 
 	{ 0, 0, 0 }
 };
@@ -647,5 +652,16 @@ int Cmd_UART_Send_String(int argc, char *argv[])
     return CMDLINE_OK;
 }
 
+int Cmd_ADC_Read(int argc, char *argv[])
+{
+    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
 
+    HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 100);
+	uint16_t adc_value = HAL_ADC_GetValue(&hadc1);
+	HAL_ADC_Stop(&hadc1);
 
+	float voltage = ((float)adc_value * 3.3f) / 4095.0f;
+	Console_Write("\r\nVoltage: %.1f V\r\n", voltage);
+    return CMDLINE_OK;
+}
