@@ -99,7 +99,7 @@ class LogicTab(QWidget):
         
         # --- CẤU HÌNH SAMPLE RATE ---
         self.cb_rate = QComboBox()
-        self.cb_rate.addItems(["10 kHz", "100 kHz", "150 kHz", "200 kHz", "250 kHz", "300 kHz"])
+        self.cb_rate.addItems(["10 kHz", "100 kHz", "150 kHz", "200 kHz", "250 kHz"])
         self.cb_rate.setCurrentText("100 kHz")
 
         layout.addWidget(QLabel("Sample Rate:"))
@@ -277,19 +277,28 @@ class LogicTab(QWidget):
         self.d3_arr[start_i:end_i] = (digital_bytes >> 3) & 1
         self.a0_arr[start_i:end_i] = (analog_bytes & 0x7F) * (3.3 / 127.0)
 
-        # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
-        self.curves['D0'].setData(self.time_arr[:end_i], self.d0_arr[:end_i])
-        self.curves['D1'].setData(self.time_arr[:end_i], self.d1_arr[:end_i])
-        self.curves['D2'].setData(self.time_arr[:end_i], self.d2_arr[:end_i])
-        self.curves['D3'].setData(self.time_arr[:end_i], self.d3_arr[:end_i])
-        self.curves['A0'].setData(self.time_arr[:end_i], self.a0_arr[:end_i])
-
         self.current_idx = end_i
 
-        # Tự động trượt thanh ngắm
-        if end_i > 0:
-            current_time = self.time_arr[end_i - 1]
-            self.plots['D0'].setXRange(0, max(current_time, 0.0001), padding=0)
+        # Data mảng Numpy đã cập nhật xong. Nhưng ta sẽ hạn chế tần số vẽ (Render) lên Card đồ họa.
+        # Bằng cách chỉ thực hiện lệnh setData mỗi ~300ms, thay vì mỗi 100ms.
+        current_t = time.time()
+        if not hasattr(self, 'last_plot_time'):
+            self.last_plot_time = 0
+            
+        if (current_t - self.last_plot_time >= 0.3) or (self.current_idx >= self.expected_samples):
+            # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
+            self.curves['D0'].setData(self.time_arr[:end_i], self.d0_arr[:end_i])
+            self.curves['D1'].setData(self.time_arr[:end_i], self.d1_arr[:end_i])
+            self.curves['D2'].setData(self.time_arr[:end_i], self.d2_arr[:end_i])
+            self.curves['D3'].setData(self.time_arr[:end_i], self.d3_arr[:end_i])
+            self.curves['A0'].setData(self.time_arr[:end_i], self.a0_arr[:end_i])
+
+            # Tự động trượt thanh ngắm
+            if end_i > 0:
+                current_time = self.time_arr[end_i - 1]
+                self.plots['D0'].setXRange(0, max(current_time, 0.0001), padding=0)
+                
+            self.last_plot_time = current_t
 
         # Kiểm tra hoàn thành
         if self.current_idx >= self.expected_samples:
@@ -319,6 +328,9 @@ class LogicTab(QWidget):
         if hasattr(self, 'a0_voltage_label'):
             self.a0_voltage_label.setText("")
 
+    # ==================================================
+    # SỰ KIỆN NÚT BẤM (GỬI LỆNH)
+    # ==================================================
     def toggle_start_stop(self):
         if getattr(self.uart_logic, 'ser', None) is None or not self.uart_logic.ser.is_open:
             print("[LOGIC] Cổng COM chưa được kết nối!")
@@ -338,6 +350,7 @@ class LogicTab(QWidget):
             self.raw_buffer.clear()
             self.leftover_byte.clear()
             self.current_idx = 0
+            self.last_plot_time = 0 # Trả lại mốc thời gian để sẵn sàng vẽ khung đầu tiên
             self.reset_plots_to_zero()
             
             # ------------------------------------------------

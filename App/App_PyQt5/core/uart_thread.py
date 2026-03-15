@@ -50,7 +50,7 @@ class UARTThread(QThread):
                         line = self.ser.readline().decode(errors="ignore").strip()
                         if line:
                             self.handle_line(line)
-                time.sleep(0.0001)
+                time.sleep(0.00001)
         except Exception as e:
             self.log_signal.emit(f"[{self.name}] ERROR: {e}")
         finally:
