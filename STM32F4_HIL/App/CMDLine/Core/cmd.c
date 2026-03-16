@@ -10,16 +10,12 @@
 #include <stdio.h>
 #include "FreeRTOS.h"
 #include "task.h"
-#include <stm32f4xx_ll_gpio.h>
 #include <stdlib.h>
 #include "w25q_slave.h"
 #include "main.h"
 
-extern DAC_HandleTypeDef hdac;
-
 static int Cmd_help(int argc, char *argv[]);
 static int Cmd_Clear_CLI(int argc, char *argv[]);
-static int Cmd_Power_DUT(int argc, char *argv[]);
 
 typedef struct {
     char commandBuffer[COMMAND_MAX_LENGTH];
@@ -67,89 +63,6 @@ static int Cmd_help(int argc, char *argv[]) {
 
 static int Cmd_Clear_CLI(int argc, char *argv[]) {
     Console_Write("\033[2J\033[H"); // clear screen
-    return CMDLINE_OK;
-}
-
-static int Cmd_Power_DUT(int argc, char *argv[]) {
-    if (argc < 3)
-        return CMDLINE_TOO_FEW_ARGS;
-    if (argc > 3)
-        return CMDLINE_TOO_MANY_ARGS;
-
-    uint32_t status = atoi(argv[1]);
-    if(status) {
-        // Power on DUT
-        LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
-        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
-        SPI3_Reset();
-
-        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
-            // DUT đã bật (logic HIGH)
-        	Console_Write("DUT is powered ON\r\n");
-        } else {
-            // DUT không bật được (logic LOW)
-        	Console_Write("Failed to power ON DUT\r\n");
-        }
-    } else {
-        LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
-
-        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
-
-        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
-            // DUT đã bật (logic HIGH)
-        	Console_Write("Failed to power OFF DUT\r\n");
-        } else {
-            // DUT không bật được (logic LOW)
-        	Console_Write("DUT is powered OFF\r\n");
-        }
-    }
-    return CMDLINE_OK;
-}
-
-static int Cmd_DAC_Set_Voltage(int argc, char *argv[]) {
-    if (argc < 3) {
-        return CMDLINE_TOO_FEW_ARGS;
-    }
-    if (argc > 3) {
-        return CMDLINE_TOO_MANY_ARGS;
-    }
-
-    char *input = argv[1];
-    char *dot_pos = strchr(input, '.');
-
-    // Nếu có dấu chấm, kiểm tra phần thập phân
-    if (dot_pos != NULL) {
-        // dot_pos + 1 là vị trí chữ số đầu tiên sau dấu chấm
-        // strlen(dot_pos + 1) sẽ trả về số lượng chữ số sau dấu chấm
-        if (strlen(dot_pos + 1) > 1) {
-            Console_Write("Error: Only 1 decimal place allowed (e.g., 1.2)\r\n");
-            return CMDLINE_OK;
-        }
-    }
-
-    float voltage = atof(input);
-    if (voltage < 0.0f || voltage > 3.3f) {
-        Console_Write("Error: Voltage out of range (0.0 - 3.3)\r\n");
-        return CMDLINE_OK;
-    }
-
-    uint32_t dac_value = (uint32_t)((voltage / 3.3f) * 4095);
-    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
-    return CMDLINE_OK;
-}
-
-static int Cmd_Power_Status(int argc, char *argv[]) {
-    if (argc > 2)
-        return CMDLINE_TOO_MANY_ARGS;
-
-    if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
-        // DUT đã bật (logic HIGH)
-        Console_Write("DUT ON\r\n");
-    } else {
-        // DUT không bật được (logic LOW)
-        Console_Write("DUT OFF\r\n");
-    }
-
     return CMDLINE_OK;
 }
 
@@ -248,14 +161,13 @@ void CLI_Init(void) {
     // Register commands
     CLI_RegisterCommand("help", Cmd_help, "Display list of available commands | format: help");
     CLI_RegisterCommand("cls", Cmd_Clear_CLI, "Clear Console | format: cls");
-    CLI_RegisterCommand("dut_power", Cmd_Power_DUT, "Power DUT on/off | format: dut_power <0|1>");
-    CLI_RegisterCommand("dut_power_status", Cmd_Power_Status, "Check DUT power status | format: dut_power_status");
-    CLI_RegisterCommand("dac_set_voltage", Cmd_DAC_Set_Voltage, "Set DAC voltage | format: dac_set_voltage <X.Y> (0.0-3.3V)");
+
+    Cmd_DUT_Control_Register();
     Cmd_SPI_Register();
     Cmd_I2C_Register();
     Cmd_CAN_Register();
     Cmd_UART_Register();
-    Cmd_ADC_Register();
+    Cmd_Analog_Register();
 
 }
 

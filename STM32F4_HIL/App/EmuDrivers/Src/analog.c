@@ -5,7 +5,7 @@
  *      Author: VyTran
  */
 
-#include "adc.h"
+#include <analog.h>
 
 extern ADC_HandleTypeDef hadc1;
 static ADC_HandleTypeDef *hadc = &hadc1;
