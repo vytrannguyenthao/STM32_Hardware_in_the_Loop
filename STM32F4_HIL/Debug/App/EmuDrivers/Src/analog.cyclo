@@ -1,0 +1,3 @@
+../App/EmuDrivers/Src/analog.c:13:7:adc_read_voltage	1
+../App/EmuDrivers/Src/analog.c:25:5:pwm_verify_voltage	3
+../App/EmuDrivers/Src/analog.c:36:7:adc_read_pwm_voltage	2
