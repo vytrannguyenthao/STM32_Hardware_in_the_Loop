@@ -95,6 +95,11 @@ tCmdLineEntry g_psCmdTable[] =
 
 	{ "adc_read",       Cmd_ADC_Read,            "Read ADC value | format: adc_read" },
 
+	{ "pwm_freq",  Cmd_PWM_Freq,  "pwm_freq <freq_khz>" },
+	{ "pwm_volt",  Cmd_PWM_Volt,  "pwm_volt <ch> <mV>" },
+	{ "pwm_start", Cmd_PWM_Start, "pwm_start <ch>" },
+	{ "pwm_stop",  Cmd_PWM_Stop,  "pwm_stop <ch>" },
+
 	{ 0, 0, 0 }
 };
 
@@ -664,4 +669,79 @@ int Cmd_ADC_Read(int argc, char *argv[])
 	float voltage = ((float)adc_value * 3.3f) / 4095.0f;
 	Console_Write("\r\nVoltage: %.1f V\r\n", voltage);
     return CMDLINE_OK;
+}
+
+#include "../pwm/pwm_control.h"
+
+int Cmd_PWM_Freq(int argc, char *argv[])
+{
+	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+
+	uint16_t freq = atoi(argv[1]);
+
+	if(freq == 0 || freq > 1000)
+	{
+		Console_Write("\r\nInvalid freq (1-1000 kHz)\r\n");
+		return CMDLINE_OK;
+	}
+
+	set_pwm_freq(freq);
+	Console_Write("\r\nPWM freq set to %u kHz\r\n",freq);
+
+	return CMDLINE_OK;
+}
+
+int Cmd_PWM_Volt(int argc, char *argv[])
+{
+	if (argc < 4) return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 4) return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t ch = atoi(argv[1]);
+	uint16_t mv = atoi(argv[2]);
+
+	if(ch < 1 || ch > 4)
+	{
+		Console_Write("\r\nInvalid channel (1-4)\r\n");
+		return CMDLINE_OK;
+	}
+
+	set_pwm_voltage(ch, mv);
+	Console_Write("\r\nCH%d voltage set to %u mV\r\n",ch,mv);
+
+	return CMDLINE_OK;
+}
+
+int Cmd_PWM_Start(int argc, char *argv[])
+{
+	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t ch = atoi(argv[1]);
+
+	if(pwm_start(ch))
+	{
+		Console_Write("\r\nInvalid channel\r\n");
+		return CMDLINE_OK;
+	}
+
+	Console_Write("\r\nPWM CH%d started\r\n",ch);
+	return CMDLINE_OK;
+}
+
+int Cmd_PWM_Stop(int argc, char *argv[])
+{
+	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t ch = atoi(argv[1]);
+
+	if(pwm_stop(ch))
+	{
+		Console_Write("\r\nInvalid channel\r\n");
+		return CMDLINE_OK;
+	}
+
+	Console_Write("\r\nPWM CH%d stopped\r\n",ch);
+	return CMDLINE_OK;
 }
