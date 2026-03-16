@@ -255,6 +255,7 @@ void CLI_Init(void) {
     Cmd_I2C_Register();
     Cmd_CAN_Register();
     Cmd_UART_Register();
+    Cmd_ADC_Register();
 
 }
 

@@ -42,5 +42,6 @@ void Cmd_SPI_Register(void);
 void Cmd_I2C_Register(void);
 void Cmd_CAN_Register(void);
 void Cmd_UART_Register(void);
+void Cmd_ADC_Register(void);
 
 #endif /* CMDLINE_COMMAND_H_ */
