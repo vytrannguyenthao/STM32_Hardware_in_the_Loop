@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.13.3 on win32)" generated="2026-03-16T19:04:15.089138" rpa="false" schemaversion="5">
+<suite id="s1" name="Tests" source="D:\STUDY\00_SCHOOL\DA\robot_framework\hil_robot\tests">
+<suite id="s1-s1" name="Adc" source="D:\STUDY\00_SCHOOL\DA\robot_framework\hil_robot\tests\adc.robot">
+<test id="s1-s1-t1" name="Simple HIL Test" line="6">
+<kw name="Connect DUT" owner="dut_lib">
+<arg>COM16</arg>
+<status status="PASS" start="2026-03-16T19:04:15.189615" elapsed="0.203219"/>
+</kw>
+<kw name="Connect HIL" owner="hil_lib">
+<arg>COM17</arg>
+<doc>Connect to HIL serial</doc>
+<status status="PASS" start="2026-03-16T19:04:15.398593" elapsed="0.205464"/>
+</kw>
+<kw name="DUT set volt" owner="dut_lib">
+<arg>1</arg>
+<arg>2000</arg>
+<status status="PASS" start="2026-03-16T19:04:15.605516" elapsed="0.001248"/>
+</kw>
+<kw name="HIL read ADC Voltage" owner="hil_lib">
+<msg time="2026-03-16T19:04:15.608939" level="INFO">${adc} = </msg>
+<var>${adc}</var>
+<status status="PASS" start="2026-03-16T19:04:15.607774" elapsed="0.001323"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-16T19:04:15.612836" level="INFO"/>
+<arg>${adc}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-16T19:04:15.610054" elapsed="0.003309"/>
+</kw>
+<kw name="Disconnect DUT" owner="dut_lib">
+<status status="PASS" start="2026-03-16T19:04:15.616054" elapsed="0.005640"/>
+</kw>
+<kw name="Disconnect HIL" owner="hil_lib">
+<doc>Disconnect HIL</doc>
+<status status="PASS" start="2026-03-16T19:04:15.623057" elapsed="0.008065"/>
+</kw>
+<status status="PASS" start="2026-03-16T19:04:15.187618" elapsed="0.446477"/>
+</test>
+<status status="PASS" start="2026-03-16T19:04:15.159034" elapsed="0.480553"/>
+</suite>
+<status status="PASS" start="2026-03-16T19:04:15.092196" elapsed="0.561044"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tests" id="s1" pass="1" fail="0" skip="0">Tests</stat>
+<stat name="Adc" id="s1-s1" pass="1" fail="0" skip="0">Tests.Adc</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
