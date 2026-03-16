@@ -1,10 +1,6 @@
 from robot.api.deco import library, keyword
+from robot.api import logger
 from cli_lib import CLI
-import re
-from robot.api import logger
-from robot.api.deco import keyword
-from robot.api import logger
-from robot.libraries.BuiltIn import BuiltIn
 
 @library(scope="GLOBAL")
 class DUTLibrary:
@@ -26,8 +22,8 @@ class DUTLibrary:
     def disconnect_dut(self):
         self.cli.disconnect()
 
-    @keyword("HIL Help")
-    def hil_help(self):
+    @keyword("DUT Help")
+    def dut_help(self):
         """
         Send 'help' command to HIL and print raw response.
         Used to verify connection and communication.
@@ -36,7 +32,7 @@ class DUTLibrary:
         resp = self.cli.execute("help")
 
         # log ra robot report (đẹp trong log.html)
-        logger.info(f"HIL HELP RESPONSE:<br><pre>{resp}</pre>", html=True)
+        logger.info(f"DUT HELP RESPONSE:<br><pre>{resp}</pre>", html=True)
 
         # log ra terminal
         logger.console("\n===== HIL HELP RESPONSE =====")
@@ -59,3 +55,31 @@ class DUTLibrary:
             raise AssertionError("Invalid DUT response")
 
         return resp
+
+    # ------------------
+    # PWM
+    # ------------------
+
+    @keyword("Start DUT PWM")
+    def start_pwm(self, ch):
+        self.cli.execute(f"pwm_start {ch}")
+
+    @keyword("Stop DUT PWM")
+    def stop_pwm(self, ch):
+        self.cli.execute(f"pwm_stop {ch}")
+
+    @keyword("Set DUT volt")
+    def set_pwm_volt(self, ch, volt):
+        mv = int(float(volt) * 1000)
+        self.cli.execute(f"pwm_volt {ch} {mv}")
+
+    @keyword("Set DUT PWM freq")
+    def set_pwm_freq(self, freq):
+        self.cli.execute(f"pwm_freq {freq}")
+
+    @keyword("Configure DUT PWM")
+    def configure_pwm(self, ch, freq, volt):
+        mv = int(float(volt) * 1000)
+        self.cli.execute(f"pwm_freq {freq}")
+        self.cli.execute(f"pwm_volt {ch} {mv}")
+        self.cli.execute(f"pwm_start {ch}")
