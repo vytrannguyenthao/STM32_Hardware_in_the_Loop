@@ -7,8 +7,8 @@
 #include "uart_driver.h"
 #include <string.h>
 
-extern UART_HandleTypeDef huart1;
-UART_HandleTypeDef *uart = &huart1;
+extern UART_HandleTypeDef huart2;
+UART_HandleTypeDef *uart = &huart2;
 
 uint8_t uart_rx_byte;
 uint8_t uart_rx_buffer[UART_RX_BUF_LEN];
