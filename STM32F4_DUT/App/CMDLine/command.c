@@ -19,7 +19,7 @@
 #include "sine_wave.h"
 #include "i2c_eeprom.h"
 
-extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c3;
 static I2C_EEPROM_t EEPROM1;
 
 extern DAC_HandleTypeDef hdac;
@@ -363,7 +363,7 @@ int Cmd_EEPROM_Init(int argc, char *argv[])
 	uint16_t page  = atoi(argv[3]);
 
 	if (EEPROM_Init(&EEPROM1,
-	                &hi2c1,
+	                &hi2c3,
 	                addr7,
 	                size,
 	                page,
@@ -471,7 +471,7 @@ int Cmd_I2C_Scan(int argc, char *argv[])
 	Console_Write("\r\nScanning I2C bus...\r\n");
 
 	for (uint8_t addr = 1; addr < 127; addr++) {
-		if (HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 2, 10) == HAL_OK) {
+		if (HAL_I2C_IsDeviceReady(&hi2c3, addr << 1, 2, 10) == HAL_OK) {
 			sprintf(msg, "Found device at 0x%02X\r\n", addr);
 			Console_Write(msg);
 			found++;
