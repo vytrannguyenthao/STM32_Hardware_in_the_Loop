@@ -14,6 +14,22 @@ class HILLibrary:
         self.cli = CLI()
 
     # ------------------
+    # Internal CLI
+    # ------------------
+    def _hil_cmd(self, cmd, expect_response=True):
+
+        logger.console(f">>> {cmd}")
+
+        resp = self.cli.execute(cmd)
+
+        logger.info(f"<pre>{resp}</pre>", html=True)
+
+        if expect_response and not resp.strip():
+            raise AssertionError(f"No response for command: {cmd}")
+
+        return resp
+
+    # ------------------
     # Connection
     # ------------------
     @keyword("Connect HIL")
@@ -50,12 +66,7 @@ class HILLibrary:
     @keyword("Verify HIL Alive")
     def verify_hil_alive(self):
 
-        resp = self.cli.execute("help")
-
-        logger.info(f"HIL RESP:\n{resp}")
-
-        if not resp.strip():
-            raise AssertionError("HIL not responding")
+        resp = self._hil_cmd("help")
 
         if "help" not in resp.lower():
             raise AssertionError("Invalid HIL response")
@@ -110,3 +121,74 @@ class HILLibrary:
             min_v,
             max_v,
         )
+
+    # ------------------
+    # I2C
+    # ------------------
+
+    def _validate_i2c_addr(self, addr):
+
+        try:
+            value = int(str(addr), 0)
+        except ValueError:
+            raise AssertionError(f"Invalid I2C address: {addr}")
+
+        if value <= 0 or value >= 0x7F:
+            raise AssertionError(
+                f"I2C address out of range: {addr}"
+            )
+
+        return value
+
+    def _validate_uint(self, name, val):
+
+        try:
+            v = int(val)
+        except ValueError:
+            raise AssertionError(f"{name} must be integer")
+
+        if v <= 0:
+            raise AssertionError(f"{name} must > 0")
+
+        return v
+
+    @keyword("HIL Init EEPROM")
+    def hil_init_eeprom(self, addr, size, page):
+
+        addr = self._validate_i2c_addr(addr)
+        size = self._validate_uint("size", size)
+        page = self._validate_uint("page", page)
+
+        if size % page != 0:
+            raise AssertionError(
+                "EEPROM size must be multiple of page size"
+            )
+
+        cmd = f"eeprom_init 0x{addr:02X} {size} {page}"
+
+        self._hil_cmd(cmd, expect_response=False)
+    
+    @keyword("HIL Deinit EEPROM")
+    def hil_deinit_eeprom(self, addr):
+        addr = self._validate_i2c_addr(addr)
+        self._hil_cmd("eeprom_deinit 0x{addr:02X}", expect_response=False)
+
+    @keyword("HIL Find EEPROM")
+    def hil_find_eeprom(self):
+
+        resp = self._hil_cmd("eeprom_find")
+
+        if "eeprom" not in resp.lower():
+            raise AssertionError("EEPROM not detected")
+
+        logger.info(resp)
+        return resp
+    
+    @keyword("HIL Activate I2C Device")
+    def hil_activate_i2c_device(self, addr):
+        addr = self._validate_i2c_addr(addr)
+        cmd = f"i2c_dev_active 0x{addr:02X}"
+        resp = self._hil_cmd(cmd)
+
+        if "not initialized" in resp.lower():
+            raise AssertionError(resp)
