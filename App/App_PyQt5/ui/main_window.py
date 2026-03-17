@@ -148,6 +148,9 @@ class MainWindow(QMainWindow):
                 uart.open(cb_port.currentText(), int(cb_baud.currentText()))
                 btn_connect.setText("Disconnect")
 
+        # Khi rút cáp, luồng bị lỗi và dừng lại, nó sẽ tự động kích hoạt tín hiệu 'finished'
+        uart.finished.connect(lambda: btn_connect.setText("Connect"))
+
         btn_refresh.clicked.connect(refresh_ports)
         btn_connect.clicked.connect(toggle)
 
