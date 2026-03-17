@@ -239,6 +239,9 @@ class LogicTab(QWidget):
         chunk = self.leftover_byte + self.raw_buffer[:]
         self.raw_buffer.clear()
 
+        # Kiểm tra xem Pico đã gửi cờ '+' báo hoàn thành toàn bộ tác vụ chưa
+        pico_finished = b'+' in chunk
+
         valid_data = np.frombuffer(chunk, dtype=np.uint8)
         valid_data = valid_data[valid_data >= 0x80] # Loại rác
 
@@ -254,6 +257,9 @@ class LogicTab(QWidget):
             self.leftover_byte.clear()
 
         if len(valid_data) == 0:
+            if pico_finished and self.is_running:
+                print(f"[LOGIC] Pico báo kết thúc. Đã lấy {self.current_idx}/{self.expected_samples} mẫu. Tự động Dừng.")
+                self.toggle_start_stop()
             return
 
         # Tách cặp và tính số lượng
@@ -285,7 +291,7 @@ class LogicTab(QWidget):
         if not hasattr(self, 'last_plot_time'):
             self.last_plot_time = 0
             
-        if (current_t - self.last_plot_time >= 0.3) or (self.current_idx >= self.expected_samples):
+        if (current_t - self.last_plot_time >= 0.3) or (self.current_idx >= self.expected_samples) or pico_finished:
             # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
             self.curves['D0'].setData(self.time_arr[:end_i], self.d0_arr[:end_i])
             self.curves['D1'].setData(self.time_arr[:end_i], self.d1_arr[:end_i])
@@ -301,8 +307,9 @@ class LogicTab(QWidget):
             self.last_plot_time = current_t
 
         # Kiểm tra hoàn thành
-        if self.current_idx >= self.expected_samples:
-            print(f"[LOGIC] Đã bắt đủ {self.current_idx} mẫu. Tự động Dừng.")
+        # Bắt buộc phải có `self.is_running` để tránh việc toggle_start_stop gọi lại hàm này và tự mở Start
+        if (self.current_idx >= self.expected_samples or pico_finished) and self.is_running:
+            print(f"[LOGIC] Đã bắt đủ mẫu hoặc Pico báo hoàn thành. Tự động Dừng.")
             self.toggle_start_stop()
 
     # ==================================================
