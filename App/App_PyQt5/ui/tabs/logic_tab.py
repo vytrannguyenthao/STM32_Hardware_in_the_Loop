@@ -50,6 +50,10 @@ class LogicTab(QWidget):
         self.time_arr = np.array([])
         self.a0_arr = np.array([])
 
+        # --- BIẾN QUẢN LÝ CÔNG CỤ ĐO TẦN SỐ ---
+        self.active_measure_ch = None
+        self.current_measure_plot = None
+
         self.plot_timer = QTimer()
         self.plot_timer.timeout.connect(self.update_plots)
 
@@ -190,7 +194,146 @@ class LogicTab(QWidget):
             
         self.proxy = pg.SignalProxy(self.plot_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
 
+        # --- KHỞI TẠO CÔNG CỤ ĐO TẦN SỐ ---
+        # Vùng chọn (màu vàng trong suốt)
+        self.measure_region = pg.LinearRegionItem(values=[0, 0], movable=True)
+        self.measure_region.setBrush(QColor(255, 215, 0, 50)) 
+        self.measure_region.hide()
+        
+        # Nhãn hiển thị Tần số neo từ trên chúc xuống
+        self.measure_text = pg.TextItem(text="", color='#000000', fill='#FFD700', anchor=(0.5, 0))
+        self.measure_text.hide()
+        
+        # Kết nối sự kiện khi người dùng kéo giãn vùng đo
+        self.measure_region.sigRegionChanged.connect(self.update_measurement)
+        
+        # Bắt sự kiện Click chuột lên biểu đồ
+        self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
+        # ------------------------------------------
+
         return self.plot_widget
+
+    # ==================================================
+    # SỰ KIỆN CLICK CHUỘT (TẠO/XÓA VÙNG ĐO)
+    # ==================================================
+    def on_mouse_clicked(self, evt):
+        pos = evt.scenePos()
+        for ch, p in self.plots.items():
+            if p.sceneBoundingRect().contains(pos):
+                mousePoint = p.vb.mapSceneToView(pos)
+                x_val = mousePoint.x()
+
+                # Nếu Double-Click: Mở vùng đo tại kênh này
+                if evt.double():
+                    # Xóa vùng đo khỏi kênh cũ (nếu có)
+                    if self.current_measure_plot is not None and self.current_measure_plot != p:
+                        self.current_measure_plot.removeItem(self.measure_region)
+                        self.current_measure_plot.removeItem(self.measure_text)
+                    
+                    # Gắn vùng đo vào kênh mới
+                    if self.current_measure_plot != p:
+                        p.addItem(self.measure_region)
+                        p.addItem(self.measure_text)
+                        self.current_measure_plot = p
+                        
+                    # Mở rộng vùng đo bằng 10% khung hình hiện tại
+                    view_range = p.viewRange()[0]
+                    w = (view_range[1] - view_range[0]) * 0.1 
+                    self.measure_region.setRegion([x_val - w/2, x_val + w/2])
+                    
+                    self.measure_region.show()
+                    self.measure_text.show()
+                    self.active_measure_ch = ch
+                    self.update_measurement()
+                    
+                # Nếu Single-Click chuột trái: Kiểm tra xem có click ra ngoài vùng đo để Hủy không
+                elif evt.button() == Qt.LeftButton:
+                    if self.measure_region.isVisible() and self.active_measure_ch == ch:
+                        r_min, r_max = self.measure_region.getRegion()
+                        if x_val < r_min or x_val > r_max:
+                            # Click ra ngoài -> Ẩn công cụ đo
+                            self.measure_region.hide()
+                            self.measure_text.hide()
+                            self.active_measure_ch = None
+                break
+
+    # ==================================================
+    # [UPDATE] HÀM TÍNH TOÁN TẦN SỐ TRONG VÙNG ĐO
+    # ==================================================
+    def update_measurement(self):
+        if not self.active_measure_ch or not self.measure_region.isVisible():
+            return
+            
+        minX, maxX = self.measure_region.getRegion()
+        if minX >= maxX: return
+        
+        ch = self.active_measure_ch
+        arr = getattr(self, f"{ch.lower()}_arr", None)
+        
+        # Kiểm tra mảng data hợp lệ
+        if arr is None or len(arr) == 0 or self.current_idx == 0:
+            self.measure_text.setText(" Freq: -- Hz ")
+            return
+
+        # Quy đổi thời gian (minX, maxX) ra Index của mảng Data
+        start_idx = max(0, int(minX * self.current_sample_rate))
+        end_idx = min(self.current_idx, int(maxX * self.current_sample_rate))
+        
+        if end_idx - start_idx < 2:
+            self.measure_text.setText(" Freq: -- Hz ")
+            return
+            
+        data_slice = arr[start_idx:end_idx]
+        
+        # --- THUẬT TOÁN ĐO TẦN SỐ CHỐNG NHIỄU (HYSTERESIS) ---
+        if ch == 'A0':
+            _min = np.min(data_slice)
+            _max = np.max(data_slice)
+            
+            # Khử nhiễu: Nếu sóng quá phẳng (biên độ < 0.1V), coi như không có dao động
+            if _max - _min < 0.1:
+                edge_indices = []
+            else:
+                # Áp dụng Hysteresis (ngưỡng 20% trên/dưới) để loại bỏ nhiễu răng cưa của DAC
+                threshold_high = _min + (_max - _min) * 0.6
+                threshold_low  = _min + (_max - _min) * 0.4
+                
+                states = np.zeros_like(data_slice, dtype=np.int8)
+                states[data_slice > threshold_high] = 1
+                states[data_slice < threshold_low] = -1
+                
+                valid_states_idx = np.where(states != 0)[0]
+                if len(valid_states_idx) > 0:
+                    valid_states = states[valid_states_idx]
+                    transitions = np.diff(valid_states) > 0 # Tìm cạnh lên (-1 -> 1)
+                    edge_indices = valid_states_idx[:-1][transitions]
+                else:
+                    edge_indices = []
+        else:
+            # Digital hoàn hảo không có nhiễu, dùng zero-crossing bình thường
+            edge_indices = np.where(np.diff(data_slice) > 0)[0]
+            
+        # Tính toán Freq dựa trên KHOẢNG CÁCH CHÍNH XÁC giữa các cạnh (không phụ thuộc độ rộng box vàng)
+        if len(edge_indices) >= 2:
+            num_cycles = len(edge_indices) - 1
+            actual_time_span = (edge_indices[-1] - edge_indices[0]) / self.current_sample_rate
+            freq = num_cycles / actual_time_span if actual_time_span > 0 else 0
+        else:
+            freq = 0
+            
+        # Định dạng chuỗi hiển thị (Đã xóa text "Edges")
+        if freq >= 1000000:
+            freq_str = f"{freq/1000000:.2f} MHz"
+        elif freq >= 1000:
+            freq_str = f"{freq/1000:.2f} kHz"
+        else:
+            freq_str = f"{freq:.2f} Hz"
+            
+        self.measure_text.setText(f" Freq: {freq_str} ")
+        
+        # Canh chỉnh vị trí nhãn: D0-D3 để ở 1.1, A0 để ở 3.1
+        y_pos = 1.1 if ch.startswith('D') else 3.1
+        self.measure_text.setPos(minX + (maxX-minX)/2, y_pos)
 
     # ==================================================
     # SỰ KIỆN RÊ CHUỘT CROSSHAIR 
@@ -247,6 +390,9 @@ class LogicTab(QWidget):
 
         if len(valid_data) == 0:
             self.leftover_byte.clear()
+            if pico_finished and self.is_running:
+                print(f"[LOGIC] Pico báo kết thúc. Đã lấy {self.current_idx}/{self.expected_samples} mẫu. Tự động Dừng.")
+                self.toggle_start_stop()
             return
 
         # CỰC KỲ QUAN TRỌNG: Xử lý byte bị lẻ cặp (tránh lệch Digital/Analog)
@@ -305,6 +451,10 @@ class LogicTab(QWidget):
                 self.plots['D0'].setXRange(0, max(current_time, 0.0001), padding=0)
                 
             self.last_plot_time = current_t
+            
+            # Ép công cụ đo tần số tính lại nếu nó đang bật và data vừa lọt vào vùng đo
+            if self.measure_region.isVisible():
+                self.update_measurement()
 
         # Kiểm tra hoàn thành
         # Bắt buộc phải có `self.is_running` để tránh việc toggle_start_stop gọi lại hàm này và tự mở Start
@@ -334,6 +484,12 @@ class LogicTab(QWidget):
         # Reset text điện áp
         if hasattr(self, 'a0_voltage_label'):
             self.a0_voltage_label.setText("")
+            
+        # Reset (Ẩn) công cụ đo khi Start lại
+        if hasattr(self, 'measure_region'):
+            self.measure_region.hide()
+            self.measure_text.hide()
+            self.active_measure_ch = None
 
     # ==================================================
     # SỰ KIỆN NÚT BẤM (GỬI LỆNH)
@@ -377,7 +533,7 @@ class LogicTab(QWidget):
             try:
                 # 1. Reset state
                 self.uart_logic.ser.write(b"*")
-                time.sleep(0.01) # Nghỉ 50ms cho Pico reset DMA
+                time.sleep(0.01)
                 
                 # 2. Setup kênh
                 self.uart_logic.ser.write(b"A10\n")
