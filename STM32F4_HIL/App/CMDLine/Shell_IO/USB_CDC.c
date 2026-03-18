@@ -50,7 +50,10 @@ void Console_Write(const char *fmt, ...) {
 
     if (len <= 0) return;
 
-    while (CDC_Transmit_FS((uint8_t*)buf, len) == USBD_BUSY);
+    uint32_t timeout = 10000; // Số vòng lặp chờ tối đa
+	while (CDC_Transmit_FS((uint8_t*)buf, len) == USBD_BUSY && timeout > 0) {
+		timeout--;
+	}
 }
 
 
