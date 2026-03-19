@@ -23,7 +23,7 @@ class CLI:
         self.ser = serial.Serial(port, baud, timeout=0.1)
 
         # wait STM32 reboot
-        time.sleep(2)
+        time.sleep(0.5)
 
         # clear boot garbage
         self.ser.reset_input_buffer()

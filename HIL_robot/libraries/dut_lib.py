@@ -202,13 +202,13 @@ class DUTLibrary:
     @keyword("DUT Write And Verify EEPROM")
     def dut_write_and_verify(self, addr, length):
 
-        logger.console("Writing EEPROM...")
+        logger.console("\nWriting EEPROM...")
         self.dut_eeprom_fill(addr, length)
 
-        logger.console("Reading EEPROM...")
+        logger.console("\nReading EEPROM...")
         data = self.dut_eeprom_read(addr, length)
 
-        logger.info("EEPROM data length OK")
+        logger.info("\nEEPROM data length OK")
 
         return data
     
@@ -235,7 +235,7 @@ class DUTLibrary:
 
         duration = end - start
 
-        logger.info(f"EEPROM write time = {duration:.4f}s")
+        logger.info(f"\nEEPROM write time = {duration:.4f}s")
 
         return duration
     
