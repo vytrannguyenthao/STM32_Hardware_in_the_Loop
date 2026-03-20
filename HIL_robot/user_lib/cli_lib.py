@@ -31,9 +31,6 @@ class CLI:
         # wake CLI
         self.ser.write(b"\n")
 
-        boot = self.ser.read_all().decode(errors="ignore")
-        print("BOOT MSG:", boot)
-
     def disconnect(self):
         """Close serial"""
         if self.ser:
