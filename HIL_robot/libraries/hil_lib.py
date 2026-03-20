@@ -84,8 +84,27 @@ class HILLibrary:
     # ------------------
     @keyword("Power DUT On")
     def power_dut_on(self):
-        resp = self._hil_cmd("dut_power 1")
-        logger.info(resp)
+        self._hil_cmd("dut_power 1")
+
+    @keyword("Power DUT Off")
+    def power_dut_off(self):
+        self._hil_cmd("dut_power 0")
+
+    @keyword("Check is DUT power on")
+    def check_is_dut_power_on(self):
+        resp = self._hil_cmd("dut_power_status")    
+        if "ON" in resp:
+            return True
+        else:
+            raise AssertionError("DUT is not powered on")
+
+    @keyword("Check is DUT power off")
+    def check_is_dut_power_off(self):
+        resp = self._hil_cmd("dut_power_status")    
+        if "OFF" in resp:
+            return True
+        else:
+            raise AssertionError("DUT is still powered on")
 
     # ------------------
     # PWM
