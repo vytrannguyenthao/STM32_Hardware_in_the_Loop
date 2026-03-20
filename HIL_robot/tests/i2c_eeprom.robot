@@ -1,17 +1,18 @@
 *** Settings ***
-Library    ../libraries/hil_lib.py
-Library    ../libraries/dut_lib.py
+Resource    ../resources/HIL_keywords.robot
+Resource    ../user_resources/DUT_keywords.robot
 
-*** Test Cases ***
+Suite Setup         Run Keywords
+...                 Connect To HIL          AND
+...                 Power DUT On            AND
+...                 Connect To DUT
+
+Suite Teardown      Run Keywords
+...                 Disconnect from HIL     AND
+...                 Disconnect from DUT
+
 *** Test Cases ***
 EEPROM Validation
-
-    Connect HIL    COM17
-    Connect DUT    COM16
-
-    Verify HIL Alive
-    Verify DUT Alive
-
     # --- HIL setup ---
     HIL Init EEPROM        0x50    1024    256
     HIL Activate I2C Device    0x50
@@ -29,6 +30,3 @@ EEPROM Validation
 
     # --- HIL deinit ---
     HIL Deinit EEPROM        0x50
-
-    Disconnect DUT
-    Disconnect HIL
