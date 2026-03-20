@@ -33,10 +33,10 @@ class HILLibrary:
     # Connection
     # ------------------
     @keyword("Connect HIL")
-    def connect_hil(self, port):
+    def connect_hil(self, port, baud):
         """Connect to HIL serial"""
-        self.cli.connect(port)
-        logger.info(f"Connected HIL at {port}")
+        self.cli.connect(port, baud)
+        logger.info(f"Connected HIL at {port}, baud {baud}")
 
     @keyword("Disconnect HIL")
     def disconnect_hil(self):

@@ -33,8 +33,8 @@ class DUTLibrary:
     # Connection
     # ------------------
     @keyword("Connect DUT")
-    def connect_dut(self, port):
-        self.cli.connect(port)
+    def connect_dut(self, port, baud):
+        self.cli.connect(port, baud)
 
     @keyword("Disconnect DUT")
     def disconnect_dut(self):

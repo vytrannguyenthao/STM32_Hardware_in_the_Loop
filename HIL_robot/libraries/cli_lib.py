@@ -18,7 +18,7 @@ class CLI:
     # CONNECTION
     # -------------------------
 
-    def connect(self, port, baud=115200):
+    def connect(self, port, baud):
 
         self.ser = serial.Serial(port, baud, timeout=0.1)
 
@@ -30,7 +30,6 @@ class CLI:
 
         # wake CLI
         self.ser.write(b"\n")
-        time.sleep(0.3)
 
         boot = self.ser.read_all().decode(errors="ignore")
         print("BOOT MSG:", boot)
