@@ -51,8 +51,8 @@ class UARTThread(QThread):
                         if line:
                             self.handle_line(line)
                 time.sleep(0.00001)
-        except Exception as e:
-            self.log_signal.emit(f"[{self.name}] ERROR: {e}")
+        except Exception:
+            pass
         finally:
             if self.ser:
                 self.ser.close()
