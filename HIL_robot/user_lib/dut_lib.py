@@ -1,6 +1,6 @@
 from robot.api.deco import library, keyword
 from robot.api import logger
-from libraries.cli_lib import CLI
+from cli_lib import CLI
 import re
 import time
 
