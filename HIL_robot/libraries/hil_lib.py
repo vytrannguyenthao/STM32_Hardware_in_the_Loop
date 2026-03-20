@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+from datetime import datetime
 from robot.api.deco import library, keyword
 from robot.api import logger
 from cli_lib import CLI
@@ -12,15 +15,28 @@ class HILLibrary:
 
     def __init__(self):
         self.cli = CLI()
+        # Tạo thư mục log và file log
+        self.log_dir = Path("hil_logs")
+        self.log_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.log_file = self.log_dir / f"hil_serial_{timestamp}.log"
 
     # ------------------
     # Internal CLI
     # ------------------
     def _hil_cmd(self, cmd, expect_response=True):
         resp = self.cli.execute(cmd)
+        resp = resp.replace("\r", "").strip()
         resp = resp.replace("HIL:~", "").strip() # Xóa prefix "HIL:~" nếu có
 
         logger.info(f"<pre>{resp}</pre>", html=True)
+
+        # Mở file ở chế độ "a" (append) để nối thêm dữ liệu vào cuối file
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            time_now = datetime.now().strftime("%H:%M:%S.%f")[:-3] # Lấy giờ phút giây . mili giây
+            # Ghi cả lệnh đã gửi và dữ liệu nhận được để dễ debug
+            f.write(f"[{time_now}] {resp}\n")
+            f.write("-" * 50 + "\n")
 
         if expect_response and not resp.strip():
             raise AssertionError(f"No response for command: {cmd}")
@@ -161,7 +177,7 @@ class HILLibrary:
     @keyword("HIL Deinit EEPROM")
     def hil_deinit_eeprom(self, addr):
         addr = self._validate_i2c_addr(addr)
-        self._hil_cmd("eeprom_deinit 0x{addr:02X}", expect_response=False)
+        self._hil_cmd(f"eeprom_deinit 0x{addr:02X}", expect_response=False)
 
     @keyword("HIL Find EEPROM")
     def hil_find_eeprom(self):
