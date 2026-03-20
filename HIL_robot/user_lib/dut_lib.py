@@ -173,7 +173,7 @@ class DUTLibrary:
 
         # ---- extract ONLY data section ----
         match = re.search(
-            r"\)\:\s*\n(.*?)\n\s*DUT:",
+            r"\)\:\s*\n(.*)",
             resp,
             re.S
         )
