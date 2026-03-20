@@ -94,7 +94,7 @@ class LogicTab(QWidget):
 
         # --- CẤU HÌNH SAMPLES ---
         self.cb_samples = QComboBox()
-        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "3 M", "10 M", "50 M", "100 M"])
+        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "2.5 M", "10 M", "50 M", "100 M"])
         self.cb_samples.setCurrentText("1 M")
 
         layout.addWidget(QLabel("Samples:"))
