@@ -17,10 +17,8 @@ class DUTLibrary:
     # Internal CLI
     # ------------------
     def _dut_cmd(self, cmd, expect_response=True):
-
-        logger.console(f">>> {cmd}")
-
         resp = self.cli.execute(cmd)
+        resp = resp.replace("DUT:~", "").strip() # Xóa prefix "DUT:~" nếu có
 
         logger.info(f"<pre>{resp}</pre>", html=True)
 
@@ -44,10 +42,6 @@ class DUTLibrary:
     def dut_help(self):
 
         resp = self._dut_cmd("help")
-
-        logger.console("\n===== DUT HELP RESPONSE =====")
-        logger.console(resp)
-        logger.console("================================")
 
         return resp
 

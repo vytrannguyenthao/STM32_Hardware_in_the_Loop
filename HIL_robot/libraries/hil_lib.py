@@ -17,10 +17,8 @@ class HILLibrary:
     # Internal CLI
     # ------------------
     def _hil_cmd(self, cmd, expect_response=True):
-
-        logger.console(f">>> {cmd}")
-
         resp = self.cli.execute(cmd)
+        resp = resp.replace("HIL:~", "").strip() # Xóa prefix "HIL:~" nếu có
 
         logger.info(f"<pre>{resp}</pre>", html=True)
 
@@ -51,15 +49,7 @@ class HILLibrary:
         Used to verify connection and communication.
         """
 
-        resp = self.cli.execute("help")
-
-        # log ra robot report
-        logger.info(f"HIL HELP RESPONSE:<br><pre>{resp}</pre>", html=True)
-
-        # log ra terminal
-        logger.console("\n===== HIL HELP RESPONSE =====")
-        logger.console(resp)
-        logger.console("================================")
+        resp = self._hil_cmd("help")
 
         return resp
     
@@ -78,7 +68,7 @@ class HILLibrary:
     # ------------------
     @keyword("Power DUT On")
     def power_dut_on(self):
-        resp = self.cli.execute("dut_power 1")
+        resp = self._hil_cmd("dut_power 1")
         logger.info(resp)
 
     # ------------------
@@ -87,7 +77,7 @@ class HILLibrary:
     @keyword("Read HIL Voltage")
     def read_voltage(self):
 
-        resp = self.cli.execute("adc_read_pwm")
+        resp = self._hil_cmd("adc_read_pwm")
 
         match = re.search(r"Measured:\s*(\d+)\s*mV", resp)
         if not match:
