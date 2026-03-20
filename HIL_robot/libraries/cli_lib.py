@@ -61,3 +61,27 @@ class CLI:
             time.sleep(0.05)
 
         return response.strip()
+    
+    # -------------------------
+    # LOGIC ANALYZER / BINARY
+    # -------------------------
+
+    def setup_logic_analyzer(self, rate: int, samples: int):
+        if not self.ser:
+            raise Exception("Serial not connected")
+
+        # 1. Reset state
+        self.ser.write(b"*")
+        time.sleep(0.05)
+
+        # 2. Cấu hình các kênh Analog / Digital
+        channels = [b"A10\n", b"D10\n", b"D11\n", b"D12\n", b"D13\n"]
+        for ch in channels:
+            self.ser.write(ch)
+            time.sleep(0.01)
+
+        # 3. Cấu hình Rate và Sample count
+        self.ser.write(f"R{rate}\n".encode('ascii'))
+        time.sleep(0.01)
+        self.ser.write(f"L{samples}\n".encode('ascii'))
+        time.sleep(0.01)

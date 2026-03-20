@@ -1,10 +1,12 @@
 *** Settings ***
 Library    ../libraries/hil_lib.py
+Library    ../libraries/logic_analyzer_lib.py
 Library    BuiltIn
 
 *** Variables ***
 ${HIL_PORT}          COM12
-${HIL_BAUDRATE}             115200
+${LOG_PORT}          COM8
+${HIL_BAUDRATE}      115200
 
 *** Keywords ***
 Connect To HIL
@@ -12,3 +14,9 @@ Connect To HIL
 
 Disconnect from HIL    
     Disconnect HIL
+
+Connect To Logic Analyzer
+    Connect Logic Analyzer     ${LOG_PORT}
+
+Disconnect from Logic Analyzer
+    Disconnect Logic Analyzer
