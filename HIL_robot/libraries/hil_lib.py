@@ -29,7 +29,7 @@ class HILLibrary:
         resp = resp.replace("\r", "").strip()
         resp = resp.replace("HIL:~", "").strip() # Xóa prefix "HIL:~" nếu có
 
-        logger.info(f"<pre>{resp}</pre>", html=True)
+        logger.info(f"{resp}")
 
         # Mở file ở chế độ "a" (append) để nối thêm dữ liệu vào cuối file
         with open(self.log_file, "a", encoding="utf-8") as f:

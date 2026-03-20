@@ -18,9 +18,10 @@ class DUTLibrary:
     # ------------------
     def _dut_cmd(self, cmd, expect_response=True):
         resp = self.cli.execute(cmd)
+        resp = resp.replace("\r", "").strip()
         resp = resp.replace("DUT:~", "").strip() # Xóa prefix "DUT:~" nếu có
 
-        logger.info(f"<pre>{resp}</pre>", html=True)
+        logger.info(f"{resp}")
 
         if expect_response and not resp.strip():
             raise AssertionError(f"No response for command: {cmd}")
