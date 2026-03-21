@@ -59,18 +59,25 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
 \end{itemize}
 
 \section{Sơ đồ mạch chi tiết}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/pcb.jpg}
+    \caption{PCB của hệ thống HIL}
+    \label{fig:pcb}
+\end{figure}
+Những khối chức năng chính trên chính trên hệ thống được thiết kế chi tiết như sau.
 \subsection{Khối nguồn}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{image/source_hil.jpg}
+    \includegraphics[width=0.55\textwidth]{image/source_hil.jpg}
     \caption{Sơ đồ khối nguồn của HIL}
     \label{fig:source_hil}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{image/source_dut.jpg}
+    \includegraphics[width=0.55\textwidth]{image/source_dut.jpg}
     \caption{Sơ đồ khối nguồn của DUT}
     \label{fig:source_dut}
 \end{figure}
@@ -95,11 +102,17 @@ Vì HIL điều khiển nguồn cấp cho DUT nên cần thiết kế hai khối
 Mạch sử dụng P-Channel MOSFET để HIL điều khiển đóng ngắt nguồn cấp cho DUT. Khi không có tín hiệu điều khiển từ HIL (HIL xuất mức tín hiệu 0), điện áp tại chân G của MOSFET xấp xỉ 5V.
 Lúc này, $V_{GS}$ xấp xỉ 0V nên MOSFET ở trạng thái tắt, nguồn không được cấp cho DUT. Khi HIL xuất mức tín hiệu cao, $Q_2$ dẫn, kéo chân G của MOSFET về mức 0V.
 Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở, nguồn được cấp cho DUT.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{image/power.jpg}
+    \caption{Khối nguồn thực tế}
+    \label{fig:power}
+\end{figure}
 
 \subsection{Khối vi điều khiển 1}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/hil_block.jpg}
+    \includegraphics[width=0.75\textwidth]{image/hil_block.jpg}
     \caption{Sơ đồ mạch của vi điều khiển 1}
     \label{fig:hil_block}
 \end{figure}
@@ -150,7 +163,7 @@ Tín hiệu từ mỗi vi điều khiển được kết nối với các điệ
 \subsection{Khối giao tiếp chung và các connector mở rộng}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/header_hil.jpg}
+    \includegraphics[width=0.8\textwidth]{image/header_hil.jpg}
     \caption{Sơ đồ mạch của khối giao tiếp chung của HIL}
     \label{fig:header_hil}
 \end{figure}
@@ -164,6 +177,12 @@ Tín hiệu từ mỗi vi điều khiển được kết nối với các điệ
 
 Với các tín hiệu giao tiếp chung như UART, SPI, I2C cần kết nối với các điện trở hạn dòng 22$\Omega$ để ổn định tín hiệu. 
 Bên cạnh đó, các tín hiệu này được đưa ra các bus connector riêng để dễ dàng kết nối với DUT. Với tín hiệu I2C, cần thêm điện trở kéo lên 3.3V.
-Các ngoại vi còn lại được kết nối với các general connector để mở rộng kết nối với các thiết bị ngoại vi khác trong tương lai nếu cần thiết.
+Các ngoại vi còn lại được kết nối với các general connector để mở rộng kết nối với các thiết bị ngoại vi khác trong tương lai nếu cần thiết.\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/connector.jpg}
+    \caption{Khối giao tiếp và connector mở rộng thực tế}
+    \label{fig:connector}
+\end{figure}
 % \section{Thiết kế PCB của hệ thống}
 
