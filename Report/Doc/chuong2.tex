@@ -19,7 +19,7 @@ Quá trình trao đổi này diễn ra liên tục theo thời gian thực hoặ
 
 \section{Các giao thức giao tiếp ngoại vi trong hệ thống mô phỏng}
 \subsection{Giao thức UART}
-UART (Universal Asynchronous Receiver Transmitter) là giao thức truyền thông nối tiếp không đồng bộ, sử dụng hai đường tín hiệu chính là TX (Transmit) và RX (Receive). Không giống như các giao thức đồng bộ, UART không sử dụng xung clock chung mà thay vào đó hai thiết bị phải thống nhất trước các tham số truyền thông như tốc độ truyền nhận, số bit dữ liệu, bit kiểm tra chẵn lẻ và bit dừng.
+UART (Universal Asynchronous Receiver Transmitter) là giao thức truyền thông nối tiếp không đồng bộ, sử dụng hai đường tín hiệu chính là TX (Transmit) và RX (Receive). Không giống như các giao thức đồng bộ, UART không sử dụng xung clock chung mà thay vào đó hai thiết bị phải thống nhất trước các tham số truyền thông như tốc độ truyền nhận (baud rate), số bit dữ liệu (Data Bits), bit kiểm tra chẵn lẻ (Parity Bit) và bit dừng (Stop Bit).
 
 \begin{figure}[H]
     \centering
@@ -28,9 +28,19 @@ UART (Universal Asynchronous Receiver Transmitter) là giao thức truyền thô
     \label{fig:uart}
 \end{figure}
 
-Nguyên lý hoạt động của UART dựa trên việc truyền dữ liệu theo từng khung. Mỗi khung dữ liệu bao gồm một bit bắt đầu, các bit dữ liệu, bit kiểm tra (nếu có) và bit kết thúc. Thiết bị nhận sẽ sử dụng tốc độ truyền nhận đã cấu hình để lấy mẫu tín hiệu và khôi phục dữ liệu ban đầu.
+Nguyên lý hoạt động của UART dựa trên việc truyền dữ liệu theo từng khung. Mỗi khung dữ liệu bao gồm một bit bắt đầu (Start Bit), các bit dữ liệu (Data), bit kiểm tra (Parity Bit) nếu có và bit kết thúc (Stop Bit). Thiết bị nhận sẽ sử dụng tốc độ truyền nhận đã cấu hình để lấy mẫu tín hiệu và khôi phục dữ liệu ban đầu.\\
 
-Trong hệ thống mô phỏng phần cứng trong vòng lặp này, UART thường được sử dụng để mô phỏng các thiết bị giao tiếp nối tiếp bên ngoài và phục vụ mục đích debug.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/uart_frame.jpg}
+    \caption{Khung dữ liệu UART}
+    \label{fig:uart_frame}
+\end{figure}
+
+Đường TX của UART thông thường là mức điện áp cao khi không truyền dữ liệu. Khi bắt đầu truyền dữ liệu, tín hiệu sẽ được kéo xuống mức thấp cho Start Bit, đóng vai trò báo hiệu bắt đầu khung dữ liệu.
+Sau Start Bit là các bit dữ liệu thông thường từ 5 đến 9 bit, phổ biến nhất là 8 bit và được truyền theo thứ tự LSB (Least Significant Bit) trước. Nếu có bit kiểm tra (Parity Bit), nó sẽ được thêm vào sau các bit dữ liệu để giúp phát hiện lỗi trong quá trình truyền.
+Cuối cùng, một hoặc nhiều bit dừng (Stop Bit) sẽ được gửi để báo hiệu kết thúc khung dữ liệu và cho phép thiết bị nhận chuẩn bị cho khung tiếp theo.
+
 \subsection{Giao thức I2C}
 I2C (Inter-Integrated Circuit) là giao thức truyền thông nối tiếp đồng bộ, sử dụng hai đường tín hiệu SDA (Serial Data) và SCL (Serial Clock). Bus I2C hoạt động theo cơ chế master–slave, trong đó thiết bị master tạo xung clock và điều khiển quá trình truyền thông, còn các thiết bị slave phản hồi dựa trên địa chỉ được gửi.
 
