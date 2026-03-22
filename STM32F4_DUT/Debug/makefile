@@ -22,6 +22,7 @@ RM := rm -rf
 -include App/w25q_driver/subdir.mk
 -include App/uart_driver/subdir.mk
 -include App/sine_wave/subdir.mk
+-include App/pwm/subdir.mk
 -include App/i2c_eeprom_driver/subdir.mk
 -include App/can_driver/subdir.mk
 -include App/USB/subdir.mk
@@ -66,6 +67,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 STM32F4_DUT.list \
 
+OBJCOPY_HEX += \
+STM32F4_DUT.hex \
+
+OBJCOPY_BIN += \
+STM32F4_DUT.bin \
+
 
 # All Target
 all: main-build
@@ -89,12 +96,22 @@ STM32F4_DUT.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+STM32F4_DUT.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "STM32F4_DUT.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+STM32F4_DUT.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32F4_DUT.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) STM32F4_DUT.elf STM32F4_DUT.list STM32F4_DUT.map default.size.stdout
+	-$(RM) STM32F4_DUT.bin STM32F4_DUT.elf STM32F4_DUT.hex STM32F4_DUT.list STM32F4_DUT.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
