@@ -1,0 +1,4 @@
+../App/pwm/pwm_control.c:16:5:pwm_start	5
+../App/pwm/pwm_control.c:37:5:pwm_stop	5
+../App/pwm/pwm_control.c:58:6:set_pwm_freq	2
+../App/pwm/pwm_control.c:72:6:set_pwm_voltage	6
