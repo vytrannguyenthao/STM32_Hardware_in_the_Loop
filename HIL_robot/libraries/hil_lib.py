@@ -6,6 +6,8 @@ from robot.api import logger
 from cli_lib import CLI
 import re
 from robot.libraries.BuiltIn import BuiltIn
+import subprocess
+import time
 
 @library(scope="GLOBAL")
 class HILLibrary:
@@ -90,6 +92,12 @@ class HILLibrary:
     def power_dut_off(self):
         self._hil_cmd("dut_power 0")
 
+    @keyword("Power DUT Cycle")
+    def power_dut_cycle(self):
+        self.power_dut_off()
+        BuiltIn().sleep(1)
+        self.power_dut_on()
+
     @keyword("Check is DUT power on")
     def check_is_dut_power_on(self):
         resp = self._hil_cmd("dut_power_status")    
@@ -105,6 +113,88 @@ class HILLibrary:
             return True
         else:
             raise AssertionError("DUT is still powered on")
+
+
+    # ------------------
+    # FLASH FW
+    # ------------------
+    def set_dut_boot0(self, value):
+        if value not in [0, 1]:
+            raise AssertionError("BOOT0 value must be 0 or 1")
+        self._hil_cmd(f"dut_boot0_set {value}")
+
+    def _wait_for_dfu_device(self, timeout=10):
+
+        start = time.time()
+
+        while time.time() - start < timeout:
+
+            result = subprocess.run(
+                ["wmic", "path", "Win32_PnPEntity", "get", "Name"],
+                capture_output=True,
+                text=True,
+            )
+
+            out = result.stdout.lower()
+
+            if "stm32 bootloader" in out:
+                logger.info("STM32 DFU device detected")
+                return
+
+            time.sleep(1)
+
+        raise AssertionError("STM32 DFU device not detected")
+    
+    def _flash_via_stm32_cli(self, fw_path):
+
+        cli_path = r"C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\STM32_Programmer_CLI.exe"
+
+        cmd = [
+            cli_path,
+            "-c", "port=USB1",
+            "-w", fw_path,
+            "0x08000000",
+            "-v",
+        ]
+
+        logger.info("Flashing firmware...")
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        logger.info(result.stdout)
+
+        if result.returncode != 0:
+            raise AssertionError("Flashing failed")
+
+        if "Download verified successfully" not in result.stdout:
+            raise AssertionError("Flash verification failed")
+
+    @keyword("Flash Firmware")
+    def flash_firmware(self, fw_path):
+        # Check file exists
+        if not os.path.isfile(fw_path):
+            raise AssertionError(f"Firmware file not found: {fw_path}")
+        
+        logger.info("Entering DFU mode")
+        # Set DUT BOOT0 to 1 to enter USB bootloader mode and power on DUT to apply change
+        self.set_dut_boot0(1)
+        BuiltIn().sleep(1)
+        self.power_dut_cycle()
+        BuiltIn().sleep(1)
+
+        # Check USB device is detected by HIL
+        self._wait_for_dfu_device()
+        logger.info("Waiting DFU stabilization...")
+        BuiltIn().sleep(2)  
+
+        # Flash fimware by using STM32 programmer CLI
+        self._flash_via_stm32_cli(fw_path)
+        
+        logger.info("Leaving DFU mode")
+        # After flashing, set BOOT0 back to 0 and reboot DUT to run new firmware
+        self.set_dut_boot0(0)
+        BuiltIn().sleep(1)
+        self.power_dut_cycle()
 
     # ------------------
     # PWM

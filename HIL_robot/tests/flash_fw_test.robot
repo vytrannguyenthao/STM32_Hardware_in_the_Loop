@@ -1,0 +1,13 @@
+*** Settings ***
+Resource    ../resources/HIL_keywords.robot
+Resource    ../user_resources/DUT_keywords.robot
+
+Suite Setup         Connect To HIL
+Suite Teardown      Disconnect from HIL
+
+*** Variables ***
+${FIRMWARE_PATH}    D:/STUDY/00_SCHOOL/DA/0_Project/STM32F4_DUT/Debug/STM32F4_DUT.hex
+
+*** Test Cases ***
+Flash Firmware to DUT
+    Flash Firmware    ${FIRMWARE_PATH}
