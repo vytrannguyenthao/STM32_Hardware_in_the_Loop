@@ -137,7 +137,7 @@ class HILLibrary:
 
             out = result.stdout.lower()
 
-            if "stm32 bootloader" in out:
+            if "stm32" in out and "bootloader" in out:
                 logger.info("STM32 DFU device detected")
                 return
 
