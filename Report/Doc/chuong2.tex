@@ -92,6 +92,45 @@ USB (Universal Serial Bus) là giao thức truyền thông nối tiếp tốc đ
 Nguyên lý hoạt động của USB dựa trên các giai đoạn như phát hiện thiết bị, cấp địa chỉ, cấu hình và trao đổi dữ liệu thông qua các endpoint. Dữ liệu USB được truyền theo các gói tin với cấu trúc chặt chẽ, đảm bảo tính toàn vẹn và độ tin cậy trong quá trình giao tiếp.
 
 Trong hệ thống mô phỏng phần cứng trong vòng lặp này, USB được sử dụng làm kênh giao tiếp giữa hệ thống mô phỏng và máy tính, hệ thống và DUT. Thông qua USB, dữ liệu mô phỏng, trạng thái DUT và kết quả kiểm thử có thể được truyền lên phần mềm giám sát, đồng thời cho phép người dùng điều khiển và cấu hình quá trình mô phỏng một cách thuận tiện.
+
+\subsection{Giao thức CAN (Controller Area Network)}
+CAN (Controller Area Network) là một giao thức truyền thông nối tiếp được phát triển cho phép các vi điều khiển và các thiết bị giao tiếp với nhau trong một mạng lưới mà không cần máy chủ trung tâm.
+CAN sử dụng mô hình truyền thông bus đa điểm (multi-master bus), trong đó tất cả các nút được kết nối vào cùng một đường truyền và đều cói quyền chủ động gửi dữ liệu khi bus rảnh.
+Nhờ cơ chế này nên hệ thống CAN có khả năng mở rộng cao và không phụ thuộc vào một thiết bị trung tâm, giúp tăng độ tin cậy và giảm nguy cơ lỗi hoàn toàn hệ thống.
+
+Ví dụ: Trong một hệ thống với 1 thiết bị trung tâm thì tất cả các thiết bị khác đều phải giao tiếp thông qua thiết bị trung tâm đó khiến việc xử lý dữ liệu sẽ rất lớn. Ngoài ra nếu thiết bị trung tâm gặp sự cố thì toàn bộ hệ thống sẽ bị ảnh hưởng.
+Trong khi đó, với CAN, mỗi thiết bị có thể giao tiếp trực tiếp với nhau mà không cần thông qua một thiết bị trung tâm nào cả, giúp giảm tải và tăng độ tin cậy cho hệ thống.
+
+Trong mạng CAN, tất cả các nút đều kết nối vào hai dây tín hiệu vi sai là CANH và CANL. Dữ liệu được truyền dưới dạng tín hiệu vi sai nhằm tăng khả năng chống nhiễu điện từ và đảm bảo độ tin cậy trong môi trường công nghiệp.
+Giao thức CAN sử dụng 2 mức logic để biểu diễn dữ liệu: Dominant (logic 0), có điện áp chênh lệch giữa CANH và CANL và Recessive (logic 1) với điện áp giữa 2 đường tín hiệu gần bằng nhau.
+Do mức Dominant có khả năng ghi đè mức Recessive, CAN có cơ chế phân xử (arbitration) cho phép nhiều nút có thể gửi dữ liệu đồng thời. Trong quá trình này, mỗi nút vừa truyền vừa đọc lại dữ liệu trên bus.
+Nếu một nút gửi bit Recessive nhưng đọc được bit Dominant, nó hiểu rằng có nút khác đang truyền với độ ưu tiên cao hơn và sẽ tự động dừng truyền. Nhờ đó, thông điệp có ID nhỏ hơn sẽ có mức ưu tiên cao hơn và tiếp tục truyền mà không xảy ra xung đột dữ liệu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{image/can_logic.jpg}
+    \caption{Giao thức CAN với tín hiệu vi sai}
+    \label{fig:can_logic}
+\end{figure}
+
+Dữ liệu trên mạng CAN đưuọc truyền dưới dạng các khung (frame). Một khung dữ liệu bao gồm các trường chính như sau:
+\begin{itemize}
+    \item SOF (Start of Frame): bit bắt đầu khung.
+    \item Arbitration Field: chứa Identifier (11 bit hoặc 29 bit) và bit RTR.
+    \item Control Field: Chứa Bit mở rộng định danh IDE và độ dài dữ liệu DLC quy định độ dài dữ liệu cần truyền (từ 0 đến 8 byte).
+    \item Data Field: Chứa dữ liệu thực tế được truyền, có độ dài tối đa 8 byte.
+    \item CRC Field: Chứa mã kiểm tra lỗi CRC để đảm bảo tính toàn vẹn của dữ liệu.
+    \item ACK Field: Chứa bit ACK để xác nhận việc nhận dữ liệu thành công.
+    \item EOF (End of Frame): bit kết thúc khung.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/can_frame.jpg}
+    \caption{Cấu trúc khung dữ liệu trong giao thức CAN}
+    \label{fig:can_frame}
+\end{figure}
+
 \subsection{Ngoại vi analog ADC/DAC}
 ADC (Analog-to-Digital Converter) và DAC (Digital-to-Analog Converter) là các ngoại vi dùng để chuyển đổi giữa tín hiệu tương tự và tín hiệu số trong hệ thống nhúng. ADC chuyển đổi điện áp hoặc dòng điện tương tự thành giá trị số để vi điều khiển xử lý, trong khi DAC thực hiện quá trình ngược lại.
 
