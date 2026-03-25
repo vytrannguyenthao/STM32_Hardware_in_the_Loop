@@ -83,7 +83,7 @@ Người dùng có thể dùng giao diện dòng lệnh để gửi các command
         \label{fig:spi_read_id}
     \end{figure}
 
-    \item \textbf{Bước 2:} PC gửi lệnh đến \textbf{HIL} để khởi tạo bộ nhớ từ địa chỉ 0 - 255 với giá trị tăng dần từ 0x00 đến 0xFF.
+    \item \textbf{Bước 2:} PC gửi lệnh đến \textbf{HIL} để khởi tạo bộ nhớ từ địa chỉ 0 - 255 với giá trị tăng dần từ 0x00 đến 0xFF.\\
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{image/spi_hil_prepare_mem.jpg}
@@ -91,15 +91,15 @@ Người dùng có thể dùng giao diện dòng lệnh để gửi các command
         \label{fig:spi_hil_prepare_mem}
     \end{figure}
 
-    \item \textbf{Bước 3:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 255 mà thiết bị SPI Flash mô phỏng trên HIL. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu gốc.
+    \item \textbf{Bước 3:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 255 mà thiết bị SPI Flash mô phỏng trên HIL. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu gốc.\\
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_read_256.jpg}
+        \includegraphics[width=1\textwidth]{image/spi_read_256.jpg}
         \caption{DUT đọc dữ liệu từ SPI Flash mô phỏng}
         \label{fig:spi_read_256}
     \end{figure}
 
-    \item \textbf{Bước 4:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT ghi giá trị vào SPI Flash mô phỏng từ địa chỉ 0 - 1023 với giá trị tăng dần từ 0x00 đến 0xFF lặp lại.
+    \item \textbf{Bước 4:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT ghi giá trị vào SPI Flash mô phỏng từ địa chỉ 0 - 1023 với giá trị tăng dần từ 0x00 đến 0xFF lặp lại.\\
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{image/spi_write.jpg}
@@ -110,12 +110,12 @@ Người dùng có thể dùng giao diện dòng lệnh để gửi các command
     \item \textbf{Bước 5:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu DUT vừa ghi vào.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_read_after_write.jpg}
+        \includegraphics[width=1\textwidth]{image/spi_read_after_write.jpg}
         \caption{DUT đọc dữ liệu sau khi ghi vào SPI Flash mô phỏng}
         \label{fig:spi_read_after_write}
     \end{figure}
 
-    \item \textbf{Bước 6:} PC gửi lệnh đến \textbf{DUT} xóa toàn bộ dữ liệu trên SPI Flash mô phỏng.
+    \item \textbf{Bước 6:} PC gửi lệnh đến \textbf{DUT} xóa toàn bộ dữ liệu trên SPI Flash mô phỏng.\\
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.65\textwidth]{image/spi_erase.jpg}
@@ -126,17 +126,17 @@ Người dùng có thể dùng giao diện dòng lệnh để gửi các command
     \item \textbf{Bước 7:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023 (toàn bộ giá trị đều là 0xFF sau khi xóa).
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_read_after_erase.jpg}
+        \includegraphics[width=1\textwidth]{image/spi_read_after_erase.jpg}
         \caption{DUT đọc dữ liệu sau khi xóa trên SPI Flash mô phỏng}
         \label{fig:spi_read_after_erase}
     \end{figure}
 \end{itemize}
 
-Sau khi hoàn thành các bước kiểm thử, kết quả sẽ được hiển thị trên giao diện chính của phần mềm PC như Hình \ref{fig:spi_test_result}.
+Sau khi hoàn thành các bước kiểm thử, kết quả sẽ được hiển thị trên giao diện chính của phần mềm PC như Hình \ref{fig:spi_test_result}.\\
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/spi_result.jpg}
+    \includegraphics[width=0.7\textwidth]{image/spi_result.jpg}
     \caption{Kết quả kiểm thử SPI Flash trên phần mềm PC}
     \label{fig:spi_test_result}
 \end{figure}
