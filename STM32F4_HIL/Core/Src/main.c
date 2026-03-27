@@ -33,6 +33,7 @@
 #include "w25q_slave.h"
 #include "i2c_rtc.h"
 #include "can_driver.h"
+#include "analog.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -142,6 +143,8 @@ int main(void)
   HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
   HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 0); // Khởi tạo DAC ở mức 0V
 
+  calc_triangle();
+  cal_sin();
   CAN_Init();
   CLI_Init();
   W25Q_Slave_Init(&w25q);

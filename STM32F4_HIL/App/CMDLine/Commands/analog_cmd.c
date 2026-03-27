@@ -69,11 +69,112 @@ static int Cmd_DAC_Set_Voltage(int argc, char *argv[]) {
     return CMDLINE_OK;
 }
 
+int Cmd_set_freq(int argc, char *argv[]) {
+	if (argc < 3) {
+		return CMDLINE_TOO_FEW_ARGS;
+	}
+	if (argc > 3) {
+		return CMDLINE_TOO_MANY_ARGS;
+	}
+
+	uint32_t freq = atoi(argv[1]);
+	if (freq == 0 || freq > 10000) {
+		Console_Write("\r\nInvalid frequency\r\n");
+		return CMDLINE_OK;
+	}
+	set_flag_freq_set(true);
+	set_freq(freq);
+	return CMDLINE_OK;
+}
+
+int Cmd_get_freq(int argc, char *argv[]) {
+	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+
+	if (!is_freq_set()) {
+		Console_Write("\r\nSine wave frequency is not set\r\n");
+		return CMDLINE_OK;
+	}
+	Console_Write("\r\nSine wave frequency is %u Hz\r\n", get_freq());
+	return (CMDLINE_OK);
+}
+
+int Cmd_Sine_Wave(int argc, char *argv[]) {
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	if (!is_freq_set()) {
+		Console_Write("\r\nFrequency is not set\r\n");
+		return CMDLINE_OK;
+	}
+
+	uint32_t tmp = atoi(argv[1]); // số byte cần ghi
+
+	if (tmp == 1) {
+		if (is_triangle_wave_on()) {
+			Console_Write("\r\nTriangle wave is already on\r\n");
+			return CMDLINE_OK;
+		}
+		set_flag_sine_wave_on(true);
+		start_gen_wave(SINE_WAVE);
+		Console_Write("\r\nStart Sine Wave\r\n");
+		return CMDLINE_OK;
+	} else if (tmp == 0) {
+		set_flag_sine_wave_on(false);
+		set_flag_freq_set(false);
+		stop_gen_wave();
+		Console_Write("\r\nStop Sine Wave\r\n");
+		return CMDLINE_OK;
+	} else {
+		Console_Write("\r\nInvalid argument\r\n");
+		return CMDLINE_OK;
+	}
+}
+
+int Cmd_Triangle_Wave(int argc, char *argv[]) {
+	if (argc < 3)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 3)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	if (!is_freq_set()) {
+		Console_Write("\r\nFrequency is not set\r\n");
+		return CMDLINE_OK;
+	}
+
+	uint32_t tmp = atoi(argv[1]); // số byte cần ghi
+
+	if (tmp == 1) {
+		if (is_sine_wave_on()) {
+			Console_Write("\r\nSine wave is already on\r\n");
+			return CMDLINE_OK;
+		}
+		set_flag_triangle_wave_on(true);
+		start_gen_wave(TRIANGLE_WAVE);
+		Console_Write("\r\nStart Triangle Wave\r\n");
+		return CMDLINE_OK;
+	} else if (tmp == 0) {
+		set_flag_triangle_wave_on(false);
+		set_flag_freq_set(false);
+		stop_gen_wave();
+		Console_Write("\r\nStop Triangle Wave\r\n");
+		return CMDLINE_OK;
+	} else {
+		Console_Write("\r\nInvalid argument\r\n");
+		return CMDLINE_OK;
+	}
+}
+
 void Cmd_Analog_Register(void)
 {
 	CLI_RegisterCommand("adc_read", cmd_adc_read, "Read ADC value");
 	CLI_RegisterCommand("adc_read_pwm", cmd_adc_read_pwm, "Read PWM voltage value");
     CLI_RegisterCommand("dac_set_voltage", Cmd_DAC_Set_Voltage, "Set DAC voltage | format: dac_set_voltage <X.Y> (0.0-3.3V)");
+    CLI_RegisterCommand("set_freq",  Cmd_set_freq,  "set sine wave frequency <freq>");
+	CLI_RegisterCommand("get_freq",  Cmd_get_freq,  "get sine wave frequency");
+	CLI_RegisterCommand("sine_wave",  Cmd_Sine_Wave,  "sine-wave <status>");
+	CLI_RegisterCommand("triangle_wave",  Cmd_Triangle_Wave,  "triangle-wave <status>");
 }
 
 
