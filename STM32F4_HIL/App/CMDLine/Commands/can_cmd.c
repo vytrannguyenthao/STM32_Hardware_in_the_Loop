@@ -35,16 +35,16 @@ static int Cmd_CAN_Read_Buffer(int argc, char *argv[]) {
 		}
 	}
 	Console_Write("\r\n");
-
-	return CMDLINE_OK;
-}
-
-static int Cmd_CAN_Clear_Buffer(int argc, char *argv[]) {
-	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
-
 	memset(can_driver.rx_buffer, 0, sizeof(can_driver.rx_buffer));
 	return CMDLINE_OK;
 }
+
+// static int Cmd_CAN_Clear_Buffer(int argc, char *argv[]) {
+// 	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+
+// 	memset(can_driver.rx_buffer, 0, sizeof(can_driver.rx_buffer));
+// 	return CMDLINE_OK;
+// }
 
 static int Cmd_CAN_LED(int argc, char *argv[]) {
 	if (argc < 4) {
@@ -94,6 +94,6 @@ static int Cmd_CAN_LED(int argc, char *argv[]) {
 void Cmd_CAN_Register(void) {
 	CLI_RegisterCommand("can_send_buffer", Cmd_CAN_Send_Buffer, "Send 256 bytes of data over CAN");
 	CLI_RegisterCommand("can_read_buffer", Cmd_CAN_Read_Buffer, "Read received CAN data buffer");
-	CLI_RegisterCommand("can_clear_buffer", Cmd_CAN_Clear_Buffer, "Clear received CAN data buffer");
+	// CLI_RegisterCommand("can_clear_buffer", Cmd_CAN_Clear_Buffer, "Clear received CAN data buffer");
 	CLI_RegisterCommand("can_led", Cmd_CAN_LED, "Turn on/ off DUT LED via CAN | format: can_led <led_status> <led_index>");
 }
