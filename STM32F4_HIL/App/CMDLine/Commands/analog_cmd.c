@@ -65,7 +65,7 @@ static int Cmd_DAC_Set_Voltage(int argc, char *argv[]) {
     }
 
     uint32_t dac_value = (uint32_t)((voltage / 3.3f) * 4095);
-    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+    HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, dac_value);
     return CMDLINE_OK;
 }
 
