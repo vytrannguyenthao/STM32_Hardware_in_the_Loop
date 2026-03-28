@@ -303,3 +303,14 @@ class HILLibrary:
 
         if "not initialized" in resp.lower():
             raise AssertionError(resp)
+
+    # ------------------
+    # SPI FLASH (W25Q)
+    # ------------------
+    @keyword("HIL prepare SPI Flash data")
+    def hil_prepare_spi_flash_data(self, length):
+        length = self._validate_uint("length", length)
+        resp = self._hil_cmd(f"w25q_prepare_mem {length}")
+        if "HIL prepare" not in resp:
+            raise AssertionError(f"HIL failed to prepare SPI Flash data")
+        return True

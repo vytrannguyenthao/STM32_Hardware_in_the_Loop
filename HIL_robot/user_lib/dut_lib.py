@@ -241,3 +241,59 @@ class DUTLibrary:
             raise AssertionError(
                 f"Write too slow: {measured}s"
             )
+
+    # ------------------
+    # SPI FLASH (W25Q)
+    # ------------------
+    @keyword("Read SPI Flash ID")
+    def read_spi_flash_id(self):
+        resp = self._dut_cmd("w25q_ID")
+        if "EF4018" in resp:
+            return True
+        else:
+            raise AssertionError(f"Wrong Flash ID! Expected EF4018, got: {resp}")
+
+    @keyword("Read SPI Flash Data")
+    def read_spi_flash_data(self, length):
+        length = self._validate_uint("length", length)
+        resp = self._dut_cmd(f"w25q_read {length}")
+
+        match = re.search(
+            r"W25Q\:\s*\n(.*)",
+            resp,
+            re.S
+        )
+
+        if not match:
+            raise AssertionError("SPI Flash data block not found in response")
+
+        data_block = match.group(1)
+
+        data = re.findall(r"\b[0-9A-Fa-f]{2}\b", data_block)
+
+        if len(data) != length:
+            raise AssertionError(
+                f"SPI Flash Read Error: Expected {length} bytes, got {len(data)}"
+            )
+        return data
+
+    @keyword("Write SPI Flash Data")
+    def write_spi_flash_data(self, length):
+        length = self._validate_uint("length", length)
+        self._dut_cmd(f"w25q_write {length}")
+
+    @keyword("Erase SPI Flash Data")
+    def erase_spi_flash_data(self):
+        rsp = self._dut_cmd(f"w25q_erasechip")
+        if "OK" not in rsp:
+            raise AssertionError(f"Failed to erase SPI Flash")
+
+    @keyword("Is SPI Flash Data Erased")
+    def is_spi_flash_data_erased(self, data):
+        for index, byte in enumerate(data):
+            # Ép kiểu về chữ HOA để so sánh cho an toàn (lỡ firmware trả về 'ff')
+            if byte.upper() != "FF":
+                raise AssertionError(
+                    f"Flash is not blank! Found byte '{byte}' at index {index}."
+                )
+        return True
