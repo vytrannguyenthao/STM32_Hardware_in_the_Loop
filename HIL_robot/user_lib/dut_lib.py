@@ -207,7 +207,7 @@ class DUTLibrary:
 
         return data
     
-    @keyword("EEPROM Data Should Increment")
+    @keyword("Data Should Increment")
     def eeprom_data_should_increment(self, data):
 
         for i, byte in enumerate(data):

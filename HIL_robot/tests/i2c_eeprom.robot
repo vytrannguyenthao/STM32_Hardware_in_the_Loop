@@ -26,7 +26,7 @@ EEPROM Validation
 
     # --- Data validation ---
     ${data}=    DUT Write And Verify EEPROM    0x50    256
-    EEPROM Data Should Increment    ${data}
+    Data Should Increment    ${data}
 
     # --- HIL deinit ---
     HIL Deinit EEPROM        0x50
