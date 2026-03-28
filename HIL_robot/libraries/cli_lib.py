@@ -1,5 +1,7 @@
 import serial
 import time
+import datetime
+import numpy as np
 
 class CLI:
     """
@@ -85,3 +87,68 @@ class CLI:
         time.sleep(0.01)
         self.ser.write(f"L{samples}\n".encode('ascii'))
         time.sleep(0.01)
+
+    # Dump data receiced from logic anlyzer for DEBUG purpose
+    def dump_to_bin_file(self, raw_data: bytes, prefix="logic_debug"):
+        """
+        Lưu toàn bộ mảng byte thô ra file .bin để phân tích (dùng HxD hoặc script Python).
+        Tên file tự động gắn timestamp để không bị ghi đè.
+        """
+        if not raw_data:
+            print("[DEBUG] Không có data để lưu.")
+            return
+
+        # Tạo tên file có ngày giờ (Ví dụ: logic_debug_20260328_153000.bin)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{prefix}_{timestamp}.bin"
+
+        try:
+            with open(filename, "wb") as f:
+                f.write(raw_data)
+            print(f"[DEBUG] Đã lưu {len(raw_data)} bytes vào file: {filename}")
+        except Exception as e:
+            print(f"[DEBUG] Lỗi khi lưu file bin: {e}")
+
+    # -------------------------
+    # Collect data stream from logic analyzer until '+' flag or timeout, return raw bytes
+    # -------------------------
+    def capture_binary_stream(self, timeout_sec: float) -> bytes:
+        """
+        Gửi lệnh 'F' để kích hoạt Analyzer và thu thập toàn bộ mảng Byte 
+        cho đến khi gặp cờ '+' hoặc hết thời gian timeout.
+        """
+        if not self.ser:
+            raise Exception("Serial not connected")
+
+        self.ser.reset_input_buffer()
+        
+        # Gửi lệnh bắt đầu
+        self.ser.write(b"F\n")
+
+        buffer = bytearray()
+        end_time = time.time() + timeout_sec
+
+        while time.time() < end_time:
+            try:
+                if self.ser.in_waiting:
+                    chunk = self.ser.read(self.ser.in_waiting)
+                    buffer.extend(chunk)
+                    
+                    # Kiểm tra cờ '+'
+                    if b'+' in chunk:
+                        break
+            except serial.SerialException as e:
+                print(f"[LỖI CỔNG COM] Ngắt kết nối đột ngột khi đang hứng data: {e}")
+                break
+            
+            # Ngủ cực ngắn để không làm kẹt CPU nhưng vẫn bắt sóng kịp thời
+            time.sleep(0.001) 
+
+        raw_array = np.frombuffer(buffer, dtype=np.uint8)
+        clean_array = raw_array[raw_array >= 0x80] # Lọc data của logic vì data analyzer luôn có MSB=1 (>=0x80)
+        final_data = clean_array.tobytes()
+        
+        # Gọi hàm ghi file debug tại đây trước khi trả về (DEBUG purpose)
+        # self.dump_to_bin_file(final_data) # Bật dòng này để log ra file đem đi debug
+
+        return final_data

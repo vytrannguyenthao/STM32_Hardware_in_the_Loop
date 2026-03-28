@@ -28,3 +28,9 @@ class Logic_Library:
     def setup_la(self, rate, samples):
         self.cli.setup_logic_analyzer(rate, samples)
         logger.info(f"Logic Analyzer setup: samples={samples}, rate={rate} Hz")
+    
+    @keyword("Read Logic Analyzer Data")
+    def read_la_data(self):
+        data = self.cli.capture_binary_stream(timeout_sec=12.0)
+        logger.info(f"Logic Analyzer data length: {len(data)} bytes")
+        return data

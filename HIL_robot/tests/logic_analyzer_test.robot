@@ -17,3 +17,4 @@ ${SAMPLE_COUNT}    2500000
 Test Set up Logic Analyzer
     # Thêm các bước thiết lập logic analyzer nếu cần
     Setup Logic Analyzer    ${SAMPLE_RATE}    ${SAMPLE_COUNT}
+    Read Logic Analyzer Data
