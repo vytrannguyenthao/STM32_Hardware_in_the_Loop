@@ -36,21 +36,60 @@ class UARTThread(QThread):
 
     def run(self):
         try:
-            self.ser = serial.Serial(self.port, self.baud, timeout=0.1)
+            # Vẫn ép buffer OS lên mức cao nhất để hứng đạn thay Python
+            self.ser = serial.Serial(self.port, self.baud, timeout=0.01)
+            if hasattr(self.ser, 'set_buffer_size'):
+                try: self.ser.set_buffer_size(rx_size=1048576) 
+                except Exception: pass
+
             self.log_signal.emit(f"[{self.name}] Connected {self.port} @ {self.baud}")
 
+            # Xô đựng data chuẩn bị gửi ra UI (Frame buffer)
+            frame_buffer = bytearray()
+            text_buffer = ""
+            
+            last_emit_time = time.time()
+            # Giới hạn tốc độ vẽ: 0.05 giây = 20 khung hình/giây (20 FPS)
+            # Bạn có thể giảm xuống 0.03 (30 FPS) nếu máy tính PC của bạn đủ mạnh
+            EMIT_INTERVAL = 0.05 
+
             while self.running:
-                if self.ser.in_waiting:
-                    if self.name == "LOGIC":
-                        raw_data = self.ser.read(self.ser.in_waiting)
-                        if raw_data:
-                            # 1. Bắn data thô ra cho UI vẽ (Gửi qua signal mới)
-                            self.data_signal.emit(raw_data)
+                if self.name == "LOGIC":
+                    # 1. HÚT SIÊU TỐC KHÔNG CHỜ ĐỢI
+                    raw_chunk = self.ser.read(32768) 
+                    
+                    if raw_chunk:
+                        # Bỏ data vừa hút vào xô
+                        frame_buffer.extend(raw_chunk)
+                        current_time = time.time()
+                        
+                        # 2. KIỂM TRA ĐÃ ĐẾN LÚC BÁO UI VẼ CHƯA?
+                        if (current_time - last_emit_time) >= EMIT_INTERVAL:
+                            # Quăng toàn bộ data trong xô ra cho UI vẽ
+                            self.data_signal.emit(bytes(frame_buffer))
+                            
+                            # Quăng xong thì dọn sạch xô để vòng lặp sau hứng tiếp
+                            frame_buffer.clear()
+                            last_emit_time = current_time
+
+                        # 3. KHI PICO CHỐT SỔ (Dấu '+')
+                        if b'+' in raw_chunk:
+                            # Quăng nốt những giọt data cuối cùng còn kẹt trong xô (nếu có)
+                            if frame_buffer:
+                                self.data_signal.emit(bytes(frame_buffer))
+                                frame_buffer.clear()
+                            self.log_signal.emit("[LOGIC] Đã tải xong toàn bộ dữ liệu.")
+                else:
+                    # Kênh Text giữ nguyên logic mượt mà
+                    if self.ser.in_waiting:
+                        raw_chunk = self.ser.read(self.ser.in_waiting)
+                        text_buffer += raw_chunk.decode(errors="ignore")
+                        while '\n' in text_buffer:
+                            line, text_buffer = text_buffer.split('\n', 1)
+                            line = line.strip()
+                            if line: self.handle_line(line)
                     else:
-                        line = self.ser.readline().decode(errors="ignore").strip()
-                        if line:
-                            self.handle_line(line)
-                time.sleep(0.00001)
+                        time.sleep(0.001)
         except Exception:
             pass
         finally:
