@@ -314,3 +314,43 @@ class HILLibrary:
         if "HIL prepare" not in resp:
             raise AssertionError(f"HIL failed to prepare SPI Flash data")
         return True
+
+    # ------------------
+    # Generate waveform
+    # ------------------
+    @keyword("HIL Generate Sine Wave")
+    def hil_generate_sine_wave(self, frequency):
+        frequency = self._validate_uint("frequency", frequency)
+        resp = self._hil_cmd(f"set_freq {frequency}")
+        if "Invalid" in resp:
+            raise AssertionError(f"Invalid frequency: {frequency}")
+        resp = self._hil_cmd("sine_wave 1")
+        if "Start" not in resp:
+            raise AssertionError(f"HIL failed to generate sine wave")
+        return True
+
+    @keyword("HIL Stop Sine Wave")
+    def hil_stop_sine_wave(self):
+        resp = self._hil_cmd("sine_wave 0")
+        if "Stop" not in resp:
+            raise AssertionError(f"HIL failed to stop sine wave")
+        return True
+
+    @keyword("HIL Generate Triangle Wave")
+    def hil_generate_triangle_wave(self, frequency):
+        frequency = self._validate_uint("frequency", frequency)
+        resp = self._hil_cmd(f"set_freq {frequency}")
+        if "Invalid" in resp:
+            raise AssertionError(f"Invalid frequency: {frequency}")
+
+        resp = self._hil_cmd("triangle_wave 1")
+        if "Start" not in resp:
+            raise AssertionError(f"HIL failed to generate triangle wave")
+        return True
+
+    @keyword("HIL Stop Triangle Wave")
+    def hil_stop_triangle_wave(self):
+        resp = self._hil_cmd("triangle_wave 0")
+        if "Stop" not in resp:
+            raise AssertionError(f"HIL failed to stop triangle wave")
+        return True

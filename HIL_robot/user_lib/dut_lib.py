@@ -297,3 +297,43 @@ class DUTLibrary:
                     f"Flash is not blank! Found byte '{byte}' at index {index}."
                 )
         return True
+
+    # ------------------
+    # Generate waveform
+    # ------------------
+    @keyword("DUT Generate Sine Wave")
+    def dut_generate_sine_wave(self, frequency):
+        frequency = self._validate_uint("frequency", frequency)
+        resp = self._dut_cmd(f"set_freq {frequency}")
+        if "Invalid" in resp:
+            raise AssertionError(f"Invalid frequency: {frequency}")
+        resp = self._dut_cmd("sine_wave 1")
+        if "Start" not in resp:
+            raise AssertionError(f"DUT failed to generate sine wave")
+        return True
+
+    @keyword("DUT Stop Sine Wave")
+    def dut_stop_sine_wave(self):
+        resp = self._dut_cmd("sine_wave 0")
+        if "Stop" not in resp:
+            raise AssertionError(f"DUT failed to stop sine wave")
+        return True
+
+    @keyword("DUT Generate Triangle Wave")
+    def dut_generate_triangle_wave(self, frequency):
+        frequency = self._validate_uint("frequency", frequency)
+        resp = self._dut_cmd(f"set_freq {frequency}")
+        if "Invalid" in resp:
+            raise AssertionError(f"Invalid frequency: {frequency}")
+
+        resp = self._dut_cmd("triangle_wave 1")
+        if "Start" not in resp:
+            raise AssertionError(f"DUT failed to generate triangle wave")
+        return True
+
+    @keyword("DUT Stop Triangle Wave")
+    def dut_stop_triangle_wave(self):
+        resp = self._dut_cmd("triangle_wave 0")
+        if "Stop" not in resp:
+            raise AssertionError(f"DUT failed to stop triangle wave")
+        return True
