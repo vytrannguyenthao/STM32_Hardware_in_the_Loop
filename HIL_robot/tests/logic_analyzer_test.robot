@@ -25,7 +25,7 @@ Test Set up Logic Analyzer
 DUT Generate Sine Wave and Acquire Data
     DUT Generate Sine Wave    ${FREQUENCY}
     ${data}    Read Logic Analyzer Data
-    Verify Sine Wave    ${data}
+    Verify Sine Wave    ${data}    ${FREQUENCY}
 
 DUT Stop Sine Wave
     DUT Stop Sine Wave

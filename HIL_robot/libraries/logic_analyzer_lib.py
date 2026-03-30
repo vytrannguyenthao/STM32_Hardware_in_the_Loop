@@ -40,7 +40,7 @@ class Logic_Library:
         return data
 
     @keyword("Verify Sine Wave")
-    def verify_analog_is_sine_wave(self, raw_data: bytes):
+    def verify_analog_is_sine_wave(self, raw_data: bytes, expected_freq_hz=None):
         sample_rate = 250000
         snr_threshold = 300
 
@@ -110,4 +110,16 @@ class Logic_Library:
                 f"Frequency of noise detected: {peak_freq:.2f} Hz."
             )
 
+        if expected_freq_hz is not None:
+            expected_freq_hz = float(expected_freq_hz) # Ép kiểu
+            
+            # Tính toán sai số 5%
+            lower_bound = expected_freq_hz * 0.95
+            upper_bound = expected_freq_hz * 1.05
+
+            if not (lower_bound <= peak_freq <= upper_bound):
+                raise AssertionError(
+                    f"FAIL: Tín hiệu LÀ sóng Sine nhưng SAI tần số! "
+                    f"Mong đợi: {expected_freq_hz} Hz (\u00B15%). Đo được thực tế: {peak_freq:.2f} Hz."
+                )
         return is_sine
