@@ -666,8 +666,8 @@ int Cmd_ADC_Read(int argc, char *argv[])
 	uint16_t adc_value = HAL_ADC_GetValue(&hadc1);
 	HAL_ADC_Stop(&hadc1);
 
-	float voltage = ((float)adc_value * 3.3f) / 4095.0f;
-	Console_Write("\r\nVoltage: %.1f V\r\n", voltage);
+	uint32_t voltage = (adc_value * 3300) / 4095;
+	Console_Write("\r\nVoltage: %lu mV\r\n", voltage);
     return CMDLINE_OK;
 }
 
