@@ -137,10 +137,14 @@ class HILLibrary:
 
             out = result.stdout.lower()
 
-            if "stm32" in out or "bootloader" in out:
+            if "bootloader" in out:
                 logger.info("STM32 DFU device detected")
                 return
 
+        # Nếu không thể tìm thấy device, cần thoát BOOT mode 1 reset lại DUT trước khi báo lỗi
+        self.set_dut_boot0(0)
+        BuiltIn().sleep(0.5)
+        self.power_dut_cycle()
         raise AssertionError("STM32 DFU device not detected")
     
     def _flash_via_stm32_cli(self, fw_path):
@@ -162,9 +166,17 @@ class HILLibrary:
         logger.info(result.stdout)
 
         if result.returncode != 0:
+            # Nếu fail, cần thoát BOOT mode 1 reset lại DUT trước khi báo lỗi
+            self.set_dut_boot0(0)
+            BuiltIn().sleep(0.5)
+            self.power_dut_cycle()
             raise AssertionError("Flashing failed")
 
         if "Download verified successfully" not in result.stdout:
+            # Nếu fail, cần thoát BOOT mode 1 reset lại DUT trước khi báo lỗi
+            self.set_dut_boot0(0)
+            BuiltIn().sleep(0.5)
+            self.power_dut_cycle()
             raise AssertionError("Flash verification failed")
 
     @keyword("Flash Firmware")
