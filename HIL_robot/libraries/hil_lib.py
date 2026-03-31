@@ -366,3 +366,44 @@ class HILLibrary:
         if "Stop" not in resp:
             raise AssertionError(f"HIL failed to stop triangle wave")
         return True
+
+    # ------------------
+    # Analog
+    # ------------------
+    @keyword("HIL Read ADC Voltage")
+    def hil_read_adc_voltage(self, expected_volt=None):
+
+        resp = self._hil_cmd("adc_read")
+
+        match = re.search(r"Measured:\s*(\d+)\s*mV", resp)
+        if not match:
+            raise AssertionError("ADC value not found")
+
+        voltage_mv = int(match.group(1))
+        if expected_volt is not None:
+            # Ép kiểu chuỗi truyền vào thành số thực, sau đó nhân 1000 để đổi ra mV
+            expected_mv = float(expected_volt) * 1000.0
+            # Tính khoảng sai số 5%
+            margin = expected_mv * 0.05
+            lower_bound = expected_mv - margin
+            upper_bound = expected_mv + margin
+
+            # So sánh trực tiếp giá trị mV thu được với khoảng cho phép
+            if voltage_mv < lower_bound or voltage_mv > upper_bound:
+                raise AssertionError(
+                    f"FAIL: Voltage out of bounds! "
+                    f"Got {voltage_mv} mV, Expected {expected_mv} mV \u00B15% "
+                    f"(Range: {lower_bound:.0f} mV to {upper_bound:.0f} mV)"
+                )
+            logger.info(f"Got {voltage_mv} mV, (Range: [{lower_bound:.0f} -> {upper_bound:.0f}] mV)")
+        return True
+    
+    @keyword("HIL Set DAC Voltage")
+    def hil_set_dac_voltage(self, voltage):
+        voltage = float(voltage)
+        if voltage < 0 or voltage > 3.3:
+            raise AssertionError("Voltage must be between 0 and 3.3 V")
+        resp = self._hil_cmd(f"dac_set_voltage {voltage}")
+        if "ERROR" in resp:
+            raise AssertionError(f"HIL failed to set DAC voltage")
+        return True

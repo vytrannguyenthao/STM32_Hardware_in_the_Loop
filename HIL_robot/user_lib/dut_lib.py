@@ -337,3 +337,34 @@ class DUTLibrary:
         if "Stop" not in resp:
             raise AssertionError(f"DUT failed to stop triangle wave")
         return True
+
+    # ------------------
+    # Analog
+    # ------------------
+    @keyword("DUT Read ADC Voltage")
+    def dut_read_adc_voltage(self, expected_volt=None):
+
+        resp = self._dut_cmd("adc_read")
+
+        match = re.search(r"Voltage:\s*(\d+)\s*mV", resp)
+        if not match:
+            raise AssertionError("ADC value not found")
+
+        voltage_mv = int(match.group(1))
+        if expected_volt is not None:
+            # Ép kiểu chuỗi truyền vào thành số thực, sau đó nhân 1000 để đổi ra mV
+            expected_mv = float(expected_volt) * 1000.0
+            # Tính khoảng sai số 5%
+            margin = expected_mv * 0.05
+            lower_bound = expected_mv - margin
+            upper_bound = expected_mv + margin
+
+            # So sánh trực tiếp giá trị mV thu được với khoảng cho phép
+            if voltage_mv < lower_bound or voltage_mv > upper_bound:
+                raise AssertionError(
+                    f"FAIL: Voltage out of bounds! "
+                    f"Got {voltage_mv} mV, Expected {expected_mv} mV \u00B15% "
+                    f"(Range: {lower_bound:.0f} mV to {upper_bound:.0f} mV)"
+                )
+            logger.info(f"Got {voltage_mv} mV, (Range: [{lower_bound:.0f} -> {upper_bound:.0f}] mV)")
+        return True
