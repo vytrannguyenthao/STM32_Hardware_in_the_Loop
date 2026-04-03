@@ -44,5 +44,7 @@ void Cmd_CAN_Register(void);
 void Cmd_UART_Register(void);
 void Cmd_Analog_Register(void);
 void Cmd_DUT_Control_Register(void);
+void Cmd_PWM_Register(void);
+void Cmd_GPIO_Register(void);
 
 #endif /* CMDLINE_COMMAND_H_ */

@@ -168,6 +168,7 @@ void CLI_Init(void) {
     Cmd_CAN_Register();
     Cmd_UART_Register();
     Cmd_Analog_Register();
-
+    Cmd_PWM_Register();
+    Cmd_GPIO_Register();
 }
 
