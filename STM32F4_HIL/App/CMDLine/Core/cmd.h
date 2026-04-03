@@ -16,7 +16,7 @@
 
 #define COMMAND_MAX_LENGTH 64
 #define MAX_HISTORY 8
-#define MAX_CMDS 32
+#define MAX_CMDS 64
 
 #define NAME_SHELL "HIL:~ "
 #define KEY_ENTER '\r'
