@@ -77,7 +77,7 @@ class CLI:
         time.sleep(0.05)
 
         # 2. Cấu hình các kênh Analog / Digital
-        channels = [b"A10\n", b"D10\n", b"D11\n", b"D12\n", b"D13\n"]
+        channels = [b"A10\n", b"D10\n", b"D11\n", b"D12\n", b"D13\n", b"D14\n", b"D15\n", b"D16\n"]
         for ch in channels:
             self.ser.write(ch)
             time.sleep(0.01)
