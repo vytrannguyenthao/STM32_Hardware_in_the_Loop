@@ -123,3 +123,76 @@ class Logic_Library:
                     f"Mong đợi: {expected_freq_hz} Hz (\u00B15%). Đo được thực tế: {peak_freq:.2f} Hz."
                 )
         return is_sine
+
+    @keyword("Verify Digital Channel")
+    def verify_digital_channel(self, raw_data: bytes, channel: int, expected_freq_hz=None, expected_duty_cycle=None):
+        if channel > 6:
+            raise ValueError("Channel must be between 0 and 6.")
+
+        sample_rate = 250000
+
+        # 1. Ép kiểu và lọc chẵn cặp
+        arr = np.frombuffer(raw_data, dtype=np.uint8)
+        valid_data = arr[arr >= 0x80]
+        if len(valid_data) % 2 != 0:
+            valid_data = valid_data[:-1]
+
+        if len(valid_data) < 1000:
+            raise ValueError("FAIL: Không đủ dữ liệu để phân tích Digital.")
+
+        # 2. TÁCH KÊNH DIGITAL
+        digital_bytes = valid_data[0::2]
+        channel_data = (digital_bytes >> int(channel)) & 1
+
+        # 3. THUẬT TOÁN TÌM CẠNH
+        diff = np.diff(channel_data)
+        rising_edges = np.where(diff == 1)[0]
+        
+        # 4. TÍNH TOÁN THÔNG SỐ
+        if len(rising_edges) < 2:
+            measured_freq = 0.0
+            measured_duty = 100.0 if channel_data[0] == 1 else 0.0
+            logger.info(f"Signal is flat (DC). Level: {'HIGH' if measured_duty == 100 else 'LOW'}")
+        else:
+            first_edge = rising_edges[0]
+            last_edge = rising_edges[-1]
+            num_cycles = len(rising_edges) - 1
+            
+            time_elapsed = (last_edge - first_edge) / sample_rate
+            measured_freq = num_cycles / time_elapsed
+            
+            exact_cycles_data = channel_data[first_edge:last_edge]
+            measured_duty = np.mean(exact_cycles_data) * 100.0
+
+        # 5. LOG KẾT QUẢ VÀO FILE ROBOT
+        logger.info(f"--- DIGITAL CHANNEL D{channel} ANALYSIS ---")
+        logger.info(f"Measured Freq: {measured_freq:.2f} Hz")
+        logger.info(f"Measured Duty Cycle: {measured_duty:.2f} %")
+
+        # Kiểm tra Tần số
+        if expected_freq_hz is not None:
+            expected_freq_hz = float(expected_freq_hz)
+            lower_f = expected_freq_hz * 0.95
+            upper_f = expected_freq_hz * 1.05
+            if not (lower_f <= measured_freq <= upper_f):
+                raise AssertionError(
+                    f"FAIL (D{channel}): Sai Tần số! "
+                    f"Mong đợi: {expected_freq_hz} Hz (\u00B15%). Đo được: {measured_freq:.2f} Hz."
+                )
+
+        if expected_duty_cycle is not None:
+            expected_duty_cycle = float(expected_duty_cycle)
+            # Tính biên độ sai số
+            error_margin = expected_duty_cycle * 0.05 
+            
+            lower_d = expected_duty_cycle - error_margin
+            upper_d = expected_duty_cycle + error_margin
+            
+            if not (lower_d <= measured_duty <= upper_d):
+                raise AssertionError(
+                    f"FAIL (D{channel}): Sai Duty Cycle! "
+                    f"Mong đợi: {expected_duty_cycle}% (\u00B15% tương đối). Đo được: {measured_duty:.2f}%."
+                )
+        
+        # Nếu code chạy được đến đây mà không bị văng AssertionError, tức là PASSED 100%
+        return True
