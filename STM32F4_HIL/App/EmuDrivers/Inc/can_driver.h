@@ -29,5 +29,6 @@ extern struct can_driver_t can_driver;
 void CAN_Init(void);
 void CAN_Send(uint8_t *data, uint8_t length);
 void CAN_SendBuffer(void);
+void CAN_Send_String(const char *str);
 
 #endif /* EMUDRIVERS_INC_CAN_DRIVER_H_ */

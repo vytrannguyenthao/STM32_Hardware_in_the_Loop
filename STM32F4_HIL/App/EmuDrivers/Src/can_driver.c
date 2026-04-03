@@ -67,6 +67,28 @@ void CAN_SendBuffer(void) {
 	}
 }
 
+void CAN_Send_Byte(uint8_t data) {
+	// Cấu hình DLC = 1 byte
+	can_driver.tx_header.DLC = 1;
+	// Copy dữ liệu vào buffer truyền
+	can_driver.tx_data[0] = data;
+	// Gửi message
+	HAL_CAN_AddTxMessage(&can_driver.hcan, &can_driver.tx_header, can_driver.tx_data, &can_driver.tx_mailbox);
+}
+
+void CAN_Send_String(const char *str) {
+	uint16_t len = strlen(str);
+
+	for (uint16_t i = 0; i < len; i++) {
+		CAN_Send_Byte((uint8_t)str[i]);
+
+		// Lưu ý: CAN có tốc độ cao nhưng nếu gửi liên tục 1 byte/frame
+		// có thể gây nghẽn bus nếu nhiều thiết bị cùng gửi.
+		// Bạn có thể thêm một khoảng delay cực nhỏ nếu cần thiết.
+		vTaskDelay(1); // Nếu dùng FreeRTOS
+	}
+}
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_driver.rx_header, can_driver.rx_data);
 	// copy dữ liệu nhận vào rx_buffer
