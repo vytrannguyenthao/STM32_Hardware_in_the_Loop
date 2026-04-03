@@ -29,16 +29,16 @@ static int Cmd_Prepare_W25Q(int argc, char *argv[]) {
 	return CMDLINE_OK;
 }
 
-static int Cmd_Reset_SPI(int argc, char *argv[]) {
-	if (argc < 2)
-		return CMDLINE_TOO_FEW_ARGS;
-	if (argc > 2)
-		return CMDLINE_TOO_MANY_ARGS;
-	SPI3_Reset();
-	return CMDLINE_OK;
-}
+// static int Cmd_Reset_SPI(int argc, char *argv[]) {
+// 	if (argc < 2)
+// 		return CMDLINE_TOO_FEW_ARGS;
+// 	if (argc > 2)
+// 		return CMDLINE_TOO_MANY_ARGS;
+// 	SPI3_Reset();
+// 	return CMDLINE_OK;
+// }
 
 void Cmd_SPI_Register(void) {
 	CLI_RegisterCommand("w25q_prepare_mem", Cmd_Prepare_W25Q, "Prepare Flash memory | format: w25q_prepare_mem <length>");
-	CLI_RegisterCommand("spi_reset", Cmd_Reset_SPI, "Reset SPI peripheral | format: spi_reset");
+	// CLI_RegisterCommand("spi_reset", Cmd_Reset_SPI, "Reset SPI peripheral | format: spi_reset");
 }
