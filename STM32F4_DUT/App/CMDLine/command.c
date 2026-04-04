@@ -673,18 +673,6 @@ int Cmd_ADC_Read(int argc, char *argv[])
 
 #include "../pwm/pwm_control.h"
 
-/*
- * pwm_cmd.c
- *
- *  Created on: Apr 3, 2026
- *      Author: Vy Tran
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "cmd.h"
-#include "pwm_control.h"
-
 int Cmd_PWM_Freq(int argc, char *argv[])
 {
 	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
@@ -712,9 +700,9 @@ int Cmd_PWM_Duty_Cycle(int argc, char *argv[])
 	uint8_t ch = atoi(argv[1]);
 	uint8_t duty = atoi(argv[2]);
 
-	if(ch < 2 || ch > 4)
+	if(ch <1 || ch > 4)
 	{
-		Console_Write("\r\nInvalid channel (2-4)\r\n");
+		Console_Write("\r\nInvalid channel (1-4)\r\n");
 		return CMDLINE_OK;
 	}
 
