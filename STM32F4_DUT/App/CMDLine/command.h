@@ -46,7 +46,7 @@ int Cmd_UART_Receive(int argc, char *argv[]);
 int Cmd_UART_Send_String(int argc, char *argv[]);
 int Cmd_ADC_Read(int argc, char *argv[]);
 int Cmd_PWM_Freq(int argc, char *argv[]);
-int Cmd_PWM_Volt(int argc, char *argv[]);
+int Cmd_PWM_Duty_Cycle(int argc, char *argv[]);
 int Cmd_PWM_Start(int argc, char *argv[]);
 int Cmd_PWM_Stop(int argc, char *argv[]);
 #endif /* CMDLINE_COMMAND_H_ */
