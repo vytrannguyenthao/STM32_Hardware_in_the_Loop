@@ -67,14 +67,13 @@ class DUTLibrary:
     def stop_pwm(self, ch):
         self._dut_cmd(f"pwm_stop {ch}", expect_response=False)
 
-    @keyword("Set DUT volt")
-    def set_pwm_volt(self, ch, volt):
-        mv = int(float(volt) * 1000)
-        self._dut_cmd(f"pwm_volt {ch} {mv}", expect_response=False)
+    @keyword("Set DUT duty cycle")
+    def set_pwm_duty(self, ch, duty):
+        self._dut_cmd(f"pwm_set_duty_cycle {ch} {duty}", expect_response=False)
 
     @keyword("Set DUT PWM freq")
     def set_pwm_freq(self, freq):
-        self._dut_cmd(f"pwm_freq {freq}", expect_response=False)
+        self._dut_cmd(f"pwm_set_freq {freq}", expect_response=False)
 
     # ------------------
     # I2C

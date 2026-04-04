@@ -124,8 +124,8 @@ class Logic_Library:
                 )
         return is_sine
 
-    @keyword("Verify Digital Channel")
-    def verify_digital_channel(self, raw_data: bytes, channel: int, expected_freq_hz=None, expected_duty_cycle=None):
+    @keyword("Verify Pulse Wave")
+    def verify_pulse_wave(self, raw_data: bytes, channel: int, expected_freq_hz=None, expected_duty_cycle=None):
         if channel > 6:
             raise ValueError("Channel must be between 0 and 6.")
 
