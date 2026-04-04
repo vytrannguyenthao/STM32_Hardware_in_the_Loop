@@ -128,8 +128,8 @@ class MainWindow(QMainWindow):
         lay = QVBoxLayout(box)
         cb_port = QComboBox()
         cb_baud = QComboBox()
-        cb_baud.addItems(["9600", "19200", "38400", "57600", "115200"])
-        cb_baud.setCurrentText("115200")
+        cb_baud.addItems(["9600", "19200", "38400", "57600", "115200","921600"])
+        cb_baud.setCurrentText("921600")
 
         def refresh_ports():
             cb_port.clear()
