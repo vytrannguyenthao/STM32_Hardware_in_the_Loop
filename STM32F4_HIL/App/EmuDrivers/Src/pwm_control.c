@@ -56,7 +56,7 @@ int pwm_stop(uint8_t ch)
 	return 0;
 }
 
-void set_pwm_freq(double freq_hz)
+void set_pwm_freq(uint64_t freq_hz)
 {
     uint64_t psc = 0;
     uint64_t arr;
@@ -101,14 +101,14 @@ void set_pwm_voltage(uint8_t ch, uint16_t voltage_mv)
 
 void set_pwm_duty_cycle(uint8_t ch, uint8_t duty)
 {
-	if(duty > 100) duty = 100;
+    if(duty > 100) duty = 100;
 
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(pwm_tim);
-    uint32_t ccr = duty * arr;
+    uint32_t ccr = ((uint32_t)duty * (arr + 1)) / 100;
 
     switch(ch)
     {
-//        case 1:
+//      case 1:
 //            __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_1, ccr);
 //            break;
         case 2:
