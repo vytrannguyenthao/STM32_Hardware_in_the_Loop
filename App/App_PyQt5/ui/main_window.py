@@ -3,7 +3,7 @@ import time
 import serial.tools.list_ports
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QGroupBox, 
                              QPushButton, QTextEdit, QSplitter, QLabel, 
-                             QComboBox, QCheckBox, QTabWidget)
+                             QComboBox, QCheckBox, QTabWidget, QHBoxLayout, QLineEdit)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIcon
 
@@ -36,9 +36,14 @@ class MainWindow(QMainWindow):
         self.logic_tab = LogicTab(self.uart_logic)
         self.peripheral_tab = PeripheralTab()
 
-        # Connect Signals -> Tabs
-        self.uart_dut.log_signal.connect(self.memory_tab.append_dut_log)
-        self.uart_hil.log_signal.connect(self.memory_tab.append_hil_log)
+        # Build Main View TRƯỚC KHI connect signals để các widget (DUT_LOG, HIL_LOG) được khởi tạo
+        splitter.addWidget(self.build_left())
+        splitter.addWidget(self.build_center())
+        splitter.setSizes([500, 1450])
+
+        # Connect Signals -> Tabs & MainWindow
+        self.uart_dut.log_signal.connect(self.append_dut_log)
+        self.uart_hil.log_signal.connect(self.append_hil_log)
         self.uart_logic.data_signal.connect(self.logic_tab.process_raw_data)
         self.uart_dut.spi_data.connect(self.memory_tab.update_spi)
         self.uart_dut.spi_clear.connect(self.memory_tab.clear_spi_table)
@@ -53,11 +58,6 @@ class MainWindow(QMainWindow):
         # Connect UART byte signals to handlers
         self.uart_dut.pc_log_signal.connect(self.handle_dut_uart_byte)
         self.uart_hil.pc_log_signal.connect(self.handle_hil_uart_byte)
-
-        # Build Main View
-        splitter.addWidget(self.build_left())
-        splitter.addWidget(self.build_center())
-        splitter.setSizes([350, 1450])
 
     def build_left(self):
         left_tabs = QTabWidget()
@@ -100,8 +100,25 @@ class MainWindow(QMainWindow):
         test_splitter.setSizes([200, 800]) 
         lay_test.addWidget(test_splitter)
 
+        # ===============================================
+        # TAB 3: TERMINAL
+        # ===============================================
+        tab_term = QWidget()
+        lay_term = QVBoxLayout(tab_term)
+        term_splitter = QSplitter(Qt.Vertical)
+
+        self.dut_term_box, self.dut_log_text = self.create_terminal_box("DUT Terminal", self.uart_dut)
+        self.hil_term_box, self.hil_log_text = self.create_terminal_box("HIL Terminal", self.uart_hil)
+
+        term_splitter.addWidget(self.dut_term_box)
+        term_splitter.addWidget(self.hil_term_box)
+        term_splitter.setSizes([500, 500])
+
+        lay_term.addWidget(term_splitter)
+
         left_tabs.addTab(tab_com, "COM")
         left_tabs.addTab(tab_test, "Test")
+        left_tabs.addTab(tab_term, "Terminal")
         return left_tabs
 
     def build_center(self):
@@ -110,6 +127,31 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.logic_tab, "Logic Analyzer")
         tabs.addTab(self.peripheral_tab, "Peripherals")
         return tabs
+
+    # ================== UI HELPER WIDGETS ==================
+    def create_terminal_box(self, title, uart):
+        # Giữ nguyên y hệt design gốc của bạn (Nền trắng, text đen)
+        box = QGroupBox(title)
+        lay = QVBoxLayout(box)
+        text = QTextEdit()
+        text.setReadOnly(True)
+        text.setStyleSheet("background:white;font-family:Consolas;font-size:9pt;")
+
+        bottom = QHBoxLayout()
+        input_line = QLineEdit()
+        input_line.setPlaceholderText("Enter command and press Enter")
+        btn_clear = QPushButton("Clear")
+        btn_clear.setFixedWidth(70)
+
+        btn_clear.clicked.connect(text.clear)
+        input_line.returnPressed.connect(lambda: (uart.send(input_line.text()), input_line.clear()))
+
+        bottom.addWidget(input_line)
+        bottom.addWidget(btn_clear)
+
+        lay.addWidget(text)
+        lay.addLayout(bottom)
+        return box, text
 
     def create_pc_log_box(self, title):
         box = QGroupBox(title)
@@ -161,6 +203,15 @@ class MainWindow(QMainWindow):
         lay.addWidget(cb_baud)
         lay.addWidget(btn_connect)
         return box
+
+    # ================= UI LOGGING SLOTS =================
+    def append_dut_log(self, text):
+        self.dut_log_text.append(text)
+        self.dut_log_text.moveCursor(self.dut_log_text.textCursor().End)
+
+    def append_hil_log(self, text):
+        self.hil_log_text.append(text)
+        self.hil_log_text.moveCursor(self.hil_log_text.textCursor().End)
 
     def pc_log_append(self, text, newline=True):
         cursor = self.pc_log[1].textCursor()
