@@ -407,3 +407,52 @@ class HILLibrary:
         if "ERROR" in resp:
             raise AssertionError(f"HIL failed to set DAC voltage")
         return True
+
+    # ------------------
+    # CAN
+    # ------------------
+    @keyword("HIL Send CAN buffer")
+    def hil_send_can_buffer(self):
+        self._hil_cmd(f"can_send_buffer", expect_response=False)
+        return True
+
+    @keyword("HIL Send CAN String")
+    def hil_send_can_string(self, text):
+        resp = self._hil_cmd(f"can_send_string {text}")
+        if "sent" not in resp:
+            raise AssertionError(f"HIL failed to send CAN string")
+        return True
+    
+    @keyword("HIL Read CAN Data")
+    def hil_read_can_data(self):
+        resp = self._hil_cmd("can_read")
+
+        # Vẫn bóc tách ID ra để in Log cho dễ theo dõi, nhưng không báo lỗi nếu thiếu
+        id_match = re.search(r"DUT ID:\s*(0x[0-9A-Fa-f]+)", resp)
+        if id_match:
+            logger.info(f"Message received from ID: {id_match.group(1)}")
+
+        # Bóc tách mảng Data
+        data_match = re.search(r"Data:\s*\n(.*)", resp, re.S)
+        if not data_match:
+            raise AssertionError("CAN Data block not found in response")
+        
+        # Nhặt các byte Hex
+        data = re.findall(r"\b[0-9A-Fa-f]{2}\b", data_match.group(1))
+        
+        # Chỉ trả về data
+        return data
+
+    @keyword("Verify CAN String Data")
+    def verify_can_string_data(self, received_data, expected_string):
+        # Quét qua từng byte Hex, đổi sang số thập phân (hệ 16), 
+        # sau đó dùng chr() để ép sang ký tự ASCII và ghép dính lại với nhau.
+        actual_string = "".join([chr(int(x, 16)) for x in received_data])
+        logger.info(f"Parsed String from CAN: '{actual_string}'")
+
+        if actual_string != expected_string:
+            raise AssertionError(
+                f"FAIL: CAN String mismatch!\n"
+                f"Expected : '{expected_string}'\n"
+                f"Actual   : '{actual_string}'"
+            )
