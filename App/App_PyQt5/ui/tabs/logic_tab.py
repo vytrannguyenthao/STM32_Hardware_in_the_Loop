@@ -146,7 +146,7 @@ class LogicTab(QWidget):
             # TỐI ƯU HÓA PYQTGRAPH CHO LOGIC ANALYZER
             # ==========================================
             p.setClipToView(True) # Chỉ vẽ những điểm nằm trong khung hình hiện tại
-            p.setDownsampling(auto=True, mode='peak') # Ghép điểm ảnh, loại bỏ lag
+            p.setDownsampling(auto=True, mode='subsample') # Ghép điểm ảnh, loại bỏ lag
             
             p.getViewBox().setBorder(pg.mkPen(color='#CCCCCC', width=1))
 
@@ -438,17 +438,33 @@ class LogicTab(QWidget):
             self.last_plot_time = 0
             
         if (current_t - self.last_plot_time >= 0.3) or (self.current_idx >= self.expected_samples) or pico_finished:
+            # Sliding window
+            if self.is_running and not pico_finished:
+                # KHI ĐANG CHẠY LIVE: Chỉ lấy 100,000 điểm mới nhất ở đuôi để vẽ
+                view_start = max(0, end_i - 100000)
+            else:
+                # KHI ĐÃ STOP (Pico gửi xong): Quét toàn bộ mảng từ 0 để User zoom/pan
+                view_start = 0
+
+            # Cắt mảng theo cửa sổ đã định
+            time_view = self.time_arr[view_start:end_i]
+
             # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
-            self.curves['D0'].setData(self.time_arr[:end_i], self.d0_arr[:end_i])
-            self.curves['D1'].setData(self.time_arr[:end_i], self.d1_arr[:end_i])
-            self.curves['D2'].setData(self.time_arr[:end_i], self.d2_arr[:end_i])
-            self.curves['D3'].setData(self.time_arr[:end_i], self.d3_arr[:end_i])
-            self.curves['A0'].setData(self.time_arr[:end_i], self.a0_arr[:end_i])
+            self.curves['D0'].setData(time_view, self.d0_arr[view_start:end_i])
+            self.curves['D1'].setData(time_view, self.d1_arr[view_start:end_i])
+            self.curves['D2'].setData(time_view, self.d2_arr[view_start:end_i])
+            self.curves['D3'].setData(time_view, self.d3_arr[view_start:end_i])
+            self.curves['A0'].setData(time_view, self.a0_arr[view_start:end_i])
 
             # Tự động trượt thanh ngắm
             if end_i > 0:
-                current_time = self.time_arr[end_i - 1]
-                self.plots['D0'].setXRange(0, max(current_time, 0.0001), padding=0)
+                if self.is_running and not pico_finished:
+                    # Đang chạy: Trục X trượt theo cửa sổ 100k điểm
+                    self.plots['D0'].setXRange(self.time_arr[view_start], self.time_arr[end_i - 1], padding=0)
+                else:
+                    # Chạy xong: Giữ view ở vị trí kết thúc
+                    final_camera_start = max(0, end_i - 100000)
+                    self.plots['D0'].setXRange(self.time_arr[final_camera_start], self.time_arr[end_i - 1], padding=0)
                 
             self.last_plot_time = current_t
             
