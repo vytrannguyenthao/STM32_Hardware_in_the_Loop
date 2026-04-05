@@ -94,8 +94,8 @@ class LogicTab(QWidget):
 
         # --- CẤU HÌNH SAMPLES ---
         self.cb_samples = QComboBox()
-        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "2.5 M", "10 M", "50 M", "100 M"])
-        self.cb_samples.setCurrentText("1 M")
+        self.cb_samples.addItems(["10 K", "100 K", "500 K", "1 M", "2.5 M", "3 M", "10 M", "50 M"])
+        self.cb_samples.setCurrentText("3 M")
 
         layout.addWidget(QLabel("Samples:"))
         layout.addWidget(self.cb_samples)
@@ -103,8 +103,8 @@ class LogicTab(QWidget):
         
         # --- CẤU HÌNH SAMPLE RATE ---
         self.cb_rate = QComboBox()
-        self.cb_rate.addItems(["10 kHz", "100 kHz", "150 kHz", "200 kHz", "250 kHz"])
-        self.cb_rate.setCurrentText("100 kHz")
+        self.cb_rate.addItems(["10 kHz", "100 kHz", "150 kHz", "200 kHz", "250 kHz", "300 kHz"])
+        self.cb_rate.setCurrentText("300 kHz")
 
         layout.addWidget(QLabel("Sample Rate:"))
         layout.addWidget(self.cb_rate)
@@ -122,11 +122,12 @@ class LogicTab(QWidget):
         self.plot_widget.ci.layout.setSpacing(0)
         self.plot_widget.ci.layout.setContentsMargins(0, 0, 0, 0)
 
-        channels = ['D0', 'D1', 'D2', 'D3', 'A0']
+        channels = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'A0']
         
         colors = {
             'D0': '#333333', 'D1': '#8B4513', 'D2': '#DC143C', 
-            'D3': '#D2691E', 'A0': '#4682B4'
+            'D3': '#D2691E', 'D4': '#800080', 'D5': '#008080', 
+            'D6': '#2E8B57', 'A0': '#4682B4'
         }
 
         self.plots = {}
@@ -331,7 +332,7 @@ class LogicTab(QWidget):
             
         self.measure_text.setText(f" Freq: {freq_str} ")
         
-        # Canh chỉnh vị trí nhãn: D0-D3 để ở 1.1, A0 để ở 3.1
+        # Canh chỉnh vị trí nhãn: D0-D6 để ở 1.1, A0 để ở 3.1
         y_pos = 1.1 if ch.startswith('D') else 3.1
         self.measure_text.setPos(minX + (maxX-minX)/2, y_pos)
 
@@ -427,6 +428,9 @@ class LogicTab(QWidget):
         self.d1_arr[start_i:end_i] = (digital_bytes >> 1) & 1
         self.d2_arr[start_i:end_i] = (digital_bytes >> 2) & 1
         self.d3_arr[start_i:end_i] = (digital_bytes >> 3) & 1
+        self.d4_arr[start_i:end_i] = (digital_bytes >> 4) & 1
+        self.d5_arr[start_i:end_i] = (digital_bytes >> 5) & 1
+        self.d6_arr[start_i:end_i] = (digital_bytes >> 6) & 1
         self.a0_arr[start_i:end_i] = (analog_bytes & 0x7F) * (3.3 / 127.0)
 
         self.current_idx = end_i
@@ -454,6 +458,9 @@ class LogicTab(QWidget):
             self.curves['D1'].setData(time_view, self.d1_arr[view_start:end_i])
             self.curves['D2'].setData(time_view, self.d2_arr[view_start:end_i])
             self.curves['D3'].setData(time_view, self.d3_arr[view_start:end_i])
+            self.curves['D4'].setData(time_view, self.d4_arr[view_start:end_i])
+            self.curves['D5'].setData(time_view, self.d5_arr[view_start:end_i])
+            self.curves['D6'].setData(time_view, self.d6_arr[view_start:end_i])
             self.curves['A0'].setData(time_view, self.a0_arr[view_start:end_i])
 
             # Tự động trượt thanh ngắm
@@ -539,6 +546,9 @@ class LogicTab(QWidget):
             self.d1_arr = np.zeros(samples, dtype=np.int8)
             self.d2_arr = np.zeros(samples, dtype=np.int8)
             self.d3_arr = np.zeros(samples, dtype=np.int8)
+            self.d4_arr = np.zeros(samples, dtype=np.int8)
+            self.d5_arr = np.zeros(samples, dtype=np.int8)
+            self.d6_arr = np.zeros(samples, dtype=np.int8)
             self.a0_arr = np.zeros(samples, dtype=np.float32)
             
             dt = 1.0 / rate
@@ -561,6 +571,12 @@ class LogicTab(QWidget):
                 self.uart_logic.ser.write(b"D12\n")
                 time.sleep(0.01)
                 self.uart_logic.ser.write(b"D13\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D14\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D15\n")
+                time.sleep(0.01)
+                self.uart_logic.ser.write(b"D16\n")
                 time.sleep(0.01)
                 
                 # 3. Setup tham số
