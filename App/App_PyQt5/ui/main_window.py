@@ -1,5 +1,6 @@
 # File: ui/main_window.py
 import time
+import serial 
 import serial.tools.list_ports
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QGroupBox, 
                              QPushButton, QTextEdit, QSplitter, QLabel, 
@@ -65,9 +66,9 @@ class MainWindow(QMainWindow):
         # TAB 1: COM
         tab_com = QWidget()
         lay_com = QVBoxLayout(tab_com)
-        lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut))
-        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil))
-        lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic))
+        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil, needs_scan=True, expected_id=""))
+        lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic, needs_scan=True, expected_id="SRPICO"))
+        lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut, needs_scan=False))
         lay_com.addStretch()  
 
         # TAB 2: TEST
@@ -165,7 +166,7 @@ class MainWindow(QMainWindow):
         lay.addWidget(btn_clear)
         return box, text
 
-    def create_uart_control(self, name, uart):
+    def create_uart_control(self, name, uart, needs_scan=False, expected_id=""):
         box = QGroupBox(f"{name} Serial Port")
         lay = QVBoxLayout(box)
         cb_port = QComboBox()
@@ -173,13 +174,60 @@ class MainWindow(QMainWindow):
         cb_baud.addItems(["9600", "19200", "38400", "57600", "115200","921600"])
         cb_baud.setCurrentText("921600")
 
+        btn_refresh = QPushButton("Refresh COM")
+        btn_scan = QPushButton("Scan Device") if needs_scan else None
+        btn_connect = QPushButton("Connect")
+
+        # Khối logic Scan Device
+        if needs_scan:
+            btn_connect.setEnabled(False) # Khóa nút Connect ban đầu
+
+            # Nếu đổi port khác -> Khóa lại bắt Scan từ đầu
+            def on_port_changed():
+                if not uart.isRunning():
+                    btn_connect.setEnabled(False)
+            cb_port.currentTextChanged.connect(on_port_changed)
+
+            def perform_scan():
+                port = cb_port.currentText()
+                if not port: return
+                baud = int(cb_baud.currentText())
+                
+                # Không được phép scan khi luồng Thread đang chiếm dụng cổng
+                if uart.isRunning():
+                    return
+
+                try:
+                    # Mở cổng tạm thời để bắn data
+                    with serial.Serial(port, baud, timeout=0.5) as s:
+                        s.reset_input_buffer()
+                        s.write(b"i\n")
+                        s.flush()
+                        time.sleep(0.1) # Chờ mạch trả lời
+                        resp = s.read(100).decode(errors='ignore').strip()
+
+                        if expected_id:
+                            if expected_id in resp:
+                                btn_connect.setEnabled(True)
+                            else:
+                                btn_connect.setEnabled(False)
+                        else:
+                            # HIL chưa cần Verify Data
+                            btn_connect.setEnabled(True)
+
+                except Exception as e:
+                    btn_connect.setEnabled(False)
+
+            btn_scan.clicked.connect(perform_scan)
+
         def refresh_ports():
+            current = cb_port.currentText()
             cb_port.clear()
             cb_port.addItems([p.device for p in serial.tools.list_ports.comports()])
+            if current in [cb_port.itemText(i) for i in range(cb_port.count())]:
+                cb_port.setCurrentText(current)
 
         refresh_ports()
-        btn_refresh = QPushButton("Refresh COM")
-        btn_connect = QPushButton("Connect")
 
         def toggle():
             if uart.isRunning():
@@ -197,8 +245,16 @@ class MainWindow(QMainWindow):
         btn_connect.clicked.connect(toggle)
 
         lay.addWidget(QLabel("COM Port"))
-        lay.addWidget(cb_port)
-        lay.addWidget(btn_refresh)
+        
+        # 2 nút Refresh và Scan vào chung một hàng
+        port_lay = QHBoxLayout()
+        port_lay.setContentsMargins(0, 0, 0, 0)
+        port_lay.addWidget(cb_port)
+        port_lay.addWidget(btn_refresh)
+        if needs_scan:
+            port_lay.addWidget(btn_scan)
+        lay.addLayout(port_lay)
+
         lay.addWidget(QLabel("Baudrate"))
         lay.addWidget(cb_baud)
         lay.addWidget(btn_connect)
@@ -441,4 +497,3 @@ class MainWindow(QMainWindow):
                 self.dut_buffer.append(val)
             except:
                 pass
-    
