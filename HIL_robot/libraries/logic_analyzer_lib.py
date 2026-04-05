@@ -25,16 +25,13 @@ class Logic_Library:
     def disconnect_la(self):
         self.cli.disconnect()
 
-    @keyword("Setup Logic Analyzer")
-    # Keyword này hiện tại được dùng để debug từng bước
-    # Sau này có thể setup luôn trong "Read Logic Analyzer Data"
-    # TODO: Không expose keyword này cho user
     def setup_la(self, rate, samples):
         self.cli.setup_logic_analyzer(rate, samples)
         logger.info(f"Logic Analyzer setup: samples={samples}, rate={rate} Hz")
     
     @keyword("Read Logic Analyzer Data")
     def read_la_data(self):
+        self.setup_la(rate=250000, samples=1250000)  # 5 giây @ 250kHz
         data = self.cli.capture_binary_stream(timeout_sec=12.0)
         logger.info(f"Logic Analyzer data length: {len(data)} bytes")
         return data
