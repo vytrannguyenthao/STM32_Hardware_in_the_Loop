@@ -123,7 +123,7 @@ class HILLibrary:
             raise AssertionError("BOOT0 value must be 0 or 1")
         self._hil_cmd(f"dut_boot0_set {value}")
 
-    def _wait_for_dfu_device(self, timeout=10):
+    def _wait_for_dfu_device(self, timeout=20):
 
         start = time.time()
 
@@ -137,7 +137,7 @@ class HILLibrary:
 
             out = result.stdout.lower()
 
-            if "bootloader" in out or "STM32" in out:
+            if "bootloader" in out or "stm32" in out:
                 logger.info("STM32 DFU device detected")
                 return
 
