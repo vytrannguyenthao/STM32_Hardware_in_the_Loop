@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         # TAB 1: COM
         tab_com = QWidget()
         lay_com = QVBoxLayout(tab_com)
-        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil, needs_scan=True, expected_id=""))
+        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil, needs_scan=True, expected_id="HIL"))
         lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic, needs_scan=True, expected_id="SRPICO"))
         lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut, needs_scan=False))
         lay_com.addStretch()  
@@ -201,7 +201,7 @@ class MainWindow(QMainWindow):
                     # Mở cổng tạm thời để bắn data
                     with serial.Serial(port, baud, timeout=0.5) as s:
                         s.reset_input_buffer()
-                        s.write(b"i\n")
+                        s.write(b"i\r\n")
                         s.flush()
                         time.sleep(0.1) # Chờ mạch trả lời
                         resp = s.read(100).decode(errors='ignore').strip()
