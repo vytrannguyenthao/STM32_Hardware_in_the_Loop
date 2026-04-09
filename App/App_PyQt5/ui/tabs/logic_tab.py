@@ -431,7 +431,6 @@ class LogicTab(QWidget):
         # KIỂM TRA HOÀN THÀNH HOẶC ĐỦ MẪU
         # ==========================================
         if (self.current_idx >= self.expected_samples or pico_finished) and self.is_running:
-            print(f"[LOGIC] Đã bắt đủ mẫu hoặc Pico báo hoàn thành. Tự động Dừng.")
             self.toggle_start_stop()
             # Trả về luôn vì toggle_start_stop sẽ set is_running = False và gọi lại update_plots một lần nữa
             return 
@@ -473,7 +472,6 @@ class LogicTab(QWidget):
             # CHẾ ĐỘ DỪNG (STOP): Render 1 lần toàn cảnh dữ liệu thu được
             # ---------------------------------------------------------
             if not self._has_rendered_full and end_i > 0:
-                print(f"[LOGIC] Bắt đầu render toàn bộ {end_i} điểm dữ liệu...")
                 
                 time_view = self.time_arr[0:end_i]
                 self.curves['D0'].setData(time_view, self.d0_arr[0:end_i])
@@ -490,7 +488,6 @@ class LogicTab(QWidget):
                 
                 # Khóa cờ lại, để các hàm cuộn/zoom chuột tự do mà không bị vẽ lại
                 self._has_rendered_full = True
-                print("[LOGIC] Render hoàn tất! Bạn có thể Zoom/Pan thoải mái.")
 
                 # Cập nhật công cụ đo tần số nếu đang bật
                 if self.measure_region.isVisible():
@@ -530,7 +527,6 @@ class LogicTab(QWidget):
     # ==================================================
     def toggle_start_stop(self):
         if getattr(self.uart_logic, 'ser', None) is None or not self.uart_logic.ser.is_open:
-            print("[LOGIC] Cổng COM chưa được kết nối!")
             return
 
         if not self.is_running:
@@ -622,7 +618,6 @@ class LogicTab(QWidget):
             
             try:
                 self.uart_logic.ser.write(b"+")
-                print("[LOGIC] Đã gửi lệnh STOP.")
             except Exception as e:
                 print(f"[LOGIC] Lỗi gửi lệnh STOP: {e}")
 
