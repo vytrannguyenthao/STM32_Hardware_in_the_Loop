@@ -147,7 +147,7 @@ class LogicTab(QWidget):
             # TỐI ƯU HÓA PYQTGRAPH CHO LOGIC ANALYZER
             # ==========================================
             p.setClipToView(True) # Chỉ vẽ những điểm nằm trong khung hình hiện tại
-            p.setDownsampling(auto=True, mode='subsample') # Ghép điểm ảnh, loại bỏ lag
+            p.setDownsampling(auto=True, mode='peak') # Ghép điểm ảnh, loại bỏ lag
             
             p.getViewBox().setBorder(pg.mkPen(color='#CCCCCC', width=1))
 
@@ -322,7 +322,7 @@ class LogicTab(QWidget):
         else:
             freq = 0
             
-        # Định dạng chuỗi hiển thị (Đã xóa text "Edges")
+        # Định dạng chuỗi hiển thị
         if freq >= 1000000:
             freq_str = f"{freq/1000000:.2f} MHz"
         elif freq >= 1000:
@@ -375,9 +375,13 @@ class LogicTab(QWidget):
             self.raw_buffer.extend(data)
 
     def update_plots(self):
-        # Nếu không có data mới, thoát sớm để rảnh CPU
+        # 1. Xác định xem có CẦN RENDER TOÀN BỘ KHÔNG (khi đang ở trạng thái Dừng)
+        needs_final_render = (not self.is_running) and getattr(self, '_has_rendered_full', False) is False
+
+        # Nếu không có data mới VÀ cũng không yêu cầu render cuối cùng thì mới thoát sớm để đỡ tốn CPU
         if len(self.raw_buffer) == 0 and len(self.leftover_byte) == 0:
-            return
+            if not needs_final_render:
+                return
 
         # Nối data cũ bị lẻ nhịp trước vào đầu chuỗi mới
         chunk = self.leftover_byte + self.raw_buffer[:]
@@ -386,104 +390,111 @@ class LogicTab(QWidget):
         # Kiểm tra xem Pico đã gửi cờ '+' báo hoàn thành toàn bộ tác vụ chưa
         pico_finished = b'+' in chunk
 
-        valid_data = np.frombuffer(chunk, dtype=np.uint8)
-        valid_data = valid_data[valid_data >= 0x80] # Loại rác
+        if len(chunk) > 0:
+            valid_data = np.frombuffer(chunk, dtype=np.uint8)
+            valid_data = valid_data[valid_data >= 0x80] # Loại rác
 
-        if len(valid_data) == 0:
-            self.leftover_byte.clear()
-            if pico_finished and self.is_running:
-                print(f"[LOGIC] Pico báo kết thúc. Đã lấy {self.current_idx}/{self.expected_samples} mẫu. Tự động Dừng.")
-                self.toggle_start_stop()
-            return
+            if len(valid_data) % 2 != 0:
+                self.leftover_byte = bytearray([valid_data[-1]])
+                valid_data = valid_data[:-1]
+            else:
+                self.leftover_byte.clear()
 
-        # CỰC KỲ QUAN TRỌNG: Xử lý byte bị lẻ cặp (tránh lệch Digital/Analog)
-        if len(valid_data) % 2 != 0:
-            self.leftover_byte = bytearray([valid_data[-1]])
-            valid_data = valid_data[:-1]
-        else:
-            self.leftover_byte.clear()
+            digital_bytes = valid_data[0::2]
+            analog_bytes = valid_data[1::2]
+            n_samples = len(digital_bytes)
 
-        if len(valid_data) == 0:
-            if pico_finished and self.is_running:
-                print(f"[LOGIC] Pico báo kết thúc. Đã lấy {self.current_idx}/{self.expected_samples} mẫu. Tự động Dừng.")
-                self.toggle_start_stop()
-            return
+            if n_samples > 0:
+                if self.current_idx + n_samples > self.expected_samples:
+                    n_samples = self.expected_samples - self.current_idx
+                    digital_bytes = digital_bytes[:n_samples]
+                    analog_bytes = analog_bytes[:n_samples]
 
-        # Tách cặp và tính số lượng
-        digital_bytes = valid_data[0::2]
-        analog_bytes = valid_data[1::2]
-        n_samples = len(digital_bytes)
+                start_i = self.current_idx
+                end_i = start_i + n_samples
 
-        # Chặn không cho mảng phình to hơn số Sample User đã chọn
-        if self.current_idx + n_samples > self.expected_samples:
-            n_samples = self.expected_samples - self.current_idx
-            digital_bytes = digital_bytes[:n_samples]
-            analog_bytes = analog_bytes[:n_samples]
+                self.d0_arr[start_i:end_i] = digital_bytes & 1
+                self.d1_arr[start_i:end_i] = (digital_bytes >> 1) & 1
+                self.d2_arr[start_i:end_i] = (digital_bytes >> 2) & 1
+                self.d3_arr[start_i:end_i] = (digital_bytes >> 3) & 1
+                self.d4_arr[start_i:end_i] = (digital_bytes >> 4) & 1
+                self.d5_arr[start_i:end_i] = (digital_bytes >> 5) & 1
+                self.d6_arr[start_i:end_i] = (digital_bytes >> 6) & 1
+                self.a0_arr[start_i:end_i] = (analog_bytes & 0x7F) * (3.3 / 127.0)
 
-        start_i = self.current_idx
-        end_i = start_i + n_samples
+                self.current_idx = end_i
 
-        # Đổ dữ liệu vào đúng vị trí của Mảng đã cấp phát sẵn (Nhanh gấp 100 lần list thường)
-        self.d0_arr[start_i:end_i] = digital_bytes & 1
-        self.d1_arr[start_i:end_i] = (digital_bytes >> 1) & 1
-        self.d2_arr[start_i:end_i] = (digital_bytes >> 2) & 1
-        self.d3_arr[start_i:end_i] = (digital_bytes >> 3) & 1
-        self.d4_arr[start_i:end_i] = (digital_bytes >> 4) & 1
-        self.d5_arr[start_i:end_i] = (digital_bytes >> 5) & 1
-        self.d6_arr[start_i:end_i] = (digital_bytes >> 6) & 1
-        self.a0_arr[start_i:end_i] = (analog_bytes & 0x7F) * (3.3 / 127.0)
+        # Lấy mốc index hiện tại để dùng cho việc vẽ (bảo vệ trường hợp end_i ở trên không được tạo)
+        end_i = self.current_idx
 
-        self.current_idx = end_i
+        # ==========================================
+        # KIỂM TRA HOÀN THÀNH HOẶC ĐỦ MẪU
+        # ==========================================
+        if (self.current_idx >= self.expected_samples or pico_finished) and self.is_running:
+            print(f"[LOGIC] Đã bắt đủ mẫu hoặc Pico báo hoàn thành. Tự động Dừng.")
+            self.toggle_start_stop()
+            # Trả về luôn vì toggle_start_stop sẽ set is_running = False và gọi lại update_plots một lần nữa
+            return 
 
-        # Data mảng Numpy đã cập nhật xong. Nhưng ta sẽ hạn chế tần số vẽ (Render) lên Card đồ họa.
-        # Bằng cách chỉ thực hiện lệnh setData mỗi ~300ms, thay vì mỗi 100ms.
+        # ==========================================
+        # HIỂN THỊ ĐỒ THỊ (RENDER LOGIC)
+        # ==========================================
         current_t = time.time()
         if not hasattr(self, 'last_plot_time'):
             self.last_plot_time = 0
             
-        if (current_t - self.last_plot_time >= 0.3) or (self.current_idx >= self.expected_samples) or pico_finished:
-            # Sliding window
-            if self.is_running and not pico_finished:
-                # KHI ĐANG CHẠY LIVE: Chỉ lấy 100,000 điểm mới nhất ở đuôi để vẽ
+        if not hasattr(self, '_has_rendered_full'):
+            self._has_rendered_full = False
+
+        if self.is_running:
+            # ---------------------------------------------------------
+            # CHẾ ĐỘ ĐANG CHẠY (LIVE): Chỉ render nối đuôi (sliding window)
+            # ---------------------------------------------------------
+            if (current_t - self.last_plot_time >= 0.3) and end_i > 0:
                 view_start = max(0, end_i - 100000)
-            else:
-                # KHI ĐÃ STOP (Pico gửi xong): Quét toàn bộ mảng từ 0 để User zoom/pan
-                view_start = 0
+                time_view = self.time_arr[view_start:end_i]
 
-            # Cắt mảng theo cửa sổ đã định
-            time_view = self.time_arr[view_start:end_i]
+                self.curves['D0'].setData(time_view, self.d0_arr[view_start:end_i])
+                self.curves['D1'].setData(time_view, self.d1_arr[view_start:end_i])
+                self.curves['D2'].setData(time_view, self.d2_arr[view_start:end_i])
+                self.curves['D3'].setData(time_view, self.d3_arr[view_start:end_i])
+                self.curves['D4'].setData(time_view, self.d4_arr[view_start:end_i])
+                self.curves['D5'].setData(time_view, self.d5_arr[view_start:end_i])
+                self.curves['D6'].setData(time_view, self.d6_arr[view_start:end_i])
+                self.curves['A0'].setData(time_view, self.a0_arr[view_start:end_i])
 
-            # Chỉ vẽ từ 0 tới điểm đang quét hiện tại
-            self.curves['D0'].setData(time_view, self.d0_arr[view_start:end_i])
-            self.curves['D1'].setData(time_view, self.d1_arr[view_start:end_i])
-            self.curves['D2'].setData(time_view, self.d2_arr[view_start:end_i])
-            self.curves['D3'].setData(time_view, self.d3_arr[view_start:end_i])
-            self.curves['D4'].setData(time_view, self.d4_arr[view_start:end_i])
-            self.curves['D5'].setData(time_view, self.d5_arr[view_start:end_i])
-            self.curves['D6'].setData(time_view, self.d6_arr[view_start:end_i])
-            self.curves['A0'].setData(time_view, self.a0_arr[view_start:end_i])
-
-            # Tự động trượt thanh ngắm
-            if end_i > 0:
-                if self.is_running and not pico_finished:
-                    # Đang chạy: Trục X trượt theo cửa sổ 100k điểm
-                    self.plots['D0'].setXRange(self.time_arr[view_start], self.time_arr[end_i - 1], padding=0)
-                else:
-                    # Chạy xong: Giữ view ở vị trí kết thúc
-                    final_camera_start = max(0, end_i - 100000)
-                    self.plots['D0'].setXRange(self.time_arr[final_camera_start], self.time_arr[end_i - 1], padding=0)
+                # Tự động trượt thanh ngắm
+                self.plots['D0'].setXRange(self.time_arr[view_start], self.time_arr[end_i - 1], padding=0)
                 
-            self.last_plot_time = current_t
-            
-            # Ép công cụ đo tần số tính lại nếu nó đang bật và data vừa lọt vào vùng đo
-            if self.measure_region.isVisible():
-                self.update_measurement()
+                self.last_plot_time = current_t
 
-        # Kiểm tra hoàn thành
-        # Bắt buộc phải có `self.is_running` để tránh việc toggle_start_stop gọi lại hàm này và tự mở Start
-        if (self.current_idx >= self.expected_samples or pico_finished) and self.is_running:
-            print(f"[LOGIC] Đã bắt đủ mẫu hoặc Pico báo hoàn thành. Tự động Dừng.")
-            self.toggle_start_stop()
+        else:
+            # ---------------------------------------------------------
+            # CHẾ ĐỘ DỪNG (STOP): Render 1 lần toàn cảnh dữ liệu thu được
+            # ---------------------------------------------------------
+            if not self._has_rendered_full and end_i > 0:
+                print(f"[LOGIC] Bắt đầu render toàn bộ {end_i} điểm dữ liệu...")
+                
+                time_view = self.time_arr[0:end_i]
+                self.curves['D0'].setData(time_view, self.d0_arr[0:end_i])
+                self.curves['D1'].setData(time_view, self.d1_arr[0:end_i])
+                self.curves['D2'].setData(time_view, self.d2_arr[0:end_i])
+                self.curves['D3'].setData(time_view, self.d3_arr[0:end_i])
+                self.curves['D4'].setData(time_view, self.d4_arr[0:end_i])
+                self.curves['D5'].setData(time_view, self.d5_arr[0:end_i])
+                self.curves['D6'].setData(time_view, self.d6_arr[0:end_i])
+                self.curves['A0'].setData(time_view, self.a0_arr[0:end_i])
+
+                # Xem toàn cảnh từ 0 đến kết thúc
+                self.plots['D0'].setXRange(0, self.time_arr[end_i - 1], padding=0)
+                
+                # Khóa cờ lại, để các hàm cuộn/zoom chuột tự do mà không bị vẽ lại
+                self._has_rendered_full = True
+                print("[LOGIC] Render hoàn tất! Bạn có thể Zoom/Pan thoải mái.")
+
+                # Cập nhật công cụ đo tần số nếu đang bật
+                if self.measure_region.isVisible():
+                    self.update_measurement()
 
     # ==================================================
     # [UPDATE] HÀM HỖ TRỢ XỬ LÝ LỆNH START/STOP
@@ -537,6 +548,7 @@ class LogicTab(QWidget):
             self.leftover_byte.clear()
             self.current_idx = 0
             self.last_plot_time = 0 # Trả lại mốc thời gian để sẵn sàng vẽ khung đầu tiên
+            self._has_rendered_full = False
             self.reset_plots_to_zero()
             
             # ------------------------------------------------
@@ -606,7 +618,7 @@ class LogicTab(QWidget):
             self.btn_start.setIcon(self.create_led_icon("gray"))
             
             self.plot_timer.stop()
-            self.update_plots() 
+            self.update_plots() # Chạy update_plots lần cuối để render toàn cảnh
             
             try:
                 self.uart_logic.ser.write(b"+")
