@@ -126,6 +126,7 @@ int main(void)
   MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
   LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_15); // Set POWER STATUS PIN
+  LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_8);
 
   calcsin();
   calc_triangle();
@@ -606,7 +607,8 @@ static void MX_GPIO_Init(void)
   LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_15);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_8|LL_GPIO_PIN_9|LL_GPIO_PIN_10|LL_GPIO_PIN_0);
+  LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_8|LL_GPIO_PIN_0|LL_GPIO_PIN_1|LL_GPIO_PIN_2
+                          |LL_GPIO_PIN_3|LL_GPIO_PIN_4|LL_GPIO_PIN_5);
 
   /**/
   GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
@@ -625,7 +627,8 @@ static void MX_GPIO_Init(void)
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_8|LL_GPIO_PIN_9|LL_GPIO_PIN_10|LL_GPIO_PIN_0;
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_8|LL_GPIO_PIN_0|LL_GPIO_PIN_1|LL_GPIO_PIN_2
+                          |LL_GPIO_PIN_3|LL_GPIO_PIN_4|LL_GPIO_PIN_5;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -641,6 +644,7 @@ static void toggle_led(void *pvParameters)
 {
 	while (1) {
 		LL_GPIO_TogglePin(GPIOA, LL_GPIO_PIN_6);
+		LL_GPIO_TogglePin(GPIOD, LL_GPIO_PIN_8);
 		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }
