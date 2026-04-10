@@ -49,4 +49,5 @@ int Cmd_PWM_Freq(int argc, char *argv[]);
 int Cmd_PWM_Duty_Cycle(int argc, char *argv[]);
 int Cmd_PWM_Start(int argc, char *argv[]);
 int Cmd_PWM_Stop(int argc, char *argv[]);
+int Cmd_Set_Led(int argc, char *argv[]);
 #endif /* CMDLINE_COMMAND_H_ */
