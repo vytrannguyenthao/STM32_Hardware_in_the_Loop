@@ -72,10 +72,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define DUT_POWER_Pin LL_GPIO_PIN_14
 #define DUT_POWER_GPIO_Port GPIOE
-#define DUT_POWER_STATUS_Pin LL_GPIO_PIN_15
-#define DUT_POWER_STATUS_GPIO_Port GPIOE
 #define DUT_BOOT0_Pin LL_GPIO_PIN_0
 #define DUT_BOOT0_GPIO_Port GPIOD
+#define DUT_POWER_STATUS_Pin LL_GPIO_PIN_1
+#define DUT_POWER_STATUS_GPIO_Port GPIOD
 #define HIL_DEBUG_LED_Pin LL_GPIO_PIN_4
 #define HIL_DEBUG_LED_GPIO_Port GPIOD
 
