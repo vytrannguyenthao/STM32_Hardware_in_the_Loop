@@ -9,14 +9,14 @@ Suite Setup         Run Keywords
 ...                 Connect To DUT
 
 Suite Teardown      Run Keywords
-# ...                 Power DUT Off                     AND
+...                 Power DUT Off                     AND
 ...                 Disconnect from HIL               AND
 ...                 Disconnect from Logic Analyzer    AND
 ...                 Disconnect from DUT
 
 *** Variables ***
-${PWM_FREQUENCY}       10000
-${PWM_DUTY_CYCLE}      60
+${PWM_FREQUENCY}       1
+${PWM_DUTY_CYCLE}      50
 ${PWM_CHANNEL}         1
 ${LA_DIGITAL_CHANNEL}  0
 
