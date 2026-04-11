@@ -67,43 +67,7 @@ void CAN_SendBuffer(void) {
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_driver.rx_header, can_driver.rx_data);
-	if (can_driver.rx_header.DLC == 2) {
-		uint8_t led_status = can_driver.rx_data[0];
-		uint8_t led_index = can_driver.rx_data[1];
-		if (led_status == 1) {
-			// Bật LED tương ứng
-			switch (led_index) {
-			case 8:
-				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_8);
-				break;
-			case 9:
-				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_9);
-				break;
-			case 10:
-				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_10);
-				break;
-			default:
-				break;
-			}
-		} else {
-			// Tắt LED tương ứng
-			switch (led_index) {
-			case 8:
-				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_8);
-				break;
-			case 9:
-				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_9);
-				break;
-			case 10:
-				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_10);
-				break;
-			default:
-				break;
-			}
-		}
-	} else {
 		// Gửi lại ngay dữ liệu vừa nhận
 		can_driver.tx_header.DLC = can_driver.rx_header.DLC;
 		HAL_CAN_AddTxMessage(hcan, &can_driver.tx_header, can_driver.rx_data, &can_driver.tx_mailbox);
-	}
 }

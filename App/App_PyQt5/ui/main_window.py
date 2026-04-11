@@ -1,9 +1,10 @@
 # File: ui/main_window.py
 import time
+import serial 
 import serial.tools.list_ports
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QGroupBox, 
                              QPushButton, QTextEdit, QSplitter, QLabel, 
-                             QComboBox, QCheckBox, QTabWidget)
+                             QComboBox, QCheckBox, QTabWidget, QHBoxLayout, QLineEdit)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIcon
 
@@ -36,9 +37,14 @@ class MainWindow(QMainWindow):
         self.logic_tab = LogicTab(self.uart_logic)
         self.peripheral_tab = PeripheralTab()
 
-        # Connect Signals -> Tabs
-        self.uart_dut.log_signal.connect(self.memory_tab.append_dut_log)
-        self.uart_hil.log_signal.connect(self.memory_tab.append_hil_log)
+        # Build Main View TRƯỚC KHI connect signals để các widget (DUT_LOG, HIL_LOG) được khởi tạo
+        splitter.addWidget(self.build_left())
+        splitter.addWidget(self.build_center())
+        splitter.setSizes([500, 1450])
+
+        # Connect Signals -> Tabs & MainWindow
+        self.uart_dut.log_signal.connect(self.append_dut_log)
+        self.uart_hil.log_signal.connect(self.append_hil_log)
         self.uart_logic.data_signal.connect(self.logic_tab.process_raw_data)
         self.uart_dut.spi_data.connect(self.memory_tab.update_spi)
         self.uart_dut.spi_clear.connect(self.memory_tab.clear_spi_table)
@@ -54,20 +60,15 @@ class MainWindow(QMainWindow):
         self.uart_dut.pc_log_signal.connect(self.handle_dut_uart_byte)
         self.uart_hil.pc_log_signal.connect(self.handle_hil_uart_byte)
 
-        # Build Main View
-        splitter.addWidget(self.build_left())
-        splitter.addWidget(self.build_center())
-        splitter.setSizes([350, 1450])
-
     def build_left(self):
         left_tabs = QTabWidget()
 
         # TAB 1: COM
         tab_com = QWidget()
         lay_com = QVBoxLayout(tab_com)
-        lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut))
-        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil))
-        lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic))
+        lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil, needs_scan=True, expected_id="HIL"))
+        lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic, needs_scan=True, expected_id="SRPICO"))
+        lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut, needs_scan=False))
         lay_com.addStretch()  
 
         # TAB 2: TEST
@@ -100,8 +101,25 @@ class MainWindow(QMainWindow):
         test_splitter.setSizes([200, 800]) 
         lay_test.addWidget(test_splitter)
 
+        # ===============================================
+        # TAB 3: TERMINAL
+        # ===============================================
+        tab_term = QWidget()
+        lay_term = QVBoxLayout(tab_term)
+        term_splitter = QSplitter(Qt.Vertical)
+
+        self.dut_term_box, self.dut_log_text = self.create_terminal_box("DUT Terminal", self.uart_dut)
+        self.hil_term_box, self.hil_log_text = self.create_terminal_box("HIL Terminal", self.uart_hil)
+
+        term_splitter.addWidget(self.dut_term_box)
+        term_splitter.addWidget(self.hil_term_box)
+        term_splitter.setSizes([500, 500])
+
+        lay_term.addWidget(term_splitter)
+
         left_tabs.addTab(tab_com, "COM")
         left_tabs.addTab(tab_test, "Test")
+        left_tabs.addTab(tab_term, "Terminal")
         return left_tabs
 
     def build_center(self):
@@ -110,6 +128,31 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.logic_tab, "Logic Analyzer")
         tabs.addTab(self.peripheral_tab, "Peripherals")
         return tabs
+
+    # ================== UI HELPER WIDGETS ==================
+    def create_terminal_box(self, title, uart):
+        # Giữ nguyên y hệt design gốc của bạn (Nền trắng, text đen)
+        box = QGroupBox(title)
+        lay = QVBoxLayout(box)
+        text = QTextEdit()
+        text.setReadOnly(True)
+        text.setStyleSheet("background:white;font-family:Consolas;font-size:9pt;")
+
+        bottom = QHBoxLayout()
+        input_line = QLineEdit()
+        input_line.setPlaceholderText("Enter command and press Enter")
+        btn_clear = QPushButton("Clear")
+        btn_clear.setFixedWidth(70)
+
+        btn_clear.clicked.connect(text.clear)
+        input_line.returnPressed.connect(lambda: (uart.send(input_line.text()), input_line.clear()))
+
+        bottom.addWidget(input_line)
+        bottom.addWidget(btn_clear)
+
+        lay.addWidget(text)
+        lay.addLayout(bottom)
+        return box, text
 
     def create_pc_log_box(self, title):
         box = QGroupBox(title)
@@ -123,21 +166,68 @@ class MainWindow(QMainWindow):
         lay.addWidget(btn_clear)
         return box, text
 
-    def create_uart_control(self, name, uart):
+    def create_uart_control(self, name, uart, needs_scan=False, expected_id=""):
         box = QGroupBox(f"{name} Serial Port")
         lay = QVBoxLayout(box)
         cb_port = QComboBox()
         cb_baud = QComboBox()
-        cb_baud.addItems(["9600", "19200", "38400", "57600", "115200"])
-        cb_baud.setCurrentText("115200")
+        cb_baud.addItems(["9600", "19200", "38400", "57600", "115200","921600"])
+        cb_baud.setCurrentText("921600")
+
+        btn_refresh = QPushButton("Refresh COM")
+        btn_scan = QPushButton("Scan Device") if needs_scan else None
+        btn_connect = QPushButton("Connect")
+
+        # Khối logic Scan Device
+        if needs_scan:
+            btn_connect.setEnabled(False) # Khóa nút Connect ban đầu
+
+            # Nếu đổi port khác -> Khóa lại bắt Scan từ đầu
+            def on_port_changed():
+                if not uart.isRunning():
+                    btn_connect.setEnabled(False)
+            cb_port.currentTextChanged.connect(on_port_changed)
+
+            def perform_scan():
+                port = cb_port.currentText()
+                if not port: return
+                baud = int(cb_baud.currentText())
+                
+                # Không được phép scan khi luồng Thread đang chiếm dụng cổng
+                if uart.isRunning():
+                    return
+
+                try:
+                    # Mở cổng tạm thời để bắn data
+                    with serial.Serial(port, baud, timeout=0.5) as s:
+                        s.reset_input_buffer()
+                        s.write(b"i\r\n")
+                        s.flush()
+                        time.sleep(0.1) # Chờ mạch trả lời
+                        resp = s.read(100).decode(errors='ignore').strip()
+
+                        if expected_id:
+                            if expected_id in resp:
+                                btn_connect.setEnabled(True)
+                            else:
+                                btn_connect.setEnabled(False)
+                        else:
+                            # HIL chưa cần Verify Data
+                            btn_connect.setEnabled(True)
+
+                except Exception as e:
+                    btn_connect.setEnabled(False)
+
+            btn_scan.clicked.connect(perform_scan)
 
         def refresh_ports():
+            current = cb_port.currentText()
             cb_port.clear()
             cb_port.addItems([p.device for p in serial.tools.list_ports.comports()])
+            if current in [cb_port.itemText(i) for i in range(cb_port.count())]:
+                cb_port.setCurrentText(current)
 
         refresh_ports()
-        btn_refresh = QPushButton("Refresh COM")
-        btn_connect = QPushButton("Connect")
 
         def toggle():
             if uart.isRunning():
@@ -155,12 +245,29 @@ class MainWindow(QMainWindow):
         btn_connect.clicked.connect(toggle)
 
         lay.addWidget(QLabel("COM Port"))
-        lay.addWidget(cb_port)
-        lay.addWidget(btn_refresh)
+        
+        # 2 nút Refresh và Scan vào chung một hàng
+        port_lay = QHBoxLayout()
+        port_lay.setContentsMargins(0, 0, 0, 0)
+        port_lay.addWidget(cb_port)
+        port_lay.addWidget(btn_refresh)
+        if needs_scan:
+            port_lay.addWidget(btn_scan)
+        lay.addLayout(port_lay)
+
         lay.addWidget(QLabel("Baudrate"))
         lay.addWidget(cb_baud)
         lay.addWidget(btn_connect)
         return box
+
+    # ================= UI LOGGING SLOTS =================
+    def append_dut_log(self, text):
+        self.dut_log_text.append(text)
+        self.dut_log_text.moveCursor(self.dut_log_text.textCursor().End)
+
+    def append_hil_log(self, text):
+        self.hil_log_text.append(text)
+        self.hil_log_text.moveCursor(self.hil_log_text.textCursor().End)
 
     def pc_log_append(self, text, newline=True):
         cursor = self.pc_log[1].textCursor()
@@ -390,4 +497,3 @@ class MainWindow(QMainWindow):
                 self.dut_buffer.append(val)
             except:
                 pass
-    

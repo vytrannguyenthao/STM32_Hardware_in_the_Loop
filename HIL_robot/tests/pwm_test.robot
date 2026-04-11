@@ -15,8 +15,6 @@ Suite Teardown      Run Keywords
 ...                 Disconnect from DUT
 
 *** Variables ***
-${SAMPLE_FREQ}         250000
-${SAMPLE_COUNT}        100000
 ${PWM_FREQUENCY}       10000
 ${PWM_DUTY_CYCLE}      60
 ${PWM_CHANNEL}         1
@@ -29,8 +27,7 @@ DUT Generate PWM Signal
     Start DUT PWM   ch=${PWM_CHANNEL}
 
 Verify PWM Signal with Logic Analyzer
-    # Set up Logic Analyzer
-    Setup Logic Analyzer    ${SAMPLE_FREQ}    ${SAMPLE_COUNT}
+    # Read data from logic analyzer
     ${data}    Read Logic Analyzer Data
 
     # Verify results

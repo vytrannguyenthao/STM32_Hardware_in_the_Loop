@@ -100,6 +100,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "pwm_start", Cmd_PWM_Start, "pwm_start <ch>" },
 	{ "pwm_stop",  Cmd_PWM_Stop,  "pwm_stop <ch>" },
 
+	{ "set_led", Cmd_Set_Led, "set_led <led_idx> <0|1>" },
+
 	{ 0, 0, 0 }
 };
 
@@ -746,3 +748,68 @@ int Cmd_PWM_Stop(int argc, char *argv[])
 	return CMDLINE_OK;
 }
 
+int Cmd_Set_Led(int argc, char *argv[])
+{
+	if (argc < 4) return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 4) return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t led_index = atoi(argv[1]);
+	uint8_t state = atoi(argv[2]);
+
+	if (led_index < 1 || led_index > 5) {
+		Console_Write("\r\nLED index out of bounds (1-5)\r\n");
+		return CMDLINE_OK;
+	}
+
+	if (state != 0 && state != 1) {
+		Console_Write("\r\nInvalid state. Please use 0 (OFF) or 1 (ON)\r\n");
+		return CMDLINE_OK;
+	}
+	
+
+	if (state == 1) {
+			// Bật LED tương ứng
+			switch (led_index) {
+			case 1:
+				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_1);
+				break;
+			case 2:
+				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_2);
+				break;
+			case 3:
+				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_3);
+				break;
+			case 4:
+				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_4);
+				break;
+			case 5:
+				LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_5);
+				break;
+			default:
+				break;
+			}
+		} else {
+			// Tắt LED tương ứng
+			switch (led_index) {
+			case 1:
+				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_1);
+				break;
+			case 2:
+				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_2);
+				break;
+			case 3:
+				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_3);
+				break;
+			case 4:
+				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_4);
+				break;
+			case 5:
+				LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_5);
+				break;
+			default:
+				break;
+			}
+		}
+
+	return CMDLINE_OK;
+}
