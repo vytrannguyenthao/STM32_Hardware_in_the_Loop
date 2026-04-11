@@ -12,7 +12,7 @@ static TIM_HandleTypeDef *pwm_tim = &htim3;
 
 #define VDC_MV 3300
 #define TIM_CLOCK 60000000
-#define ARR_MAX   0xFFFFFFFFULL
+#define ARR_MAX 0xFFFFULL
 
 int pwm_start(uint8_t ch)
 {
