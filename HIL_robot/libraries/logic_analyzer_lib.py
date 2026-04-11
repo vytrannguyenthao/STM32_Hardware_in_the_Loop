@@ -193,3 +193,60 @@ class Logic_Library:
         
         # Nếu code chạy được đến đây mà không bị văng AssertionError, tức là PASSED 100%
         return True
+
+    @keyword("Verify Triangle Wave")
+    def verify_triangle_wave(self, raw_data: bytes, expected_freq_hz=None):
+        sample_rate = 250000
+
+        arr = np.frombuffer(raw_data, dtype=np.uint8)
+
+        if len(arr) % 2 != 0:
+            arr = arr[:-1]
+
+        analog_bytes = arr[1::2]
+        voltages = (analog_bytes & 0x7F) * (3.3 / 127.0)
+
+        voltages -= np.mean(voltages)
+        voltages *= np.hanning(len(voltages))
+
+        fft_vals = np.fft.rfft(voltages)
+        fft_mag = np.abs(fft_vals)
+
+        freqs = np.fft.rfftfreq(len(voltages), d=1/sample_rate)
+
+        peak_idx = np.argmax(fft_mag[1:]) + 1
+        f0 = freqs[peak_idx]
+
+        def harmonic_energy(h):
+            idx = np.argmin(np.abs(freqs - h*f0))
+            return np.sum(fft_mag[max(0, idx-2):idx+3])
+
+        A1 = harmonic_energy(1)
+        A2 = harmonic_energy(2)
+        A3 = harmonic_energy(3)
+        A4 = harmonic_energy(4)
+        A5 = harmonic_energy(5)
+
+        logger.info(f"A1={A1:.2f}, A2={A2:.2f}, A3={A3:.2f}, A4={A4:.2f}, A5={A5:.2f}")
+
+        # Triangle characteristics:
+        # - Even harmonics small
+        # - Odd harmonics decrease rapidly
+        if A2 > A3 * 0.5:
+            raise AssertionError("FAIL: Even harmonic too large for triangle wave.")
+
+        if A4 > A5 * 0.5:
+            raise AssertionError("FAIL: Even harmonic too large for triangle wave.")
+
+        if not (A1 > A3 > A5):
+            raise AssertionError("FAIL: Odd harmonics not decreasing properly.")
+
+        if expected_freq_hz is not None:
+            expected_freq_hz = float(expected_freq_hz)
+            if not (0.95*expected_freq_hz <= f0 <= 1.05*expected_freq_hz):
+                raise AssertionError(
+                    f"FAIL: Wrong frequency. Expected {expected_freq_hz}, got {f0:.2f}"
+                )
+
+        logger.info(f"Triangle Wave detected. Freq={f0:.2f} Hz")
+        return True
