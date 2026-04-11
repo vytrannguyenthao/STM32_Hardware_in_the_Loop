@@ -93,7 +93,7 @@ static void toggle_led(void *pvParameters);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint32_t cnt=0;
+uint32_t cnt = 0;
 /* USER CODE END 0 */
 
 /**
@@ -139,7 +139,6 @@ int main(void)
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-  HAL_TIM_Base_Start_IT(&htim3);
   if (HAL_I2C_EnableListen_IT(&hi2c1) != HAL_OK) {
 	  Error_Handler();
   }
@@ -507,7 +506,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 2499;
+  htim3.Init.Prescaler = 5999;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 9999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -831,6 +830,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+
+  if (htim->Instance == TIM3) {
+	  rtc_tick();
+	  cnt++;
+  }
 
   /* USER CODE END Callback 1 */
 }
