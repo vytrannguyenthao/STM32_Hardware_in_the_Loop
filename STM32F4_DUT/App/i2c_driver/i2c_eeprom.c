@@ -5,7 +5,7 @@
  *      Author: Vy Tran
  */
 
-#include "i2c_eeprom.h"
+#include <i2c_driver/i2c_eeprom.h>
 static HAL_StatusTypeDef EEPROM_WaitReady(I2C_EEPROM_t *eeprom)
 {
     return HAL_I2C_IsDeviceReady(eeprom->hi2c,
