@@ -17,7 +17,7 @@ static uint8_t active_addr = 0xFF;
 
 void i2c_emu_device_init(void)
 {
-    for (int i = 0; i <= I2C_DEV_MAX; i++)
+    for (int i = 0; i < I2C_DEV_MAX; i++)
     {
         i2c_dev_table[i].type  = I2C_DEV_UNKNOWN;
         i2c_dev_table[i].state = I2C_STATE_UNUSED;
@@ -46,7 +46,7 @@ int i2c_set_slave_addr(uint8_t addr7)
 
     if (i2c_dev_table[addr7].state != I2C_STATE_INITED) return -2;
 
-    for (int i = 0; i <= I2C_DEV_MAX; i++)
+    for (int i = 0; i < I2C_DEV_MAX; i++)
     {
     	if (i2c_dev_table[i].state == I2C_STATE_USING){
             i2c_dev_table[i].state = I2C_STATE_INITED;
@@ -59,8 +59,8 @@ int i2c_set_slave_addr(uint8_t addr7)
     hi2c->Init.OwnAddress1 = (addr7 << 1);
     HAL_I2C_Init(hi2c);
 
-    HAL_I2C_EnableListen_IT(hi2c);
     active_addr = addr7;
+    HAL_I2C_EnableListen_IT(hi2c);
 
     return 0;
 }
@@ -144,6 +144,6 @@ void HAL_I2C_ListenCpltCallback(I2C_HandleTypeDef *hi2c)
         }
     }
 
-    active_addr = 0xFF;
+//    active_addr = 0xFF;
     HAL_I2C_EnableListen_IT(hi2c);
 }

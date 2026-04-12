@@ -16,13 +16,20 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DS1307_REG_COUNT   8
 
-typedef struct {
-    uint8_t regs[DS1307_REG_COUNT];
+#define DS1307_REG_COUNT 64
+
+typedef struct
+{
     uint8_t addr;
     bool running;
+
+    uint8_t regs[DS1307_REG_COUNT];
     uint8_t cur_reg;
+    bool rx_expect_reg;
+
+    uint8_t rx_byte;
+    uint8_t tx_byte;
 } t_rtc;
 
 typedef struct {

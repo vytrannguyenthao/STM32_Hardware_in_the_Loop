@@ -16,7 +16,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define I2C_DEV_MAX 127
+#define I2C_DEV_MAX 128
 
 typedef enum {
     I2C_STATE_UNUSED = 0,
