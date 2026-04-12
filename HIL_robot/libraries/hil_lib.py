@@ -84,21 +84,21 @@ class HILLibrary:
     # ------------------
     # Power control
     # ------------------
-    @keyword("Power DUT On")
+    @keyword("HIL Power DUT On")
     def power_dut_on(self):
         self._hil_cmd("dut_power 1")
 
-    @keyword("Power DUT Off")
+    @keyword("HIL Power DUT Off")
     def power_dut_off(self):
         self._hil_cmd("dut_power 0")
 
-    @keyword("Power DUT Cycle")
+    @keyword("HIL Power DUT Cycle")
     def power_dut_cycle(self):
         self.power_dut_off()
         BuiltIn().sleep(1)
         self.power_dut_on()
 
-    @keyword("Check is DUT power on")
+    @keyword("HIL Check is DUT power on")
     def check_is_dut_power_on(self):
         resp = self._hil_cmd("dut_power_status")    
         if "ON" in resp:
@@ -106,7 +106,7 @@ class HILLibrary:
         else:
             raise AssertionError("DUT is not powered on")
 
-    @keyword("Check is DUT power off")
+    @keyword("HIL Check is DUT power off")
     def check_is_dut_power_off(self):
         resp = self._hil_cmd("dut_power_status")    
         if "OFF" in resp:
@@ -181,7 +181,7 @@ class HILLibrary:
             self.power_dut_cycle()
             raise AssertionError("Flash verification failed")
 
-    @keyword("Flash Firmware")
+    @keyword("HIL Flash Firmware for DUT")
     def flash_firmware(self, fw_path):
         # Check file exists
         if not os.path.isfile(fw_path):
@@ -456,7 +456,7 @@ class HILLibrary:
         # Chỉ trả về data
         return data
 
-    @keyword("Verify CAN String Data")
+    @keyword("HIL Verify CAN String Data")
     def verify_can_string_data(self, received_data, expected_string):
         # Quét qua từng byte Hex, đổi sang số thập phân (hệ 16), 
         # sau đó dùng chr() để ép sang ký tự ASCII và ghép dính lại với nhau.

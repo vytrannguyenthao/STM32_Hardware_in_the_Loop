@@ -10,4 +10,4 @@ ${FIRMWARE_PATH}    D:/STUDY/00_SCHOOL/DA/0_Project/STM32F4_DUT/Debug/STM32F4_DU
 
 *** Test Cases ***
 Flash Firmware to DUT
-    Flash Firmware    ${FIRMWARE_PATH}
+    HIL Flash Firmware for DUT    ${FIRMWARE_PATH}

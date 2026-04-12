@@ -29,14 +29,14 @@ class Logic_Library:
         self.cli.setup_logic_analyzer(rate, samples)
         logger.info(f"Logic Analyzer setup: samples={samples}, rate={rate} Hz")
     
-    @keyword("Read Logic Analyzer Data")
+    @keyword("LA Read Data")
     def read_la_data(self):
         self.setup_la(rate=250000, samples=1250000)  # 5 giây @ 250kHz
         data = self.cli.capture_binary_stream(timeout_sec=12.0)
         logger.info(f"Logic Analyzer data length: {len(data)} bytes")
         return data
 
-    @keyword("Verify Sine Wave")
+    @keyword("LA Verify Sine Wave")
     def verify_analog_is_sine_wave(self, raw_data: bytes, expected_freq_hz=None):
         sample_rate = 250000
         snr_threshold = 300
@@ -121,7 +121,7 @@ class Logic_Library:
                 )
         return is_sine
 
-    @keyword("Verify Pulse Wave")
+    @keyword("LA Verify Pulse Wave")
     def verify_pulse_wave(self, raw_data: bytes, channel: int, expected_freq_hz=None, expected_duty_cycle=None):
         if channel > 6:
             raise ValueError("Channel must be between 0 and 6.")
@@ -194,7 +194,7 @@ class Logic_Library:
         # Nếu code chạy được đến đây mà không bị văng AssertionError, tức là PASSED 100%
         return True
 
-    @keyword("Verify Triangle Wave")
+    @keyword("LA Verify Triangle Wave")
     def verify_triangle_wave(self, raw_data: bytes, expected_freq_hz=None):
         sample_rate = 250000
 

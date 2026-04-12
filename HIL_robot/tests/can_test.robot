@@ -3,7 +3,7 @@ Resource    ../resources/HIL_keywords.robot
 Resource    ../user_resources/DUT_keywords.robot
 Suite Setup         Run Keywords
 ...                 Connect To HIL    AND
-...                 Power DUT On
+...                 HIL Power DUT On
 
 Suite Teardown      Disconnect from HIL
 
@@ -20,4 +20,4 @@ Test CAN send and receive string
 
     # Read data from CAN and verify
     ${received_data}=    HIL Read CAN Data
-    Verify CAN String Data    received_data=${received_data}    expected_string=${my_string}
+    HIL Verify CAN String Data    received_data=${received_data}    expected_string=${my_string}

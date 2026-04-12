@@ -59,19 +59,19 @@ class DUTLibrary:
     # ------------------
     # PWM
     # ------------------
-    @keyword("Start DUT PWM")
+    @keyword("DUT Start PWM")
     def start_pwm(self, ch):
         self._dut_cmd(f"pwm_start {ch}", expect_response=False)
 
-    @keyword("Stop DUT PWM")
+    @keyword("DUT Stop PWM")
     def stop_pwm(self, ch):
         self._dut_cmd(f"pwm_stop {ch}", expect_response=False)
 
-    @keyword("Set DUT duty cycle")
+    @keyword("DUT Set duty cycle")
     def set_pwm_duty(self, ch, duty):
         self._dut_cmd(f"pwm_set_duty_cycle {ch} {duty}", expect_response=False)
 
-    @keyword("Set DUT PWM freq")
+    @keyword("DUT Set PWM freq")
     def set_pwm_freq(self, freq):
         self._dut_cmd(f"pwm_set_freq {freq}", expect_response=False)
 
@@ -215,7 +215,7 @@ class DUTLibrary:
                     f"Mismatch at {i}: {byte}"
                 )
             
-    @keyword("Measure EEPROM Write Time")
+    @keyword("DUT Measure EEPROM Write Time")
     def measure_write_time(self, addr, length):
 
         addr = self._validate_i2c_addr(addr)
@@ -233,7 +233,7 @@ class DUTLibrary:
 
         return duration
     
-    @keyword("Write Time Should Be Less Than")
+    @keyword("DUT Write Time Should Be Less Than")
     def write_time_should_be_less_than(self, measured, limit):
 
         if float(measured) > float(limit):
@@ -244,7 +244,7 @@ class DUTLibrary:
     # ------------------
     # SPI FLASH (W25Q)
     # ------------------
-    @keyword("Read SPI Flash ID")
+    @keyword("DUT Read SPI Flash ID")
     def read_spi_flash_id(self):
         resp = self._dut_cmd("w25q_ID")
         if "EF4018" in resp:
@@ -252,7 +252,7 @@ class DUTLibrary:
         else:
             raise AssertionError(f"Wrong Flash ID! Expected EF4018, got: {resp}")
 
-    @keyword("Read SPI Flash Data")
+    @keyword("DUT Read SPI Flash Data")
     def read_spi_flash_data(self, length):
         length = self._validate_uint("length", length)
         resp = self._dut_cmd(f"w25q_read {length}")
@@ -276,18 +276,18 @@ class DUTLibrary:
             )
         return data
 
-    @keyword("Write SPI Flash Data")
+    @keyword("DUT Write SPI Flash Data")
     def write_spi_flash_data(self, length):
         length = self._validate_uint("length", length)
         self._dut_cmd(f"w25q_write {length}")
 
-    @keyword("Erase SPI Flash Data")
+    @keyword("DUT Erase SPI Flash Data")
     def erase_spi_flash_data(self):
         rsp = self._dut_cmd(f"w25q_erasechip")
         if "OK" not in rsp:
             raise AssertionError(f"Failed to erase SPI Flash")
 
-    @keyword("Is SPI Flash Data Erased")
+    @keyword("DUT Verify Is SPI Flash Data Erased")
     def is_spi_flash_data_erased(self, data):
         for index, byte in enumerate(data):
             # Ép kiểu về chữ HOA để so sánh cho an toàn (lỡ firmware trả về 'ff')

@@ -4,7 +4,7 @@ Resource    ../user_resources/DUT_keywords.robot
 
 Suite Setup         Run Keywords
 ...                 Connect To HIL          AND
-...                 Power DUT On            AND
+...                 HIL Power DUT On            AND
 ...                 Connect To DUT
 
 Suite Teardown      Run Keywords
