@@ -28,7 +28,7 @@ DUT Generate PWM Signal
 
 Verify PWM Signal with Logic Analyzer
     # Read data from logic analyzer
-    ${data}    Read Logic Analyzer Data
+    ${data}=    Read Logic Analyzer Data
 
     # Verify results
     Verify Pulse Wave    raw_data=${data}    channel=${LA_DIGITAL_CHANNEL}    expected_freq_hz=${PWM_FREQUENCY}    expected_duty_cycle=${PWM_DUTY_CYCLE}

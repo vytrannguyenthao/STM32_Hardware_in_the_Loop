@@ -20,17 +20,17 @@ ${TRIANGLE_FREQUENCY}       1000
 *** Test Cases ***
 
 DUT Generate Sine Wave and Acquire Data
-    DUT Generate Sine Wave    ${SINE_FREQUENCY}
-    ${data}    Read Logic Analyzer Data
-    Verify Sine Wave    ${data}    ${SINE_FREQUENCY}
+    DUT Generate Sine Wave    frequency=${SINE_FREQUENCY}
+    ${data}=    Read Logic Analyzer Data
+    Verify Sine Wave    raw_data=${data}    expected_freq_hz=${SINE_FREQUENCY}
 
 DUT Stop Sine Wave
     DUT Stop Sine Wave
 
 DUT Generate Triangle Wave and Acquire Data
-    DUT Generate Triangle Wave    ${TRIANGLE_FREQUENCY}
-    ${data}    Read Logic Analyzer Data
-    Verify Triangle Wave    ${data}    ${TRIANGLE_FREQUENCY}
+    DUT Generate Triangle Wave    frequency=${TRIANGLE_FREQUENCY}
+    ${data}=    Read Logic Analyzer Data
+    Verify Triangle Wave    raw_data=${data}    expected_freq_hz=${TRIANGLE_FREQUENCY}
 
 DUT Stop Triangle Wave
     DUT Stop Triangle Wave

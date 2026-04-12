@@ -19,17 +19,17 @@ ${voltage_4}    3.3
 
 *** Test Cases ***
 Test DUT Read 1.5V
-    HIL Set DAC Voltage     ${voltage_1}
-    DUT Read ADC Voltage    ${voltage_1}
+    HIL Set DAC Voltage     voltage=${voltage_1}
+    DUT Read ADC Voltage    expected_volt=${voltage_1}
 
 Test DUT Read 2.0V
-    HIL Set DAC Voltage     ${voltage_2}
-    DUT Read ADC Voltage    ${voltage_2}
+    HIL Set DAC Voltage     voltage=${voltage_2}
+    DUT Read ADC Voltage    expected_volt=${voltage_2}
 
 Test DUT Read 3.0V
-    HIL Set DAC Voltage     ${voltage_3}
-    DUT Read ADC Voltage    ${voltage_3}
+    HIL Set DAC Voltage     voltage=${voltage_3}
+    DUT Read ADC Voltage    expected_volt=${voltage_3}
 
 Test DUT Read 3.3V
-    HIL Set DAC Voltage     ${voltage_4}
-    DUT Read ADC Voltage    ${voltage_4}
+    HIL Set DAC Voltage     voltage=${voltage_4}
+    DUT Read ADC Voltage    expected_volt=${voltage_4}

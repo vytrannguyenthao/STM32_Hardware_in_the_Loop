@@ -15,27 +15,27 @@ Suite Teardown      Run Keywords
 *** Test Cases ***
 RTC Initialization
     # --- HIL setup ---
-    HIL Init RTC        0x68
-    HIL Activate I2C Device    0x68
+    HIL Init RTC        addr=0x68
+    HIL Activate I2C Device    addr=0x68
 
     # --- DUT setup ---
     DUT Init RTC
 
 RTC Set and Get Time/Date
-    DUT Set RTC Time    14    30    45
+    DUT Set RTC Time    hour=14    minute=30    second=45
     ${time}=    DUT Get RTC Time
-    RTC Time Should Be Within    ${time}    14    30    45    7
+    RTC Time Should Be Within    rtc_data=${time}    hour=14    minute=30    second=45    tolerance=7
 
-    DUT Set RTC Date    1    12    4    26
+    DUT Set RTC Date    dow=1    date=12    month=4    year=26
     ${date}=    DUT Get RTC Date
-    RTC Date Should Be    ${date}    1    12    4    26
+    RTC Date Should Be    rtc_data=${date}    dow=1    date=12    month=4    year=26
 
 RTC Time Progression
-    DUT Set RTC Date    7    31    12    26
-    DUT Set RTC Time    23    59    50
+    DUT Set RTC Date    dow=7    date=31    month=12    year=26
+    DUT Set RTC Time    hour=23    minute=59    second=50
     Sleep    10s
     ${date}=    DUT Get RTC Date
     ${time}=    DUT Get RTC Time
-    RTC Time Should Be Within    ${time}    0    0    0    7
-    RTC Date Should Be    ${date}    1    1    1    27
+    RTC Time Should Be Within    rtc_data=${time}    hour=0    minute=0    second=0    tolerance=7
+    RTC Date Should Be    rtc_data=${date}    dow=1    date=1    month=1    year=27
     

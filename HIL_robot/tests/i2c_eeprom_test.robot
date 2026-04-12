@@ -15,19 +15,19 @@ Suite Teardown      Run Keywords
 *** Test Cases ***
 EEPROM Validation
     # --- HIL setup ---
-    HIL Init EEPROM        0x50    1024    256
-    HIL Activate I2C Device    0x50
+    HIL Init EEPROM            addr=0x50    size=1024    page=256
+    HIL Activate I2C Device    addr=0x50
 
     # --- DUT setup ---
-    DUT Init EEPROM        0x50    1024    256
+    DUT Init EEPROM            addr=0x50    size=1024    page=256
 
     # --- Timing ---
-    ${t}=    Measure EEPROM Write Time    0x50    256
+    ${t}=    Measure EEPROM Write Time    addr=0x50    length=256
     Write Time Should Be Less Than    ${t}    5
 
     # --- Data validation ---
-    ${data}=    DUT Write And Verify EEPROM    0x50    256
-    Data Should Increment    ${data}
+    ${data}=    DUT Write And Verify EEPROM    addr=0x50    length=256
+    Data Should Increment    data=${data}
 
     # --- HIL deinit ---
-    HIL Deinit EEPROM        0x50
+    HIL Deinit EEPROM        addr=0x50
