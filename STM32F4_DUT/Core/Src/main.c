@@ -144,7 +144,7 @@ int main(void)
   xTaskCreate(toggle_led, "toggle_led", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
 	CommandLine_Init();
-	xTaskCreate(CommandLine_Task, "DUT Console", configMINIMAL_STACK_SIZE * 4, NULL, 2, NULL);
+	xTaskCreate(CommandLine_Task, "DUT Console", configMINIMAL_STACK_SIZE * 8, NULL, 2, NULL);
   ADC_FFT_Init();
 	vTaskStartScheduler();
   /* USER CODE END 2 */
