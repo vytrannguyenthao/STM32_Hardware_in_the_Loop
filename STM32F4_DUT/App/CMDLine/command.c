@@ -17,7 +17,8 @@
 #include "usb.h"
 #include "w25q_driver.h"
 #include "sine_wave.h"
-#include "i2c_eeprom.h"
+#include "i2c_driver/i2c_eeprom.h"
+#include "i2c_driver/i2c_rtc.h"
 #include "adc_fft.h"
 
 extern I2C_HandleTypeDef hi2c3;
@@ -83,6 +84,12 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "eeprom_write", Cmd_EEPROM_Write, "eeprom_write <addr> <len>" },
 	{ "eeprom_read",  Cmd_EEPROM_Read,  "eeprom_read <addr> <len>" },
 	{ "eeprom_fill",  Cmd_EEPROM_Fill,  "eeprom_fill <addr> <len>" },
+
+	{ "rtc_init",  Cmd_RTC_Init,  "Init the communication with RTC DS1307" },
+	{ "rtc_set_time",  Cmd_RTC_Set_Time,  "rtc_set_time <hour> <min> <sec>" },
+	{ "rtc_get_time",  Cmd_RTC_Get_Time,  "get RTC time" },
+	{ "rtc_set_date",  Cmd_RTC_Set_Date,  "rtc_set_date <day> <date> <mon> <year>" },
+	{ "rtc_get_date",  Cmd_RTC_Get_Date,  "get RTC date" },
 
 	{ "set_freq",  Cmd_set_freq,  "set sine wave frequency <freq>" },
 	{ "get_freq",  Cmd_get_freq,  "get sine wave frequency" },
@@ -463,6 +470,115 @@ int Cmd_EEPROM_Fill(int argc, char *argv[])
 
 	Console_Write("\r\nEEPROM fill OK\r\n");
 	return CMDLINE_OK;
+}
+
+int Cmd_RTC_Init(int argc, char *argv[])
+{
+	if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	//Địa chỉ của DS1307 được để mặc định là 0x68 nên không cần set
+	DS1307_Init(&hi2c3);
+	Console_Write("\r\nDS1307 init OK\r\n");
+	return CMDLINE_OK;
+}
+
+int Cmd_RTC_Set_Time(int argc, char *argv[])
+{
+	if (argc < 5)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 5)
+		return CMDLINE_TOO_MANY_ARGS;
+
+    uint8_t hour = atoi(argv[1]);
+    uint8_t min  = atoi(argv[2]);
+    uint8_t sec  = atoi(argv[3]);
+
+    if (hour > 23 || min > 59 || sec > 59)
+    {
+        Console_Write("ERR: Invalid time\r\n");
+        return CMDLINE_OK;
+    }
+
+    DS1307_SetHour(hour);
+    DS1307_SetMinute(min);
+    DS1307_SetSecond(sec);
+
+    Console_Write("DS1307 set time OK: %02d:%02d:%02d\r\n",
+                  hour, min, sec);
+
+    return CMDLINE_OK;
+}
+
+int Cmd_RTC_Get_Time(int argc, char *argv[])
+{
+	if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+	uint8_t hour = DS1307_GetHour();
+	uint8_t min = DS1307_GetMinute();
+	uint8_t sec = DS1307_GetSecond();
+	Console_Write("\r\nDS1307 get time OK: %d:%d:%d\r\n", hour, min, sec);
+	return CMDLINE_OK;
+}
+
+int Cmd_RTC_Set_Date(int argc, char *argv[])
+{
+	if (argc < 6)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 6)
+		return CMDLINE_TOO_MANY_ARGS;
+
+    uint8_t day   = atoi(argv[1]);
+    uint8_t date  = atoi(argv[2]);
+    uint8_t month = atoi(argv[3]);
+    uint8_t year2 = atoi(argv[4]);   // 0..99
+
+    if (year2 > 99)
+    {
+        Console_Write("ERR: Invalid year (0-99)\r\n");
+        return CMDLINE_OK;
+    }
+
+    uint16_t full_year = 2000 + year2;
+
+    if (!rtc_validate_date(day, date, month, full_year))
+    {
+        Console_Write("ERR: Invalid date\r\n");
+        return CMDLINE_OK;
+    }
+
+    DS1307_SetDayOfWeek(day);
+    DS1307_SetDate(date);
+    DS1307_SetMonth(month);
+    DS1307_SetYear(full_year);
+
+    Console_Write("DS1307 set date OK: DOW=%d %02d/%02d/%04d\r\n",
+                  day, date, month, full_year);
+
+    return CMDLINE_OK;
+}
+
+int Cmd_RTC_Get_Date(int argc, char *argv[])
+{
+	if (argc < 2)
+		return CMDLINE_TOO_FEW_ARGS;
+	if (argc > 2)
+		return CMDLINE_TOO_MANY_ARGS;
+
+    uint8_t day   = DS1307_GetDayOfWeek();
+    uint8_t date  = DS1307_GetDate();
+    uint8_t month = DS1307_GetMonth();
+    uint16_t year = DS1307_GetYear();
+
+    Console_Write("DS1307 get date OK: DOW=%d %02d/%02d/%04d\r\n",
+                  day, date, month, year);
+
+    return CMDLINE_OK;
 }
 
 int Cmd_I2C_Scan(int argc, char *argv[])

@@ -51,4 +51,10 @@ int Cmd_PWM_Start(int argc, char *argv[]);
 int Cmd_PWM_Stop(int argc, char *argv[]);
 int Cmd_Set_Led(int argc, char *argv[]);
 int Cmd_Read_Sine_Frequency(int argc, char *argv[]);
+int Cmd_RTC_Init(int argc, char *argv[]);
+int Cmd_RTC_Set_Time(int argc, char *argv[]);
+int Cmd_RTC_Get_Time(int argc, char *argv[]);
+int Cmd_RTC_Set_Date(int argc, char *argv[]);
+int Cmd_RTC_Get_Date(int argc, char *argv[]);
+
 #endif /* CMDLINE_COMMAND_H_ */
