@@ -101,8 +101,8 @@ class DUTLibrary:
         except ValueError:
             raise AssertionError(f"{name} must be integer")
 
-        if v <= 0:
-            raise AssertionError(f"{name} must > 0")
+        if v < 0:
+            raise AssertionError(f"{name} must be a positive integer")
 
         return v
 
@@ -366,4 +366,230 @@ class DUTLibrary:
                     f"(Range: {lower_bound:.0f} mV to {upper_bound:.0f} mV)"
                 )
             logger.info(f"Got {voltage_mv} mV, (Range: [{lower_bound:.0f} -> {upper_bound:.0f}] mV)")
+        return True
+    
+    # ------------------
+    # RTC (DS1307)
+    # ------------------
+
+    def _validate_rtc_time(self, hour, minute, second):
+        hour = self._validate_uint("hour", hour)
+        minute = self._validate_uint("minute", minute)
+        second = self._validate_uint("second", second)
+
+        if hour > 23:
+            raise AssertionError("Hour must be 0-23")
+        if minute > 59:
+            raise AssertionError("Minute must be 0-59")
+        if second > 59:
+            raise AssertionError("Second must be 0-59")
+
+        return hour, minute, second
+
+
+    def _is_leap_year(self, year):
+        return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+
+
+    def _days_in_month(self, month, year):
+        days = [31, 28, 31, 30, 31, 30,
+                31, 31, 30, 31, 30, 31]
+
+        if month == 2 and self._is_leap_year(year):
+            return 29
+
+        return days[month - 1]
+
+
+    def _validate_rtc_date(self, dow, date, month, year):
+        dow = self._validate_uint("day_of_week", dow)
+        date = self._validate_uint("date", date)
+        month = self._validate_uint("month", month)
+        year = self._validate_uint("year", year)
+
+        if dow < 1 or dow > 7:
+            raise AssertionError("Day-of-week must be 1-7")
+
+        if month < 1 or month > 12:
+            raise AssertionError("Month must be 1-12")
+
+        if year > 99:
+            raise AssertionError("Year must be 0-99")
+
+        full_year = 2000 + year
+
+        max_day = self._days_in_month(month, full_year)
+
+        if date < 1 or date > max_day:
+            raise AssertionError(
+                f"Invalid date {date}/{month}/{full_year}"
+            )
+
+        return dow, date, month, year
+
+    @keyword("DUT Init RTC")
+    def dut_init_rtc(self):
+        resp = self._dut_cmd("rtc_init")
+
+        if "OK" not in resp.upper():
+            raise AssertionError(
+                f"RTC init failed: {resp}"
+            )
+
+        return True
+
+
+    @keyword("DUT Set RTC Time")
+    def dut_set_rtc_time(self, hour, minute, second):
+
+        hour, minute, second = self._validate_rtc_time(
+            hour, minute, second
+        )
+
+        resp = self._dut_cmd(
+            f"rtc_set_time {hour} {minute} {second}"
+        )
+
+        if "OK" not in resp.upper():
+            raise AssertionError(
+                f"RTC set time failed: {resp}"
+            )
+
+        return True
+
+
+    @keyword("DUT Get RTC Time")
+    def dut_get_rtc_time(self):
+
+        resp = self._dut_cmd("rtc_get_time")
+
+        match = re.search(
+            r"(\d{1,2}):(\d{1,2}):(\d{1,2})",
+            resp
+        )
+
+        if not match:
+            raise AssertionError(
+                f"Failed to parse RTC time: {resp}"
+            )
+
+        hour = int(match.group(1))
+        minute = int(match.group(2))
+        second = int(match.group(3))
+
+        return {
+            "hour": hour,
+            "minute": minute,
+            "second": second
+        }
+
+    @keyword("RTC Time Should Be Within")
+    def rtc_time_should_be_within(
+        self,
+        rtc_data,
+        hour,
+        minute,
+        second,
+        tolerance=2
+    ):
+        hour = int(hour)
+        minute = int(minute)
+        second = int(second)
+        tolerance = int(tolerance)
+
+        expected = hour * 3600 + minute * 60 + second
+
+        actual = (
+            int(rtc_data["hour"]) * 3600 +
+            int(rtc_data["minute"]) * 60 +
+            int(rtc_data["second"])
+        )
+
+        if abs(actual - expected) > tolerance:
+            raise AssertionError(
+                f"RTC time out of tolerance. "
+                f"Expected {hour:02}:{minute:02}:{second:02}, "
+                f"Got {rtc_data['hour']:02}:{rtc_data['minute']:02}:{rtc_data['second']:02}"
+            )
+
+        return True
+
+    @keyword("DUT Set RTC Date")
+    def dut_set_rtc_date(self, dow, date, month, year):
+
+        dow, date, month, year = self._validate_rtc_date(
+            dow, date, month, year
+        )
+
+        resp = self._dut_cmd(
+            f"rtc_set_date {dow} {date} {month} {year}"
+        )
+
+        if "OK" not in resp.upper():
+            raise AssertionError(
+                f"RTC set date failed: {resp}"
+            )
+
+        return True
+
+
+    @keyword("DUT Get RTC Date")
+    def dut_get_rtc_date(self):
+
+        resp = self._dut_cmd("rtc_get_date")
+
+        match = re.search(
+            r"DOW=(\d+)\s+(\d{1,2})/(\d{1,2})/(\d{4})",
+            resp
+        )
+
+        if not match:
+            raise AssertionError(
+                f"Failed to parse RTC date: {resp}"
+            )
+
+        return {
+            "dow": int(match.group(1)),
+            "date": int(match.group(2)),
+            "month": int(match.group(3)),
+            "year": int(match.group(4))
+        }
+
+
+    @keyword("RTC Date Should Be")
+    def rtc_date_should_be(
+        self,
+        rtc_data,
+        dow,
+        date,
+        month,
+        year
+    ):
+
+        dow, date, month, year = self._validate_rtc_date(
+            dow, date, month, year
+        )
+
+        full_year = 2000 + year
+
+        if rtc_data["dow"] != dow:
+            raise AssertionError(
+                f"DOW mismatch: {rtc_data['dow']} != {dow}"
+            )
+
+        if rtc_data["date"] != date:
+            raise AssertionError(
+                f"Date mismatch: {rtc_data['date']} != {date}"
+            )
+
+        if rtc_data["month"] != month:
+            raise AssertionError(
+                f"Month mismatch: {rtc_data['month']} != {month}"
+            )
+
+        if rtc_data["year"] != full_year:
+            raise AssertionError(
+                f"Year mismatch: {rtc_data['year']} != {full_year}"
+            )
+
         return True

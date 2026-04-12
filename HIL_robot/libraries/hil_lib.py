@@ -320,6 +320,15 @@ class HILLibrary:
         if "not initialized" in resp.lower():
             raise AssertionError(resp)
 
+    @keyword("HIL Init RTC")
+    def hil_init_rtc(self, addr):
+        addr = self._validate_i2c_addr(addr)
+        cmd = f"rtc_init 0x{addr:02X}"
+        resp = self._hil_cmd(cmd)
+
+        if "ok" not in resp.lower():
+            raise AssertionError(resp)
+
     # ------------------
     # SPI FLASH (W25Q)
     # ------------------

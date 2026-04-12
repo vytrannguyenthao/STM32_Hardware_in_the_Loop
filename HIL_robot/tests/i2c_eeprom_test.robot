@@ -8,6 +8,7 @@ Suite Setup         Run Keywords
 ...                 Connect To DUT
 
 Suite Teardown      Run Keywords
+...                 Power DUT Off           AND
 ...                 Disconnect from HIL     AND
 ...                 Disconnect from DUT
 
