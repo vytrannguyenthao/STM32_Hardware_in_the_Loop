@@ -28,6 +28,7 @@
 #include "w25q_driver.h"
 #include "sine_wave.h"
 #include "can_driver.h"
+#include "adc_fft.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -144,6 +145,7 @@ int main(void)
 
 	CommandLine_Init();
 	xTaskCreate(CommandLine_Task, "DUT Console", configMINIMAL_STACK_SIZE * 4, NULL, 2, NULL);
+  ADC_FFT_Init();
 	vTaskStartScheduler();
   /* USER CODE END 2 */
 
@@ -686,7 +688,7 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }

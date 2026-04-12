@@ -18,6 +18,7 @@
 #include "w25q_driver.h"
 #include "sine_wave.h"
 #include "i2c_eeprom.h"
+#include "adc_fft.h"
 
 extern I2C_HandleTypeDef hi2c3;
 static I2C_EEPROM_t EEPROM1;
@@ -101,6 +102,8 @@ tCmdLineEntry g_psCmdTable[] =
 	{ "pwm_stop",  Cmd_PWM_Stop,  "pwm_stop <ch>" },
 
 	{ "set_led", Cmd_Set_Led, "set_led <led_idx> <0|1>" },
+
+	{ "read_sine_freq", Cmd_Read_Sine_Frequency, "read_sine_freq" },
 
 	{ 0, 0, 0 }
 };
@@ -810,6 +813,15 @@ int Cmd_Set_Led(int argc, char *argv[])
 				break;
 			}
 		}
+
+	return CMDLINE_OK;
+}
+
+int Cmd_Read_Sine_Frequency(int argc, char *argv[])
+{
+	if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+
+	ADC_FFT_TriggerCapture();
 
 	return CMDLINE_OK;
 }
