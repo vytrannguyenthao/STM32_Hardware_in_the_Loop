@@ -27,8 +27,11 @@ class PeripheralTab(QWidget):
         self.led_colors = ["#e74c3c", "#2ecc71", "#3498db", "#f1c40f", "#9b59b6"]
         self.led_ui_elements = [] 
         
-        # Biến cờ kiểm tra tần số đã set chưa
+        # Biến cờ kiểm tra tần số PWM đã set chưa
         self._is_freq_set = False 
+        
+        # Biến trạng thái cho Waveform Generator
+        self._wave_running = "NONE" # "NONE", "SINE", "TRIANGLE"
 
         # ==================================================
         # CHIA ĐÔI MÀN HÌNH BẰNG QSPLITTER
@@ -54,7 +57,7 @@ class PeripheralTab(QWidget):
 
         self.splitter.addWidget(self.left_panel)
         self.splitter.addWidget(self.right_panel)
-        self.splitter.setSizes([400, 750]) 
+        self.splitter.setSizes([500, 650]) 
         
         main_layout.addWidget(self.splitter)
 
@@ -140,17 +143,21 @@ class PeripheralTab(QWidget):
         wave_layout.addLayout(wfreq_layout)
 
         btn_layout = QHBoxLayout()
-        self.btn_gen_sine = QPushButton("Gen Sine")
-        self.btn_gen_tri = QPushButton("Gen Triangle")
-        self.btn_stop_wave = QPushButton("Stop Wave")
-        self.btn_stop_wave.setEnabled(False) 
         
-        btn_layout.addWidget(self.btn_gen_sine)
-        btn_layout.addWidget(self.btn_gen_tri)
-        btn_layout.addWidget(self.btn_stop_wave)
+        # Tạo 2 nút Start độc lập
+        self.btn_wave_sine = QPushButton("Start Sine")
+        
+        self.btn_wave_tri = QPushButton("Start Triangle")
+        
+        btn_layout.addWidget(self.btn_wave_sine)
+        btn_layout.addWidget(self.btn_wave_tri)
         wave_layout.addLayout(btn_layout)
         
         self.left_layout.addWidget(wave_group)
+
+        # Gán sự kiện cho 2 nút Wave
+        self.btn_wave_sine.clicked.connect(self.on_toggle_sine)
+        self.btn_wave_tri.clicked.connect(self.on_toggle_tri)
 
         # --------------------------------------------------
         # 3. Khối 5 bóng đèn LED
@@ -235,15 +242,11 @@ class PeripheralTab(QWidget):
         self.left_layout.addStretch()
 
         # --- Gán sự kiện UI ---
-        self.btn_gen_sine.clicked.connect(self.on_gen_sine)
-        self.btn_gen_tri.clicked.connect(self.on_gen_tri)
-        self.btn_stop_wave.clicked.connect(self.on_stop_wave)
-        
         self.adc_slider.valueChanged.connect(self.on_adc_slider_changed)
         self.btn_read_adc.clicked.connect(self.on_read_adc_clicked)
         self.btn_can_str.clicked.connect(self.on_can_send_string)
         self.btn_can_buf.clicked.connect(self.on_can_send_buffer)
-        self.btn_can_read.clicked.connect(self.on_can_read_manual) # Kích hoạt sự kiện Đọc
+        self.btn_can_read.clicked.connect(self.on_can_read_manual)
 
     # ==================================================
     # BUILD CỘT PHẢI (CAN MONITOR)
@@ -323,25 +326,73 @@ class PeripheralTab(QWidget):
             self.uart_dut.send(f"pwm_set_duty_cycle {channel} {value}")
 
     # --- LOGIC WAVE ---
-    def on_gen_sine(self):
-        self.btn_gen_sine.setEnabled(False)
-        self.btn_gen_tri.setEnabled(False)
-        self.btn_stop_wave.setEnabled(True)
+    def on_toggle_sine(self):
         freq = self.spin_wave_freq.value()
-        # TODO: Điền command gen sine
+        
+        if self._wave_running == "NONE":
+            # Đang dừng -> Chạy Sine
+            # Kiểm tra tần số nằm trong range 1-10000
+            if 1 <= freq <= 10000:
+                if self.uart_dut:
+                    self.uart_dut.send(f"set_freq {freq}")
+                    self.uart_dut.send("sine_wave 1")
+                
+                self._wave_running = "SINE"
+                self.btn_wave_sine.setText("Stop Sine")
+                
+                # Khóa nút Triangle
+                self.btn_wave_tri.setEnabled(False)
+                
+                # Khóa Spinbox Tần số (Không cho đổi khi đang chạy)
+                self.spin_wave_freq.setEnabled(False)
+            
+        elif self._wave_running == "SINE":
+            # Đang chạy Sine -> Dừng
+            if self.uart_dut:
+                self.uart_dut.send("sine_wave 0")
+            
+            self._wave_running = "NONE"
+            self.btn_wave_sine.setText("Start Sine")
+            
+            # Mở khóa nút Triangle
+            self.btn_wave_tri.setEnabled(True)
+            
+            # Mở khóa Spinbox Tần số
+            self.spin_wave_freq.setEnabled(True)
 
-    def on_gen_tri(self):
-        self.btn_gen_sine.setEnabled(False)
-        self.btn_gen_tri.setEnabled(False)
-        self.btn_stop_wave.setEnabled(True)
+    def on_toggle_tri(self):
         freq = self.spin_wave_freq.value()
-        # TODO: Điền command gen triangle
-
-    def on_stop_wave(self):
-        self.btn_gen_sine.setEnabled(True)
-        self.btn_gen_tri.setEnabled(True)
-        self.btn_stop_wave.setEnabled(False)
-        # TODO: Điền command stop wave
+        
+        if self._wave_running == "NONE":
+            # Đang dừng -> Chạy Triangle
+            # Kiểm tra tần số nằm trong range 1-10000
+            if 1 <= freq <= 10000:
+                if self.uart_dut:
+                    self.uart_dut.send(f"set_freq {freq}")
+                    self.uart_dut.send("triangle_wave 1")
+                
+                self._wave_running = "TRIANGLE"
+                self.btn_wave_tri.setText("Stop Triangle")
+                
+                # Khóa nút Sine
+                self.btn_wave_sine.setEnabled(False)
+                
+                # Khóa Spinbox Tần số
+                self.spin_wave_freq.setEnabled(False)
+            
+        elif self._wave_running == "TRIANGLE":
+            # Đang chạy Triangle -> Dừng
+            if self.uart_dut:
+                self.uart_dut.send("triangle_wave 0")
+            
+            self._wave_running = "NONE"
+            self.btn_wave_tri.setText("Start Triangle")
+            
+            # Mở khóa nút Sine
+            self.btn_wave_sine.setEnabled(True)
+            
+            # Mở khóa Spinbox Tần số
+            self.spin_wave_freq.setEnabled(True)
 
     # --- LOGIC LED ---
     def on_led_toggle(self, led_idx, is_on):
@@ -439,7 +490,6 @@ class PeripheralTab(QWidget):
         self.can_table.scrollToBottom()
 
     def _flush_can_data(self):
-        """Hàm này được gọi bởi QTimer khi mạch HIL ngừng gửi dữ liệu CAN RX trong 100ms"""
         if self._is_reading_can and self._temp_can_data:
             self._is_reading_can = False
             full_payload = " ".join(self._temp_can_data)
