@@ -320,6 +320,61 @@ class HILLibrary:
         if "not initialized" in resp.lower():
             raise AssertionError(resp)
 
+    def _validate_rtc_time(self, hour, minute, second):
+        hour = self._validate_uint("hour", hour)
+        minute = self._validate_uint("minute", minute)
+        second = self._validate_uint("second", second)
+
+        if hour > 23:
+            raise AssertionError("Hour must be 0-23")
+        if minute > 59:
+            raise AssertionError("Minute must be 0-59")
+        if second > 59:
+            raise AssertionError("Second must be 0-59")
+
+        return hour, minute, second
+
+
+    def _is_leap_year(self, year):
+        return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+
+
+    def _days_in_month(self, month, year):
+        days = [31, 28, 31, 30, 31, 30,
+                31, 31, 30, 31, 30, 31]
+
+        if month == 2 and self._is_leap_year(year):
+            return 29
+
+        return days[month - 1]
+
+
+    def _validate_rtc_date(self, dow, date, month, year):
+        dow = self._validate_uint("day_of_week", dow)
+        date = self._validate_uint("date", date)
+        month = self._validate_uint("month", month)
+        year = self._validate_uint("year", year)
+
+        if dow < 1 or dow > 7:
+            raise AssertionError("Day-of-week must be 1-7")
+
+        if month < 1 or month > 12:
+            raise AssertionError("Month must be 1-12")
+
+        if year > 99:
+            raise AssertionError("Year must be 0-99")
+
+        full_year = 2000 + year
+
+        max_day = self._days_in_month(month, full_year)
+
+        if date < 1 or date > max_day:
+            raise AssertionError(
+                f"Invalid date {date}/{month}/{full_year}"
+            )
+
+        return dow, date, month, year
+
     @keyword("HIL Init RTC")
     def hil_init_rtc(self, addr):
         addr = self._validate_i2c_addr(addr)
@@ -328,6 +383,93 @@ class HILLibrary:
 
         if "ok" not in resp.lower():
             raise AssertionError(resp)
+
+    @keyword("HIL Prepare RTC Time")
+    def hil_set_rtc_time(self, addr, hour, minute, second):
+
+        hour, minute, second = self._validate_rtc_time(
+            hour, minute, second
+        )
+        addr = self._validate_i2c_addr(addr)
+
+        resp = self._hil_cmd(
+            f"rtc_set_time 0x{addr:02X} {hour} {minute} {second}"
+        )
+
+        if "OK" not in resp.upper():
+            raise AssertionError(
+                f"HIL prepare time failed: {resp}"
+            )
+
+        return True
+
+    @keyword("HIL Get RTC Time")
+    def hil_get_rtc_time(self, addr):
+
+        addr = self._validate_i2c_addr(addr)
+        resp = self._hil_cmd(f"rtc_get_time 0x{addr:02X}")
+
+        match = re.search(
+            r"(\d{1,2}):(\d{1,2}):(\d{1,2})",
+            resp
+        )
+
+        if not match:
+            raise AssertionError(
+                f"Failed to parse RTC time: {resp}"
+            )
+
+        hour = int(match.group(1))
+        minute = int(match.group(2))
+        second = int(match.group(3))
+
+        return {
+            "hour": hour,
+            "minute": minute,
+            "second": second
+        }
+    
+    @keyword("HIL Set RTC Date")
+    def hil_set_rtc_date(self, addr, dow, date, month, year):
+
+        addr = self._validate_i2c_addr(addr)
+        dow, date, month, year = self._validate_rtc_date(
+            dow, date, month, year
+        )
+
+        resp = self._hil_cmd(
+            f"rtc_set_date 0x{addr:02X} {dow} {date} {month} {year}"
+        )
+
+        if "OK" not in resp.upper():
+            raise AssertionError(
+                f"HIL set date failed: {resp}"
+            )
+
+        return True
+
+    @keyword("HIL Get RTC Date")
+    def hil_get_rtc_date(self, addr):
+
+        addr = self._validate_i2c_addr(addr)
+        resp = self._hil_cmd(f"rtc_get_date 0x{addr:02X}")
+
+        match = re.search(
+            r"DOW=(\d+)\s+(\d{1,2})/(\d{1,2})/(\d{4})",
+            resp
+        )
+
+        if not match:
+            raise AssertionError(
+                f"Failed to parse RTC date: {resp}"
+            )
+
+        return {
+            "dow": int(match.group(1)),
+            "date": int(match.group(2)),
+            "month": int(match.group(3)),
+            "year": int(match.group(4))
+        }
 
     # ------------------
     # SPI FLASH (W25Q)
