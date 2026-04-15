@@ -111,9 +111,10 @@ static int cmd_i2c_rtc_set_time(int argc, char *argv[])
 
 static int cmd_i2c_rtc_set_date(int argc, char *argv[])
 {
-    if (argc < 5) {
-        Console_Write("Usage: rtc_set_date <addr> <dd> <mm> <yy>\r\n");
-        return CMDLINE_BAD_CMD;
+    if (argc < 7) {
+        return CMDLINE_TOO_FEW_ARGS;
+    } else if (argc > 7) {
+        return CMDLINE_TOO_MANY_ARGS;
     }
 
     uint8_t addr = (uint8_t)strtol(argv[1], NULL, 0);
@@ -126,11 +127,12 @@ static int cmd_i2c_rtc_set_date(int argc, char *argv[])
 
     rtc_date_t d;
     d.day   = atoi(argv[2]);
-    d.month = atoi(argv[3]);
-    d.year  = atoi(argv[4]);
+	d.date  = atoi(argv[3]);
+    d.month = atoi(argv[4]);
+    d.year  = atoi(argv[5]);
 
     rtc_set_date(rtc, &d);
-    Console_Write("Date set: %02d/%02d/%02d\r\n", d.day, d.month, d.year);
+    Console_Write("Date set: %01d, %02d/%02d/%02d\r\n", d.day, d.date, d.month, d.year);
 
     return CMDLINE_OK;
 }
@@ -175,7 +177,7 @@ static int cmd_i2c_rtc_get_date(int argc, char *argv[])
     rtc_date_t d;
     rtc_get_date(rtc, &d);
 
-    Console_Write("Date: %02d/%02d/%02d\r\n", d.day, d.month, d.year);
+    Console_Write("Date: %01d, %02d/%02d/%02d\r\n", d.day, d.date, d.month, d.year);
     return CMDLINE_OK;
 }
 
@@ -270,8 +272,8 @@ void Cmd_I2C_Register(void)
     CLI_RegisterCommand("rtc_init",      cmd_i2c_rtc_init,      "Init I2C RTC emulator");
     CLI_RegisterCommand("rtc_deinit",    cmd_i2c_rtc_deinit,    "Deinit I2C RTC");
 
-    CLI_RegisterCommand("rtc_set_time",  cmd_i2c_rtc_set_time,  "Set RTC time");
-    CLI_RegisterCommand("rtc_set_date",  cmd_i2c_rtc_set_date,  "Set RTC date");
+    CLI_RegisterCommand("rtc_set_time",  cmd_i2c_rtc_set_time,  "rtc_set_time <addr> <hour> <min> <sec>");
+    CLI_RegisterCommand("rtc_set_date",  cmd_i2c_rtc_set_date,  "rtc_set_date <addr> <day> <date> <mon> <year>");
 
     CLI_RegisterCommand("rtc_get_time",  cmd_i2c_rtc_get_time,  "Get RTC time");
     CLI_RegisterCommand("rtc_get_date",  cmd_i2c_rtc_get_date,  "Get RTC date");

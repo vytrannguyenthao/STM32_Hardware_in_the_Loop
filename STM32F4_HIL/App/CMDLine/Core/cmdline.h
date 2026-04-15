@@ -53,6 +53,8 @@ extern "C"
 
 #define CMDLINE_NONE_RETURN   (6)
 
+#define CMDLINE_EXEC_FAILED		(7)
+
 //*****************************************************************************
 //
 // Command line function callback type.
