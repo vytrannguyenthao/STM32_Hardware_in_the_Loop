@@ -210,10 +210,8 @@ void process_command(char rxData, CMDLine_Context *context) {
 
 				// Process command
 				int8_t ret_val = CmdLineProcess(context->commandBuffer);
-				if (ret_val != CMDLINE_OK) {
-					Console_Write("\r\n");
-					Console_Write(ErrorCode[ret_val]);
-				}
+				Console_Write("\r\n");
+				Console_Write(ErrorCode[ret_val]);
 				Console_Write("\r\n");
 				Console_Write(NAME_SHELL);
 				context->commandBufferIndex = 0;
