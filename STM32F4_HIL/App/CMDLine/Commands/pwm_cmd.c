@@ -12,27 +12,26 @@
 
 int Cmd_PWM_Freq(int argc, char *argv[])
 {
-	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
-	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 3)
+	    return (argc < 3) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
 	uint32_t freq = atoi(argv[1]);
 
 	if(freq == 0)
 	{
 		Console_Write("\r\nInvalid freq\r\n");
-		return CMDLINE_OK;
+		return CMDLINE_INVALID_ARG;
 	}
 
 	set_pwm_freq(freq);
 	Console_Write("\r\nPWM freq set to %d Hz\r\n", freq);
-
 	return CMDLINE_OK;
 }
 
 int Cmd_PWM_Duty_Cycle(int argc, char *argv[])
 {
-	if (argc < 4) return CMDLINE_TOO_FEW_ARGS;
-	if (argc > 4) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 4)
+	    return (argc < 4) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
 	uint8_t ch = atoi(argv[1]);
 	uint8_t duty = atoi(argv[2]);
@@ -40,26 +39,24 @@ int Cmd_PWM_Duty_Cycle(int argc, char *argv[])
 	if(ch < 2 || ch > 4)
 	{
 		Console_Write("\r\nInvalid channel (2-4)\r\n");
-		return CMDLINE_OK;
+		return CMDLINE_INVALID_ARG;
 	}
 
 	set_pwm_duty_cycle(ch, duty);
 	Console_Write("\r\nCH%d duty cycle set to %u %\r\n",ch, duty);
-
 	return CMDLINE_OK;
 }
 
 int Cmd_PWM_Start(int argc, char *argv[])
 {
-	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
-	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 3)
+	    return (argc < 3) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
 	uint8_t ch = atoi(argv[1]);
-
 	if(pwm_start(ch))
 	{
 		Console_Write("\r\nInvalid channel\r\n");
-		return CMDLINE_OK;
+		return CMDLINE_INVALID_ARG;
 	}
 
 	Console_Write("\r\nPWM CH%d started\r\n",ch);
@@ -68,15 +65,14 @@ int Cmd_PWM_Start(int argc, char *argv[])
 
 int Cmd_PWM_Stop(int argc, char *argv[])
 {
-	if (argc < 3) return CMDLINE_TOO_FEW_ARGS;
-	if (argc > 3) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 3)
+	    return (argc < 3) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
 	uint8_t ch = atoi(argv[1]);
-
 	if(pwm_stop(ch))
 	{
 		Console_Write("\r\nInvalid channel\r\n");
-		return CMDLINE_OK;
+		return CMDLINE_INVALID_ARG;
 	}
 
 	Console_Write("\r\nPWM CH%d stopped\r\n",ch);

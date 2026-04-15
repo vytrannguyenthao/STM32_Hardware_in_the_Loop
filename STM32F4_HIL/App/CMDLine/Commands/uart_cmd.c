@@ -13,19 +13,19 @@
 
 static int Cmd_UART_Init(int argc, char *argv[])
 {
-    if (argc > 2)
-        return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     UART_Init();
     UART_Clear();
     Console_Write("UART Initialized\r\n");
-
     return CMDLINE_OK;
 }
 
 static int Cmd_UART_Dump_Buffer(int argc, char *argv[])
 {
-    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     uint8_t buf[256];
     for (uint16_t i = 0; i < 256; i++)
@@ -35,15 +35,14 @@ static int Cmd_UART_Dump_Buffer(int argc, char *argv[])
     }
 
     UART_Send(buf, 256);
-
     Console_Write("UART TX 256 bytes DONE\r\n");
-
     return CMDLINE_OK;
 }
 
 static int Cmd_UART_Receive(int argc, char *argv[])
 {
-    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     uint8_t buf[256];
     uint16_t len;
@@ -62,7 +61,6 @@ static int Cmd_UART_Receive(int argc, char *argv[])
     }
 
     Console_Write("\r\n");
-
     return CMDLINE_OK;
 }
 
@@ -85,19 +83,8 @@ static int Cmd_UART_Send_String(int argc, char *argv[])
 
 void Cmd_UART_Register(void)
 {
-    CLI_RegisterCommand("uart_init",
-                        Cmd_UART_Init,
-                        "Initialize UART RX interrupt");
-
-    CLI_RegisterCommand("uart_dump",
-                        Cmd_UART_Dump_Buffer,
-                        "Dump 256 incremental bytes and tranfer");
-
-    CLI_RegisterCommand("uart_rx",
-                        Cmd_UART_Receive,
-                        "Dump received UART buffer");
-
-    CLI_RegisterCommand("uart_tx",
-                        Cmd_UART_Send_String,
-                        "Send string via UART | format: uart_send <text>");
+    CLI_RegisterCommand("uart_init", Cmd_UART_Init, "Initialize UART RX interrupt");
+    CLI_RegisterCommand("uart_dump", Cmd_UART_Dump_Buffer, "Dump 256 incremental bytes and tranfer");
+    CLI_RegisterCommand("uart_rx", Cmd_UART_Receive, "Dump received UART buffer");
+    CLI_RegisterCommand("uart_tx", Cmd_UART_Send_String, "Send string via UART | format: uart_send <text>");
 }

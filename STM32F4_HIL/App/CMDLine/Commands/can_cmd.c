@@ -21,7 +21,8 @@ static int Cmd_CAN_Send_Buffer(int argc, char *argv[]) {
 }
 
 static int Cmd_CAN_Read_Buffer(int argc, char *argv[]) {
-    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     Console_Write("DUT ID: 0x%x\r\n", can_driver.rx_header.StdId);
 	Console_Write("Data:\r\n");

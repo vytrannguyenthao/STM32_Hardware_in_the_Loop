@@ -17,43 +17,52 @@
 
 static int Cmd_Power_DUT(int argc, char *argv[])
 {
-	if (argc != 3)
-	    return (argc < 3) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
+    if (argc != 3)
+        return (argc < 3) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     uint32_t status = atoi(argv[1]);
-    if(status) {
-        // Power on DUT
-        LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
-        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
-        SPI3_Reset();
+    switch(status)
+    {
+        case 1:
+            LL_GPIO_SetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
 
-        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
-            // DUT đã bật (logic HIGH)
-        	Console_Write("DUT is powered ON\r\n");
-        } else {
-            // DUT không bật được (logic LOW)
-        	Console_Write("Failed to power ON DUT\r\n");
-        }
-    } else {
-        LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            SPI3_Reset();
 
-        vTaskDelay(pdMS_TO_TICKS(100)); // delay để DUT ổn định
+            if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port,
+                                      DUT_POWER_STATUS_Pin)) {
+                Console_Write("DUT is powered ON\r\n");
+            } else {
+                Console_Write("Failed to power ON DUT\r\n");
+                return CMDLINE_EXEC_FAILED;
+            }
+            break;
 
-        if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
-            // DUT đã bật (logic HIGH)
-        	Console_Write("Failed to power OFF DUT\r\n");
-        } else {
-            // DUT không bật được (logic LOW)
-        	Console_Write("DUT is powered OFF\r\n");
-        }
+        case 0:
+            LL_GPIO_ResetOutputPin(DUT_POWER_GPIO_Port, DUT_POWER_Pin);
+
+            vTaskDelay(pdMS_TO_TICKS(100));
+
+            if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port,
+                                      DUT_POWER_STATUS_Pin)) {
+                Console_Write("Failed to power OFF DUT\r\n");
+                return CMDLINE_EXEC_FAILED;
+            } else {
+                Console_Write("DUT is powered OFF\r\n");
+            }
+            break;
+
+        default:
+            return CMDLINE_INVALID_ARG;
     }
+
     return CMDLINE_OK;
 }
 
 static int Cmd_Power_Status(int argc, char *argv[])
 {
-    if (argc > 2)
-        return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     if (LL_GPIO_IsInputPinSet(DUT_POWER_STATUS_GPIO_Port, DUT_POWER_STATUS_Pin)) {
         // DUT đã bật (logic HIGH)
@@ -82,6 +91,7 @@ static int Cmd_Set_BOOT0(int argc, char *argv[])
 	        	Console_Write("DUT BOOT0 set to low successfully \r\n");
 	        } else {
 	        	Console_Write("FAIL to set DUT BOOT0 to low \r\n");
+	            return CMDLINE_EXEC_FAILED;
 	        }
 
 			break;
@@ -94,6 +104,7 @@ static int Cmd_Set_BOOT0(int argc, char *argv[])
 	        	Console_Write("DUT BOOT0 set to high successfully \r\n");
 	        } else {
 	        	Console_Write("FAIL to set DUT BOOT0 to high \r\n");
+	            return CMDLINE_EXEC_FAILED;
 	        }
 
 			break;

@@ -31,11 +31,11 @@ const char *ErrorCode[8] = {
 		"OK\r\n",
         "BAD_CMD\r\n",
         "TOO_MANY_ARGS\r\n",
-        "TOO_FEW_ARGS\r\n"
-		"INVALID_ARGS\r\n "
-		"CMD_OK_BUT_PENDING...\r\n"
-		"CMD_NONE_RETURN\r\n"
-		"EXEC_FAIL\r\n"
+        "TOO_FEW_ARGS\r\n",
+		"INVALID_ARGS\r\n ",
+		"CMD_OK_BUT_PENDING...\r\n",
+		"CMD_NONE_RETURN\r\n",
+		"EXEC_FAIL\r\n",
 };
 
 tCmdLineEntry g_psCmdTable[MAX_CMDS];

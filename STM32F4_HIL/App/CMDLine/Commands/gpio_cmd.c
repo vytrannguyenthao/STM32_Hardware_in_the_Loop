@@ -43,10 +43,11 @@ static void gpio_print_cb(const char *name,
 
 static int Cmd_GPIO_List(int argc, char *argv[])
 {
-    Console_Write("\r\n%-4s %-4s %-5s %-5s\r\n",
-                  "PORT", "PIN", "DIR", "STATE");
-    Console_Write("---------------------\r\n");
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
+    Console_Write("\r\n%-4s %-4s %-5s %-5s\r\n", "PORT", "PIN", "DIR", "STATE");
+    Console_Write("---------------------\r\n");
     gpio_list_all(gpio_print_cb);
 
     return CMDLINE_OK;
@@ -71,7 +72,7 @@ static int Cmd_GPIO_Write(int argc, char *argv[])
     if(gpio_write(port, pin, value) != GPIO_OK)
     {
         Console_Write("GPIO write failed\r\n");
-        return CMDLINE_INVALID_ARG;
+        return CMDLINE_EXEC_FAILED;
     }
 
     Console_Write("GPIO write OK\r\n");
@@ -90,16 +91,14 @@ static int Cmd_GPIO_Read(int argc, char *argv[])
         return CMDLINE_INVALID_ARG;
 
     uint32_t pin = (1U << pin_num);
-
     uint8_t value;
     if(gpio_read(port, pin, &value) != GPIO_OK)
     {
         Console_Write("GPIO read failed\r\n");
-        return CMDLINE_INVALID_ARG;
+        return CMDLINE_EXEC_FAILED;
     }
 
     Console_Write("GPIO = %d\r\n", value);
-
     return CMDLINE_OK;
 }
 
