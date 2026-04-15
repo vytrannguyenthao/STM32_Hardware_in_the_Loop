@@ -27,11 +27,12 @@ typedef struct {
 
 static CMDLine_Context pContext = {0};
 
-const char *ErrorCode[4] = {
+const char *ErrorCode[5] = {
 		"OK\r\n",
         "BAD_CMD\r\n",
         "TOO_MANY_ARGS\r\n",
         "TOO_FEW_ARGS\r\n"
+		"INVALID_ARGS\r\n "
 };
 
 tCmdLineEntry g_psCmdTable[MAX_CMDS];
@@ -97,10 +98,9 @@ static void process_command(char rxData, CMDLine_Context *context) {
             context->historyIndex = context->historyCount;
 
             int8_t ret_val = CmdLineProcess(context->commandBuffer);
-            if(ret_val != CMDLINE_OK) {
-                Console_Write(ErrorCode[ret_val]);
-            }
-            Console_Write("\r\n");
+			Console_Write("\r\n");
+			Console_Write(ErrorCode[ret_val]);
+			Console_Write("\r\n");
         }
         context->commandBufferIndex = 0;
         Console_Write(NAME_SHELL);
