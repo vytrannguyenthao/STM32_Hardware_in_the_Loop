@@ -81,7 +81,7 @@ class PeripheralTab(QWidget):
         freq_layout = QHBoxLayout()
         freq_layout.addWidget(QLabel("Common Frequency (Hz):"))
         self.spin_pwm_freq = QSpinBox()
-        self.spin_pwm_freq.setRange(1, 100000)
+        self.spin_pwm_freq.setRange(1, 1000000)
         self.spin_pwm_freq.setValue(1000)
         
         self.btn_set_freq = QPushButton("Set Freq")
@@ -260,7 +260,7 @@ class PeripheralTab(QWidget):
         
         toolbar.addStretch() # Đẩy nút Clear Log sát lề phải
         toolbar.addWidget(self.btn_clear_log)
-        
+
         self.can_table = QTableWidget(0, 5)
         self.can_table.setHorizontalHeaderLabels(["Time", "Dir", "ID / Type", "HEX Data", "ASCII Parse"])
         self.can_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
