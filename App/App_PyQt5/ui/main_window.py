@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         # Setup Tabs (Need to be created first so we can connect signals to them)
         self.memory_tab = MemoryTab(self.uart_dut, self.uart_hil)
         self.logic_tab = LogicTab(self.uart_logic)
-        self.peripheral_tab = PeripheralTab()
+        self.peripheral_tab = PeripheralTab(self.uart_dut, self.uart_hil)
 
         # Build Main View TRƯỚC KHI connect signals để các widget (DUT_LOG, HIL_LOG) được khởi tạo
         splitter.addWidget(self.build_left())
