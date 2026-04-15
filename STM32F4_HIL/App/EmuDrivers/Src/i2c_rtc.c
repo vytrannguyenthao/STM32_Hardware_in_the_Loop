@@ -88,7 +88,8 @@ void rtc_set_time(t_rtc *r, rtc_time_t *t)
 
 void rtc_set_date(t_rtc *r, rtc_date_t *d)
 {
-    r->regs[4] = bin2bcd(d->day);
+    r->regs[3] = bin2bcd(d->day);
+    r->regs[4] = bin2bcd(d->date);
     r->regs[5] = bin2bcd(d->month);
     r->regs[6] = bin2bcd(d->year);
 }
@@ -102,7 +103,8 @@ void rtc_get_time(t_rtc *r, rtc_time_t *t)
 
 void rtc_get_date(t_rtc *r, rtc_date_t *d)
 {
-    d->day   = bcd2bin(r->regs[4]);
+    d->day   = bcd2bin(r->regs[3]);
+    d->date  = bcd2bin(r->regs[4]);
     d->month = bcd2bin(r->regs[5]);
     d->year  = bcd2bin(r->regs[6]);
 }

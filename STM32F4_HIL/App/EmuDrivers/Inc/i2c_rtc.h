@@ -40,6 +40,7 @@ typedef struct {
 
 typedef struct {
 	uint8_t day;
+	uint8_t date;
 	uint8_t month;
 	uint8_t year;
 } rtc_date_t;
