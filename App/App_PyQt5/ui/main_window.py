@@ -69,6 +69,36 @@ class MainWindow(QMainWindow):
         lay_com.addWidget(self.create_uart_control("HIL", self.uart_hil, needs_scan=True, expected_id="HIL"))
         lay_com.addWidget(self.create_uart_control("LOGIC", self.uart_logic, needs_scan=True, expected_id="SRPICO"))
         lay_com.addWidget(self.create_uart_control("DUT", self.uart_dut, needs_scan=False))
+        
+        # ===============================================
+        # KHỐI ĐIỀU KHIỂN NGUỒN DUT (POWER CONTROL)
+        # ===============================================
+        power_box = QGroupBox("DUT Power Control")
+        power_lay = QHBoxLayout(power_box)
+        
+        # Đèn trạng thái nguồn (Tròn)
+        self.power_indicator = QLabel()
+        self.power_indicator.setFixedSize(20, 20)
+        self.set_power_indicator_state(False) # Mặc định Tắt (Màu đỏ)
+        
+        # Các nút bấm
+        self.btn_power_on = QPushButton("ON")
+        self.btn_power_off = QPushButton("OFF")
+        self.btn_power_status = QPushButton("Status")
+        
+        # Setup UI layout cho khối nguồn
+        power_lay.addWidget(self.btn_power_on)
+        power_lay.addWidget(self.btn_power_off)
+        power_lay.addStretch()
+        power_lay.addWidget(self.power_indicator)
+        
+        # Gán sự kiện tạm thời để đổi màu đèn
+        self.btn_power_on.clicked.connect(lambda: self.set_power_indicator_state(True))
+        self.btn_power_off.clicked.connect(lambda: self.set_power_indicator_state(False))
+        
+        lay_com.addWidget(power_box)
+        # ===============================================
+
         lay_com.addStretch()  
 
         # TAB 2: TEST
@@ -259,6 +289,19 @@ class MainWindow(QMainWindow):
         lay.addWidget(cb_baud)
         lay.addWidget(btn_connect)
         return box
+
+    def set_power_indicator_state(self, is_on):
+        """Hàm cập nhật màu sắc cho đèn báo nguồn (Xanh = ON, Đỏ = OFF)"""
+        if is_on:
+            self.uart_hil.send("dut_power 1")
+            self.power_indicator.setStyleSheet(
+                "background-color: #2ecc71; border-radius: 10px; border: 1px solid #27ae60;"
+            )
+        else:
+            self.uart_hil.send("dut_power 0")
+            self.power_indicator.setStyleSheet(
+                "background-color: #e74c3c; border-radius: 10px; border: 1px solid #c0392b;"
+            )
 
     # ================= UI LOGGING SLOTS =================
     def append_dut_log(self, text):
