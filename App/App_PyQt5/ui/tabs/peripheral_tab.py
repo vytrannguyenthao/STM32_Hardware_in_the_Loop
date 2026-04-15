@@ -33,6 +33,9 @@ class PeripheralTab(QWidget):
         # Biến trạng thái cho Waveform Generator
         self._wave_running = "NONE" # "NONE", "SINE", "TRIANGLE"
 
+        # Biến lưu lại index của LED đang chờ HIL đọc phản hồi
+        self._pending_led_idx = None
+
         # ==================================================
         # CHIA ĐÔI MÀN HÌNH BẰNG QSPLITTER
         # ==================================================
@@ -398,13 +401,19 @@ class PeripheralTab(QWidget):
 
     # --- LOGIC LED ---
     def on_led_toggle(self, led_idx, is_on):
-        indicator = self.led_ui_elements[led_idx]
-        if is_on:
-            color = self.led_colors[led_idx]
-            indicator.setStyleSheet(f"background-color: {color}; border-radius: 12px; border: 1px solid #7f8c8d;")
-        else:
-            indicator.setStyleSheet("background-color: #bdc3c7; border-radius: 12px; border: 1px solid #7f8c8d;")
-        #TODO: Gửi command LED tương ứng
+        if not self.uart_dut or not self.uart_hil: return
+        
+        # 1. Gửi lệnh set_led cho DUT (index DUT từ 1 đến 5)
+        dut_index = led_idx + 1
+        state_val = 1 if is_on else 0
+        self.uart_dut.send(f"set_led {dut_index} {state_val}")
+        
+        # Ghi nhớ lại bóng đèn đang thao tác để chờ HIL phản hồi
+        self._pending_led_idx = led_idx
+        
+        # 2 & 3. Delay 50ms, sau đó yêu cầu HIL đọc port e (pin HIL từ 0 đến 4)
+        hil_pin = led_idx
+        QTimer.singleShot(50, lambda: self.uart_hil.send(f"gpio_read e {hil_pin}"))
 
     # --- LOGIC ADC ---
     def on_adc_slider_changed(self, value):
@@ -513,6 +522,28 @@ class PeripheralTab(QWidget):
     def parse_hil_log(self, text):
         text = text.strip()
         if not text: return
+
+        if "GPIO =" in text and getattr(self, '_pending_led_idx', None) is not None:
+            try:
+                # Bóc tách data GPIO
+                val_str = text.split("GPIO =")[1].strip()
+                val = int(val_str)
+                
+                idx = self._pending_led_idx
+                indicator = self.led_ui_elements[idx]
+                
+                # Nếu là 1 thì sáng đèn theo màu chỉ định, 0 thì màu xám (tắt)
+                if val == 1:
+                    color = self.led_colors[idx]
+                    indicator.setStyleSheet(f"background-color: {color}; border-radius: 12px; border: 1px solid #7f8c8d;")
+                else:
+                    indicator.setStyleSheet("background-color: #bdc3c7; border-radius: 12px; border: 1px solid #7f8c8d;")
+                
+                # Reset lại cờ sau khi xử lý xong
+                self._pending_led_idx = None
+            except Exception:
+                pass
+            return # Tránh chạy tiếp xuống phần parse CAN bên dưới
 
         if "DUT ID:" in text:
             self._temp_can_id = text.split(":")[1].strip()
