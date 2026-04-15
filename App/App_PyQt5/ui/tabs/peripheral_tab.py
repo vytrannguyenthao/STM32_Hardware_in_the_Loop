@@ -261,9 +261,11 @@ class PeripheralTab(QWidget):
         toolbar.addStretch() # Đẩy nút Clear Log sát lề phải
         toolbar.addWidget(self.btn_clear_log)
         
-        self.can_table = QTableWidget(0, 4)
-        self.can_table.setHorizontalHeaderLabels(["Time", "Dir", "ID / Type", "Data Payload"])
+        self.can_table = QTableWidget(0, 5)
+        self.can_table.setHorizontalHeaderLabels(["Time", "Dir", "ID / Type", "HEX Data", "ASCII Parse"])
         self.can_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.can_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        
         self.can_table.setColumnWidth(0, 80)
         self.can_table.setColumnWidth(1, 40)
         self.can_table.setColumnWidth(2, 90)
@@ -463,16 +465,26 @@ class PeripheralTab(QWidget):
         self.can_table.insertRow(row)
         
         t_str = time.strftime("%H:%M:%S")
-        display_text = payload
         
-        if direction == "RX" and all(c in "0123456789abcdefABCDEF \n" for c in payload):
-            ascii_preview = self.parse_hex_to_ascii(payload)
-            display_text = f"[HEX]   {payload}\n[ASCII] {ascii_preview}"
+        # Biến chứa data
+        display_hex = payload
+        display_ascii = ""
+        
+        # Phân loại data để cho vào đúng cột
+        # Nếu payload toàn mã Hex -> đưa vào cột HEX, dịch ra cột ASCII
+        if all(c in "0123456789abcdefABCDEF \n" for c in payload) and payload.strip():
+            display_ascii = self.parse_hex_to_ascii(payload)
+        # Nếu đang gửi String trực tiếp -> đưa vào cột ASCII, để trống cột HEX
+        elif can_id == "String": 
+            display_ascii = payload
+            display_hex = ""
 
+        # Tạo 5 item cho 5 cột
         item_time = QTableWidgetItem(t_str)
         item_dir = QTableWidgetItem(direction)
         item_id = QTableWidgetItem(can_id)
-        item_data = QTableWidgetItem(display_text)
+        item_hex = QTableWidgetItem(display_hex)
+        item_ascii = QTableWidgetItem(display_ascii)
         
         color = QColor("#d35400") if direction == "TX" else QColor("#2980b9")
         item_dir.setForeground(color)
@@ -481,10 +493,12 @@ class PeripheralTab(QWidget):
         for item in [item_time, item_dir, item_id]:
             item.setTextAlignment(Qt.AlignCenter)
             
+        # Nạp 5 item vào đúng các cột
         self.can_table.setItem(row, 0, item_time)
         self.can_table.setItem(row, 1, item_dir)
         self.can_table.setItem(row, 2, item_id)
-        self.can_table.setItem(row, 3, item_data)
+        self.can_table.setItem(row, 3, item_hex)
+        self.can_table.setItem(row, 4, item_ascii)
         
         self.can_table.resizeRowToContents(row)
         self.can_table.scrollToBottom()
