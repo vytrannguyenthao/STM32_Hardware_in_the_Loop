@@ -34,13 +34,17 @@ static void gpio_print_cb(const char *name,
                           const char *dir,
                           uint8_t state)
 {
-    Console_Write("%c %u %s %u\r\n",
-                  port, pin, dir, state);
+    Console_Write("%-4c %-4u %-5s %-5u\r\n",
+                  port,
+                  pin,
+                  dir,
+                  state);
 }
 
 static int Cmd_GPIO_List(int argc, char *argv[])
 {
-    Console_Write("\r\nPORT PIN DIR STATE\r\n");
+    Console_Write("\r\n%-4s %-4s %-5s %-5s\r\n",
+                  "PORT", "PIN", "DIR", "STATE");
     Console_Write("---------------------\r\n");
 
     gpio_list_all(gpio_print_cb);
