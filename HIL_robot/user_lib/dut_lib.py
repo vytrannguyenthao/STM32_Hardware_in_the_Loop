@@ -368,6 +368,42 @@ class DUTLibrary:
             logger.info(f"Got {voltage_mv} mV, (Range: [{lower_bound:.0f} -> {upper_bound:.0f}] mV)")
         return True
     
+    @keyword("DUT Read Sine Frequency")
+    def dut_read_sine_frequency(self, expected_freq_hz=None):
+        resp = self._dut_cmd("read_sine_freq")
+        match = re.search(r"Measured Frequency:\s*(\d+(?:\.\d+)?)\s*Hz", resp)
+        if not match:
+            raise AssertionError("Frequency value not found in response")
+
+        # Ép kiểu giá trị đọc được sang số thực (float)
+        measured_freq = float(match.group(1))
+
+        # Logic so sánh nếu có truyền tần số kỳ vọng vào file .robot
+        if expected_freq_hz is not None:
+            expected_freq = float(expected_freq_hz)
+            
+            # Cho phép sai số 5%
+            margin = expected_freq * 0.05
+            lower_bound = expected_freq - margin
+            upper_bound = expected_freq + margin
+
+            # Check trường hợp FAIL trước (Nằm ngoài vùng cho phép)
+            if measured_freq < lower_bound or measured_freq > upper_bound:
+                raise AssertionError(
+                    f"Sine frequency out of bounds! "
+                    f"Got {measured_freq} Hz, Expected {expected_freq} Hz \u00B15% "
+                    f"(Range: {lower_bound:.1f} Hz to {upper_bound:.1f} Hz)"
+                )
+            
+            # Đã lọt qua được lệnh raise ở trên -> Chắc chắn PASS
+            logger.info(
+                f"Measured {measured_freq} Hz. "
+                f"Expected: {expected_freq} Hz (Range: [{lower_bound:.1f} -> {upper_bound:.1f}] Hz)"
+            )
+
+        # Trả về tần số đo được
+        return measured_freq
+    
     # ------------------
     # RTC (DS1307)
     # ------------------
