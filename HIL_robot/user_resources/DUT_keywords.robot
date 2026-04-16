@@ -4,7 +4,7 @@ Library    BuiltIn
 
 *** Variables ***
 ${DUT_PORT}        COM11
-${DUT_BAUDRATE}    115200
+${DUT_BAUDRATE}    921600
 
 *** Keywords ***
 Connect To DUT

@@ -18,7 +18,7 @@ class Logic_Library:
     # Connection
     # ------------------
     @keyword("Connect Logic Analyzer")
-    def connect_la(self, port, baud=115200):
+    def connect_la(self, port, baud=921600):
         self.cli.connect(port, baud)
 
     @keyword("Disconnect Logic Analyzer")

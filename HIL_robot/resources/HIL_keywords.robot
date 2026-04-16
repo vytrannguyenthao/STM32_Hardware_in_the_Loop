@@ -6,7 +6,7 @@ Library    BuiltIn
 *** Variables ***
 ${HIL_PORT}          COM12
 ${LOG_PORT}          COM8
-${HIL_BAUDRATE}      115200
+${HIL_BAUDRATE}      921600
 
 *** Keywords ***
 Connect To HIL
