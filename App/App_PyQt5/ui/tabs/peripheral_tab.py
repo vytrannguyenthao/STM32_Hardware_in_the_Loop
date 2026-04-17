@@ -556,6 +556,11 @@ class PeripheralTab(QWidget):
         if self._is_reading_can:
             if "Data:" in text: return 
             
+            if text == "OK":
+                self._can_flush_timer.stop()
+                self._flush_can_data()
+                return
+            
             is_hex = bool(re.match(r'^([0-9A-Fa-f]{2}\s*)+$', text))
             if is_hex or text.replace(" ", "").isalnum(): 
                 self._temp_can_data.append(text)
