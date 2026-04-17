@@ -611,3 +611,27 @@ class HILLibrary:
                 f"Expected : '{expected_string}'\n"
                 f"Actual   : '{actual_string}'"
             )
+
+    # ------------------
+    # GPIO
+    # ------------------
+    @keyword("HIL Set GPIO")
+    def hil_set_gpio_state(self, port, pin, state):
+        resp = self._hil_cmd(f"gpio_write {port} {pin} {state}")
+        if "OK" not in resp:
+            raise AssertionError(f"{resp}")
+        return True
+
+    @keyword("HIL Read GPIO")
+    def hil_read_gpio_state(self, port, pin, expected_state=None):
+        resp = self._hil_cmd(f"gpio_read {port} {pin}")
+        match = re.search(r"GPIO =\s*(\d)", resp)
+        if not match:
+            raise AssertionError(f"Failed to read GPIO state: {resp}")
+        state = int(match.group(1))
+        if expected_state is not None and state != int(expected_state):
+            raise AssertionError(
+                f"FAIL: GPIO state mismatch! Expected {expected_state}, got {state}"
+            )
+        return True
+

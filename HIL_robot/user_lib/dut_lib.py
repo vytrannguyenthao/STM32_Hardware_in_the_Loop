@@ -629,3 +629,13 @@ class DUTLibrary:
             )
 
         return True
+
+    # ------------------
+    # GPIO LED
+    # ------------------
+    @keyword("DUT Set LED")
+    def dut_set_led(self, index, state):
+        rsp = self._dut_cmd(f"set_led {index} {state}")
+        if "OK" not in rsp:
+            raise AssertionError(f"Failed to set LED {index} to {state}")
+        return True
