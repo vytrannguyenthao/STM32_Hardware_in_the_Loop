@@ -59,8 +59,13 @@ class CLI:
             if self.ser.in_waiting:
                 data = self.ser.read(self.ser.in_waiting).decode(errors="ignore")
                 response += data
-
-            time.sleep(0.05)
+                # Chuyển chuỗi thành chữ hoa để check không phân biệt hoa/thường
+                if "OK" in response.upper():
+                    time.sleep(0.2)
+                    if self.ser.in_waiting:
+                        response += self.ser.read(self.ser.in_waiting).decode(errors="ignore")
+                    break
+            time.sleep(0.2)
 
         return response.strip()
     
