@@ -259,7 +259,7 @@ class LogicTab(QWidget):
                 break
 
     # ==================================================
-    # [UPDATE] HÀM TÍNH TOÁN TẦN SỐ TRONG VÙNG ĐO
+    # HÀM TÍNH TOÁN TẦN SỐ VÀ DUTY CYCLE
     # ==================================================
     def update_measurement(self):
         if not self.active_measure_ch or not self.measure_region.isVisible():
@@ -273,7 +273,10 @@ class LogicTab(QWidget):
         
         # Kiểm tra mảng data hợp lệ
         if arr is None or len(arr) == 0 or self.current_idx == 0:
-            self.measure_text.setText(" Freq: -- Hz ")
+            if ch == 'A0':
+                self.measure_text.setText(" Freq: -- Hz ")
+            else:
+                self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
             return
 
         # Quy đổi thời gian (minX, maxX) ra Index của mảng Data
@@ -281,10 +284,14 @@ class LogicTab(QWidget):
         end_idx = min(self.current_idx, int(maxX * self.current_sample_rate))
         
         if end_idx - start_idx < 2:
-            self.measure_text.setText(" Freq: -- Hz ")
+            if ch == 'A0':
+                self.measure_text.setText(" Freq: -- Hz ")
+            else:
+                self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
             return
             
         data_slice = arr[start_idx:end_idx]
+        duty_cycle_val = None # Biến lưu Duty cycle cho Digital
         
         # --- THUẬT TOÁN ĐO TẦN SỐ CHỐNG NHIỄU (HYSTERESIS) ---
         if ch == 'A0':
@@ -314,6 +321,12 @@ class LogicTab(QWidget):
             # Digital hoàn hảo không có nhiễu, dùng zero-crossing bình thường
             edge_indices = np.where(np.diff(data_slice) > 0)[0]
             
+            # TÍNH TOÁN DUTY CYCLE CHO KÊNH DIGITAL
+            # Đếm tổng số mẫu có giá trị bằng 1 (Mức Cao) chia cho tổng số mẫu vùng được chọn
+            high_samples = np.sum(data_slice == 1)
+            total_samples = len(data_slice)
+            duty_cycle_val = (high_samples / total_samples) * 100.0 if total_samples > 0 else 0.0
+            
         # Tính toán Freq dựa trên KHOẢNG CÁCH CHÍNH XÁC giữa các cạnh (không phụ thuộc độ rộng box vàng)
         if len(edge_indices) >= 2:
             num_cycles = len(edge_indices) - 1
@@ -322,7 +335,7 @@ class LogicTab(QWidget):
         else:
             freq = 0
             
-        # Định dạng chuỗi hiển thị
+        # Định dạng chuỗi hiển thị Tần số
         if freq >= 1000000:
             freq_str = f"{freq/1000000:.2f} MHz"
         elif freq >= 1000:
@@ -330,7 +343,11 @@ class LogicTab(QWidget):
         else:
             freq_str = f"{freq:.2f} Hz"
             
-        self.measure_text.setText(f" Freq: {freq_str} ")
+        # Nối thêm Duty Cycle nếu là kênh Digital
+        if ch != 'A0' and duty_cycle_val is not None:
+            self.measure_text.setText(f" Freq: {freq_str} | Duty: {duty_cycle_val:.1f}% ")
+        else:
+            self.measure_text.setText(f" Freq: {freq_str} ")
         
         # Canh chỉnh vị trí nhãn: D0-D6 để ở 1.1, A0 để ở 3.1
         y_pos = 1.1 if ch.startswith('D') else 3.1
