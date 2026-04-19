@@ -639,3 +639,48 @@ class DUTLibrary:
         if "OK" not in rsp:
             raise AssertionError(f"Failed to set LED {index} to {state}")
         return True
+
+    # ------------------
+    # UART
+    # ------------------
+    @keyword("DUT Init UART")
+    def dut_init_uart(self):
+        resp = self._dut_cmd(f"uart_init")
+        if "OK" not in resp:
+            raise AssertionError(f"{resp}")
+        return True
+
+    @keyword("DUT Send UART String")
+    def dut_send_uart_string(self, text):
+        resp = self._dut_cmd(f"uart_tx {text}")
+        if "OK" not in resp:
+            raise AssertionError(f"DUT failed to send UART string")
+        return True
+
+    @keyword("DUT Read UART Data")
+    def dut_read_uart_data(self):
+        resp = self._dut_cmd("uart_rx")
+
+        if "OK" not in resp:
+            raise AssertionError("DUT failed to read UART data")
+
+        resp = re.sub(r"uart_rx([0-9A-Fa-f]{2})", r"uart_rx \1", resp)
+        data = re.findall(r"[0-9A-Fa-f]{2}", resp)
+
+        if not data:
+            raise AssertionError("No UART data found")
+
+        return data
+
+    @keyword("DUT Verify UART String")
+    def verify_string(self, received_data, expected_string):
+
+        actual_string = "".join([chr(int(x, 16)) for x in received_data]).strip()
+        expected_string = expected_string.strip()
+
+        if actual_string != expected_string:
+            raise AssertionError(
+                f"String mismatch\n"
+                f"Expected: '{expected_string}'\n"
+                f"Actual  : '{actual_string}'"
+            )

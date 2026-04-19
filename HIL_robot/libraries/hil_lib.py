@@ -635,3 +635,46 @@ class HILLibrary:
             )
         return True
 
+    # ------------------
+    # UART
+    # ------------------
+    @keyword("HIL Init UART")
+    def hil_init_uart(self):
+        resp = self._hil_cmd(f"uart_init")
+        if "OK" not in resp:
+            raise AssertionError(f"{resp}")
+        return True
+
+    @keyword("HIL Send UART String")
+    def hil_send_uart_string(self, text):
+        resp = self._hil_cmd(f"uart_tx {text}")
+        if "OK" not in resp:
+            raise AssertionError(f"HIL failed to send UART string")
+        return True
+    
+    @keyword("HIL Read UART Data")
+    def hil_read_uart_data(self):
+        resp = self._hil_cmd("uart_rx")
+
+        if "OK" not in resp:
+            raise AssertionError(f"HIL failed to read UART data")
+
+        data = re.findall(r"\b[0-9A-Fa-f]{2}\b", resp)
+
+        if not data:
+            raise AssertionError("No UART data found")
+
+        return data
+
+    @keyword("HIL Verify UART String")
+    def verify_string(self, received_data, expected_string):
+
+        actual_string = "".join([chr(int(x, 16)) for x in received_data]).strip()
+        expected_string = expected_string.strip()
+
+        if actual_string != expected_string:
+            raise AssertionError(
+                f"String mismatch\n"
+                f"Expected: '{expected_string}'\n"
+                f"Actual  : '{actual_string}'"
+            )
