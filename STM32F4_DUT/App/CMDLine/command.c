@@ -215,6 +215,7 @@ void process_command(char rxData, CMDLine_Context *context) {
 				Console_Write("\r\n");
 				Console_Write(NAME_SHELL);
 				context->commandBufferIndex = 0;
+		        memset(context->commandBuffer, 0, sizeof(context->commandBuffer));
 			} else {
 				Console_Write("\r\n");
 				Console_Write(NAME_SHELL);
