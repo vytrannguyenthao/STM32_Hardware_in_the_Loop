@@ -738,10 +738,13 @@ int Cmd_UART_Dump_Buffer(int argc, char *argv[])
 
 int Cmd_UART_Receive(int argc, char *argv[])
 {
-    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     uint8_t buf[256];
     uint16_t len;
+
+    Console_Write("UART RX DATA:\r\n");
 
     while ((len = UART_Read(buf, sizeof(buf))) > 0)
     {
@@ -755,7 +758,6 @@ int Cmd_UART_Receive(int argc, char *argv[])
     }
 
     Console_Write("\r\n");
-
     return CMDLINE_OK;
 }
 
