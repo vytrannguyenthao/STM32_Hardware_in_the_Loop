@@ -106,6 +106,7 @@ static void process_command(char rxData, CMDLine_Context *context) {
 			Console_Write("\r\n");
         }
         context->commandBufferIndex = 0;
+        memset(context->commandBuffer, 0, sizeof(context->commandBuffer));
         Console_Write(NAME_SHELL);
     } else if(rxData == KEY_BACKSPACE) {
         if(context->commandBufferIndex>0) {
