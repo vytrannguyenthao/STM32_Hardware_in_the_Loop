@@ -664,8 +664,7 @@ class DUTLibrary:
         if "OK" not in resp:
             raise AssertionError("DUT failed to read UART data")
 
-        resp = re.sub(r"uart_rx([0-9A-Fa-f]{2})", r"uart_rx \1", resp)
-        data = re.findall(r"[0-9A-Fa-f]{2}", resp)
+        data = re.findall(r"\b[0-9A-Fa-f]{2}\b", resp)
 
         if not data:
             raise AssertionError("No UART data found")
