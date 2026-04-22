@@ -120,7 +120,45 @@ Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở
 Vi điều khiển được sử dụng là STM32F407VET6 có tích hợp nhiều ngoại vi, phù hợp để mô phỏng các phần cứng cho mục đích kiểm thử DUT và giao tiếp với PC.
 
 Mạch bao gồm các tụ lọc nguồn nhằm ổn định điện áp hoạt động cho vi điều khiển. Bên cạnh đó, mạch còn bao gồm các khối cơ bản như DEBUGGER hỗ trợ lập trình và gỡ lỗi,
-khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...
+khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...\\
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|l|c|X|} 
+\hline
+\textbf{Ngoại vi / Tín hiệu} & \textbf{Chân tín hiệu} & \textbf{Mô tả} \\ 
+\hline
+Power Control & PE14 & Điều khiển nguồn của DUT \\ 
+\hline
+Power Status Input & PD1 & Đọc trạng thái nguồn của DUT \\ 
+\hline
+BOOT CTRL & PD0 & Kích hoạt chế độ Boot 1 để nạp chương trình bằng USB \\ 
+\hline
+SPI3 & \parbox[t]{3cm}{\centering PC10 (SCK), PC11 (MISO), PC12 (MOSI), PA15 (NSS) \vspace{2pt}} & Mô phỏng SPI Flash \\ 
+\hline
+I2C1 & \parbox[t]{3cm}{\centering PB6 (SCL), PB7 (SDA) \vspace{3pt}} & Mô phỏng I2C EEPROM \\ 
+\hline
+USART2 & \parbox[t]{3cm}{\centering PD5 (TX), PD6 (RX) \vspace{3pt}} & Giao tiếp UART \\ 
+\hline
+CAN1 & \parbox[t]{3cm}{\centering PB9 (TX), PB8 (RX) \vspace{3pt}} & Giao tiếp CAN bus \\ 
+\hline
+PWM & PA1, PA2, PA3 & Xuất tín hiệu PWM điều khiển \\ 
+\hline
+DAC & PA5 & Xuất tín hiệu analog (DAC) \\ 
+\hline
+Waveform Analog & PA4 & Phát tín hiệu dạng sóng (sin, tam giác) \\ 
+\hline
+ADC & PA0 & Đọc tín hiệu analog từ DUT \\ 
+\hline
+GPIO Input & PE0 -- PE13 & Đọc tín hiệu số từ DUT \\ 
+\hline
+GPIO Output & \parbox[t]{3cm}{\centering PB0 -- PB5, PB10 -- PB15 \vspace{3pt}} & Xuất tín hiệu số điều khiển DUT \\ 
+\hline
+\end{tabularx}
+\caption{Các ngoại vi và chân tín hiệu trong hệ thống HIL}
+\label{tab:hil_peripherals_pins}
+\end{table}
 
 \subsection{Khối vi điều khiển 2}
 \begin{figure}[H]
@@ -133,7 +171,25 @@ khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...
 Vi điều khiển được sử dụng là module Rasberry Pi Pico hoạt động như một logic analyzer hoặc oscilloscope, có nhiệm vụ thu thập và xử lý tín hiệu analog, digital từ DUT. Sau đó gửi dữ liệu thu được lên PC qua giao tiếp USB để 
 thực hiện các test case liên quan đến việc xử lý tín hiệu như kiểm tra tần số,...
 
-Mạch cũng được bao gồm nút nhấn RESET, debug led, các tụ lọc nguồn nhằm ổn định điện áp hoạt động cho module. 
+Mạch cũng được bao gồm nút nhấn RESET, debug led, các tụ lọc nguồn nhằm ổn định điện áp hoạt động cho module. \\
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|l|c|X|} 
+\hline
+\textbf{Tín hiệu} & \textbf{Chân tín hiệu} & \textbf{Mô tả} \\ 
+\hline
+Digital Channel & GPIO2 -- 8 & Thu thập tín hiệu số từ DUT \\ 
+\hline
+Analog Channel & GPIO26 & Thu thập tín hiệu analog từ DUT \\
+\hline
+UART & GPIO0 (TX), GPIO1 (RX) & Debug UART \\
+\hline
+\end{tabularx}
+\caption{Các ngoại vi và chân tín hiệu trong hệ thống Logic Analyzer}
+\label{tab:logic_analyzer_pins}
+\end{table}
 
 \subsection{Khối giao tiếp CAN}
 \begin{figure}[H]
