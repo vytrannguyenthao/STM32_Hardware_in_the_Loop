@@ -1,49 +1,101 @@
-\chapter{THIẾT KẾ VÀ THỰC HIỆN PHẦN MỀM TRÊN MÁY TÍNH}
+\chapter{THIẾT KẾ VÀ THỰC HIỆN PHẦN MỀM NHÚNG CHO DUT}
+\section{Yêu cầu phần mềm DUT để tương thích hệ thống HIL}
 
-Trong hệ thống Hardware-in-the-Loop, phần mềm chạy trên máy tính đóng vai trò là trung tâm điều phối, cho phép người dùng cấu hình hệ thống, điều khiển quá trình mô phỏng và theo dõi trạng thái hoạt động của cả HIL và DUT. Phần mềm này không trực tiếp tham gia vào việc mô phỏng phần cứng mà đóng vai trò giao diện tương tác, hỗ trợ xây dựng và thực thi các kịch bản kiểm thử một cách linh hoạt.
+Trong hệ thống HIL, thiết bị DUT được xem như một hệ thống độc lập do người dùng phát triển. Vì vậy, hệ thống HIL không can thiệp vào kiến trúc nội bộ hay cách triển khai phần mềm nhúng trên DUT. Thay vào đó, hệ thống chỉ định nghĩa các yêu cầu giao tiếp nhằm đảm bảo DUT có thể tích hợp và kiểm thử tự động một cách nhất quán.
 
-Thông qua phần mềm trên máy tính, người dùng có thể gửi các lệnh cấu hình đến hệ thống HIL, điều khiển DUT thực hiện các thao tác giao tiếp với thiết bị ngoại vi mô phỏng, đồng thời thu thập dữ liệu phản hồi phục vụ cho việc đánh giá và debug firmware.
+Do đó, phần mềm trên DUT được khuyến nghị cần tuân thủ các quy định giao tiếp tối thiểu được mô tả dưới đây.
 
-\section{Yêu cầu thiết kế}
+\subsection{Mô hình giao tiếp}
 
-Các yêu cầu thiết kế chính cho phần mềm trên máy tính bao gồm:
+DUT nên hỗ trợ mô hình giao tiếp dạng yêu cầu – phản hồi (command–response model). Máy tính kiểm thử gửi lệnh điều khiển đến DUT và DUT phải trả về phản hồi tương ứng sau khi thực thi.
+
+Mỗi lệnh được xử lý độc lập và kết thúc bằng ký tự xuống dòng nhằm đảm bảo khả năng đồng bộ dữ liệu.
+
+\subsection{Giao diện truyền thông}
+
+DUT nên cung cấp ít nhất một kênh giao tiếp với máy tính hoặc hệ thống HIL nhằm phục vụ việc cấu hình, điều khiển và thu thập dữ liệu kiểm thử. 
+Kênh giao tiếp này có thể được hiện thực thông qua các chuẩn phổ biến như UART, USB, CAN hoặc Ethernet tùy theo đặc điểm phần cứng của DUT.
+
+\subsection{Định dạng lệnh}
+
+Định dạng lệnh được khuyến nghị sử dụng văn bản ASCII nhằm đơn giản hóa việc quan sát dữ liệu, debug và tích hợp với các công cụ kiểm thử tự động. Định dạng lệnh cơ bản có thể được mô tả như sau:
+
+\begin{verbatim} <command> <arg1> <arg2> ... \n
+\end{verbatim}
+
+Ví dụ:
+
+\begin{verbatim}
+pwm_set 50
+adc_read
+\end{verbatim}
+
+\subsection{Định dạng phản hồi}
+
+Sau khi xử lý lệnh, DUT nên gửi phản hồi theo một trong các dạng:
 
 \begin{itemize}
-    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa đơn giản, dễ sử dụng, cho phép người dùng thao tác trực tiếp với DUT và hệ thống HIL.
-    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp nối tiếp (serial), phục vụ việc điều khiển DUT và HIL song song.
-    \item Hệ thống phải cho phép gửi các lệnh cấu hình và điều khiển mô phỏng đến HIL, đồng thời nhận và hiển thị phản hồi từ DUT và HIL theo thời gian thực.
-    \item Phần mềm cần hỗ trợ xây dựng và thực thi các kịch bản kiểm thử tự động nhằm đánh giá hành vi firmware của DUT.
-    \item Dữ liệu giao tiếp phải được ghi nhận đầy đủ để phục vụ mục đích debug và đánh giá kết quả kiểm thử.
+\item OK — thực thi thành công
+\item ERROR — xảy ra lỗi
+\item Dữ liệu đo được hoặc trạng thái thiết bị
 \end{itemize}
 
-\section{Sơ đồ giao tiếp giữa PC, HIL và DUT}
+Việc chuẩn hóa phản hồi giúp hệ thống HIL có thể tự động phân tích kết quả kiểm thử.
 
-Sơ đồ giao tiếp tổng thể giữa phần mềm trên máy tính, hệ thống HIL và DUT được minh họa trong Hình \ref{fig:PC_HIL_DUT}.
+\subsection{Yêu cầu thời gian phản hồi}
+
+DUT nên phản hồi trong khoảng thời gian xác định để tránh lỗi timeout trong quá trình kiểm thử tự động. Thời gian phản hồi khuyến nghị nhỏ hơn 1 giây cho mỗi lệnh, tùy thuộc vào độ phức tạp của thao tác thực hiện.
+
+\section{Nguyên lý hoạt động của chương trình DUT mẫu}
+
+Để dễ dang tích hợp với hệ thống HIL, chương trình DUT mẫu được xây dựng nhằm minh họa nguyên lý tương tác giữa thiết bị DUT và hệ thống HIL. Mục tiêu của chương trình mẫu không phải là áp đặt kiến trúc phần mềm cụ thể, mà cung cấp một cơ chế tham khảo giúp người dùng dễ dàng tích hợp DUT với hệ thống kiểm thử.
+
+Dưới đây là một số nguyên lý hoạt động cơ bản của chương trình DUT mẫu:
+\begin{itemize}
+    \item Chương trình DUT mẫu sử dụng một task chuyên trách để xử lý các lệnh nhận được từ máy tính thông qua giao tiếp USB. Task này hoạt động theo cơ chế vòng lặp vô hạn, liên tục chờ dữ liệu và phản hồi sau khi xử lý.
+    \item Khi nhận được một lệnh, chương trình phân tích cú pháp để xác định loại lệnh và các tham số đi kèm. Dựa trên loại lệnh, chương trình thực hiện các thao tác tương ứng như cấu hình tham số giao tiếp hoặc kích hoạt mô phỏng thiết bị ngoại vi.
+    \item Chương trình DUT mẫu không thực hiện mô phỏng thiết bị ngoại vi mà chỉ đóng vai trò là đối tượng tiếp nhận và xử lý tín hiệu mô phỏng từ hệ thống HIL. Điều này giúp đánh giá tính đúng đắn và độ ổn định của firmware trên DUT khi tương tác với các tín hiệu mô phỏng.
+\item OK — thực thi thành công
+\item ERROR — xảy ra lỗi
+\item Dữ liệu đo được hoặc trạng thái thiết bị
+\end{itemize}
+
+Việc chuẩn hóa phản hồi giúp hệ thống HIL có thể tự động phân tích kết quả kiểm thử.
+
+\subsection{Yêu cầu thời gian phản hồi}
+
+DUT nên phản hồi trong khoảng thời gian xác định để tránh lỗi timeout trong quá trình kiểm thử tự động. Thời gian phản hồi khuyến nghị nhỏ hơn 1 giây cho mỗi lệnh, tùy thuộc vào độ phức tạp của thao tác thực hiện.
+
+\section{Nguyên lý hoạt động của chương trình DUT mẫu}
+
+Để dễ dang tích hợp với hệ thống HIL, chương trình DUT mẫu được xây dựng nhằm minh họa nguyên lý tương tác giữa thiết bị DUT và hệ thống HIL. Mục tiêu của chương trình mẫu không phải là áp đặt kiến trúc phần mềm cụ thể, mà cung cấp một cơ chế tham khảo giúp người dùng dễ dàng tích hợp DUT với hệ thống kiểm thử.
+
+Dưới đây là một số nguyên lý hoạt động cơ bản của chương trình DUT mẫu:
+\begin{itemize}
+    \item Chương trình DUT mẫu sử dụng một task chuyên trách để xử lý các lệnh nhận được từ máy tính thông qua giao tiếp USB. Task này hoạt động theo cơ chế vòng lặp vô hạn, liên tục chờ dữ liệu và phản hồi sau khi xử lý.
+    \item Khi nhận được một lệnh, chương trình phân tích cú pháp để xác định loại lệnh và các tham số đi kèm. Dựa trên loại lệnh, chương trình thực hiện các thao tác tương ứng như cấu hình tham số giao tiếp hoặc kích hoạt mô phỏng thiết bị ngoại vi.
+    \item Chương trình DUT mẫu không thực hiện mô phỏng thiết bị ngoại vi mà chỉ đóng vai trò là đối tượng tiếp nhận và xử lý tín hiệu mô phỏng từ hệ thống HIL. Điều này giúp đánh giá tính đúng đắn và độ ổn định của firmware trên DUT khi tương tác với các tín hiệu mô phỏng.
+\end{itemize}
+
+Lưu đồ giải thuật tổng quát mô tả trình tự hoạt động chính của hệ thống DUT mẫu được trình bày trong Hình \ref{fig:DUT_overview}.
+Lưu đồ giải thuật tổng quát mô tả trình tự hoạt động chính của hệ thống DUT mẫu được trình bày trong Hình \ref{fig:DUT_overview}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/PC_HIL_DUT.png}
-    \caption{Sơ đồ giao tiếp giữa PC, HIL và DUT}
-    \label{fig:PC_HIL_DUT}
+    \includegraphics[width=0.3\textwidth]{image/HIL_overview.jpg}
+    \caption{Lưu đồ giải thuật tổng quát của hệ thống DUT mẫu}
+    \includegraphics[width=0.3\textwidth]{image/HIL_overview.jpg}
+    \caption{Lưu đồ giải thuật tổng quát của hệ thống DUT mẫu}
+    \label{fig:DUT_overview}
 \end{figure}
 
-Phần mềm trên máy tính giao tiếp với hệ thống HIL và DUT thông qua giao tiếp USB (serial). Các lệnh cấu hình và điều khiển được gửi từ PC đến HIL hoặc DUT, trong khi dữ liệu phản hồi từ các thiết bị này được gửi ngược lại để hiển thị và phân tích.
-
-PC đóng vai trò điều khiển trung tâm, tự động thực hiện các bài kiểm thử bằng cách gửi các lệnh theo trình tự định sẵn đến hệ thống HIL. Sau khi nhận lệnh, HIL tiến hành cấu hình và chuẩn bị môi trường mô phỏng phần cứng tương ứng. Tiếp theo, PC gửi các lệnh điều khiển đến DUT, cho phép DUT giao tiếp trực tiếp với HIL, qua đó mô phỏng quá trình tương tác giữa DUT và các thiết bị ngoại vi trong điều kiện vận hành thực tế.
-
-Trong suốt quá trình kiểm thử, PC liên tục thu thập dữ liệu phản hồi từ cả DUT và HIL, tiến hành đánh giá kết quả kiểm thử và hiển thị thông tin cho người dùng. Toàn bộ quá trình này được tổ chức thành một vòng lặp, đảm bảo việc mô phỏng phần cứng và kiểm thử hệ thống được thực hiện một cách tự động, nhất quán và hiệu quả.
-
-\section{Lưu đồ giải thuật tổng quát của phần mềm trên máy tính}
-
-Lưu đồ giải thuật tổng quát mô tả hoạt động của phần mềm trên máy tính được trình bày trong Hình \ref{fig:PC_overview}.
-
+Lưu đồ giải thuật chi tiết của task xử lý lệnh từ máy tính trên DUT được minh họa trong Hình \ref{fig:DUT_CLI_task}.
+Lưu đồ giải thuật chi tiết của task xử lý lệnh từ máy tính trên DUT được minh họa trong Hình \ref{fig:DUT_CLI_task}.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{image/PC_overview.png}
-    \caption{Lưu đồ giải thuật tổng quát cho phần mềm trên máy tính}
-    \label{fig:PC_overview}
+    \includegraphics[width=0.7\textwidth]{image/HIL_CLI_task.jpg}
+    \caption{Lưu đồ giải thuật của task xử lý lệnh từ máy tính}
+    \includegraphics[width=0.7\textwidth]{image/HIL_CLI_task.jpg}
+    \caption{Lưu đồ giải thuật của task xử lý lệnh từ máy tính}
+    \label{fig:DUT_CLI_task}
 \end{figure}
-
-Sau khi khởi động, phần mềm tiến hành khởi tạo giao diện người dùng và các thành phần giao tiếp nối tiếp. Người dùng có thể lựa chọn cổng COM và tốc độ baud phù hợp để kết nối với DUT và HIL.
-
-Khi kết nối được thiết lập, phần mềm bắt đầu nhận dữ liệu phản hồi từ các thiết bị thông qua các luồng đọc riêng biệt. Người dùng có thể gửi lệnh thủ công hoặc kích hoạt các kịch bản kiểm thử tự động. Trong suốt quá trình vận hành, dữ liệu giao tiếp được hiển thị theo thời gian thực trên giao diện nhằm hỗ trợ theo dõi và debug.
