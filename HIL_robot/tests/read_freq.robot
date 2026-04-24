@@ -27,3 +27,6 @@ DUT Read Frequency & Re-Generate Sine Wave
 LA Collect Waveform Data
     ${data}=    LA Read Data
     LA Verify Sine Wave    raw_data=${data}    expected_freq_hz=${FREQ}
+
+HIL Stop Sine Wave
+    HIL Stop Sine Wave
