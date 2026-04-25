@@ -9,8 +9,8 @@ Thông qua phần mềm trên máy tính, người dùng có thể gửi các l�
 Các yêu cầu thiết kế chính cho phần mềm trên máy tính bao gồm:
 
 \begin{itemize}
-    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa đơn giản, dễ sử dụng, cho phép người dùng thao tác trực tiếp với DUT và hệ thống HIL.
-    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp nối tiếp (serial), phục vụ việc điều khiển DUT và HIL song song.
+    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa (GUI), dễ sử dụng, cho phép người dùng thao tác trực tiếp với DUT và hệ thống HIL.
+    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp serial, phục vụ việc điều khiển DUT và HIL song song.
     \item Hệ thống phải cho phép gửi các lệnh cấu hình và điều khiển mô phỏng đến HIL, đồng thời nhận và hiển thị phản hồi từ DUT và HIL theo thời gian thực.
     \item Phần mềm cần hỗ trợ xây dựng và thực thi các kịch bản kiểm thử tự động nhằm đánh giá hành vi firmware của DUT.
     \item Dữ liệu giao tiếp phải được ghi nhận đầy đủ để phục vụ mục đích debug và đánh giá kết quả kiểm thử.
@@ -39,11 +39,25 @@ Lưu đồ giải thuật tổng quát mô tả hoạt động của phần mề
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{image/PC_overview.png}
+    \includegraphics[width=1.05\textwidth]{image/App_overview.jpg}
     \caption{Lưu đồ giải thuật tổng quát cho phần mềm trên máy tính}
     \label{fig:PC_overview}
 \end{figure}
 
-Sau khi khởi động, phần mềm tiến hành khởi tạo giao diện người dùng và các thành phần giao tiếp nối tiếp. Người dùng có thể lựa chọn cổng COM và tốc độ baud phù hợp để kết nối với DUT và HIL.
+Phần mềm trên máy tính được thiết kế theo mô hình đa luồng (Multi-threading). Sự phân tách này nhằm tách biệt hoàn toàn luồng hiển thị giao diện (Main UI Thread) khỏi các luồng xử lý giao tiếp với phần cứng.
+Qua đó đảm bảo việc cập nhật giao diện luôn mượt mà và không bị gián đoạn khi hệ thống phải xử lý các tác vụ truyền nhận serial.
 
-Khi kết nối được thiết lập, phần mềm bắt đầu nhận dữ liệu phản hồi từ các thiết bị thông qua các luồng đọc riêng biệt. Người dùng có thể gửi lệnh thủ công hoặc kích hoạt các kịch bản kiểm thử tự động. Trong suốt quá trình vận hành, dữ liệu giao tiếp được hiển thị theo thời gian thực trên giao diện nhằm hỗ trợ theo dõi và debug.
+Quá trình khởi động ứng dụng bắt đầu bằng việc khởi tạo cửa sổ chính \texttt{QMainWindow}. Để tối ưu hóa không gian hiển thị và phân tách logic điều khiển cho người dùng, bộ quản lý không gian làm việc \texttt{QTabWidget} được triển khai, đóng vai trò như một bộ định tuyến cho phép chuyển đổi linh hoạt giữa các tab khác nhau bằng cách chọn vào tab tương ứng.
+Trong đó Serial Tab chịu trách nhiệm cấu hình các thông số cho cổng giao tiếp trước khi kết nối. Các tab chức năng như Automation Test, Memory, Peripherals, Logic Analyzer có nhiệm vụ tiếp nhận các lệnh điều khiển thông qua cổng serial, đồng thời xử lý và cập nhật kết quả lên giao diện người dùng.
+Riêng Terminal Tab được thiết kế để người dùng có thể tương tác với phần cứng bằng cách gửi các lệnh thủ công.
+
+Nhằm đáp ứng yêu cầu giao tiếp đồng thời với nhiều thiết bị phần cứng, Serial Thread sẽ có 3 luồng chuyên biệt, hoạt động song song. Cụ thể, luồng HIL quản lý lệnh điều khiển và giám sát thiết bị giả lập phần cứng; luồng Logic Analyzer chịu trách nhiệm giao tiếp, thu thập chuỗi dữ liệu từ Logic analyzer; luồng DUT đảm nhận việc truyền nhận dữ liệu với phần cứng đang được kiểm thử.
+
+Khối giao diện người dùng và luồng xử lý giao tiếp được liên kết với nhau theo cơ chế hướng sự kiện (Event-driven). Khi có thao tác điều khiển từ người dùng tại các tab, khối giao diện sẽ phát tín hiệu kích hoạt các tác vụ tương ứng trong các luồng Serial.
+Các luồng nền này tiến hành giao tiếp vật lý với phần cứng và ngay sau khi quá trình thực thi hoàn tất, chúng sẽ gửi tín hiệu mang theo dữ liệu trả về cho khối giao diện người dùng để tiến hành thực hiện các cập nhật cần thiết lên ứng dụng.
+
+\section{Lưu đồ giải thuật chi tiết của phần mềm trên máy tính}
+\subsection{Xử lý Serial Tab}
+\subsection{Xử lý Memory Tab}
+\subsection{Xử lý Peripherals Tab}
+\subsection{Xử lý Logic Analyzer Tab}
