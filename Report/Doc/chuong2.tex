@@ -137,6 +137,57 @@ ADC (Analog-to-Digital Converter) và DAC (Digital-to-Analog Converter) là các
 Nguyên lý hoạt động của ADC dựa trên việc lấy mẫu tín hiệu analog theo chu kỳ và lượng hóa thành giá trị số với độ phân giải xác định. DAC tạo ra tín hiệu analog bằng cách chuyển đổi các giá trị số thành mức điện áp tương ứng.
 
 Trong hệ thống mô phỏng phần cứng trong vòng lặp này, ADC và DAC được sử dụng để mô phỏng các tín hiệu cảm biến và tín hiệu điều khiển analog. Việc mô phỏng này cho phép kiểm thử khả năng xử lý tín hiệu tương tự của DUT, đánh giá phản ứng của firmware trước các thay đổi liên tục của tín hiệu đầu vào và kiểm tra các thuật toán xử lý tín hiệu trong điều kiện gần với thực tế.
+\subsection{Timer và PWM}
+
+\textbf{Timer} là một ngoại vi phần cứng quan trọng trong vi điều khiển, được sử dụng để đếm xung clock nội bộ hoặc xung từ nguồn bên ngoài nhằm thực hiện các chức năng liên quan đến thời gian. Timer cho phép hệ thống tạo ra các khoảng trễ chính xác, đo thời gian, đếm sự kiện, tạo ngắt định kỳ và hỗ trợ nhiều chức năng điều khiển khác trong hệ thống nhúng.
+
+Nguyên lý hoạt động của timer dựa trên việc bộ đếm (counter) tăng hoặc giảm giá trị theo từng xung clock. Khi giá trị đếm đạt đến một ngưỡng xác định trước gọi là giá trị tự nạp lại (\texttt{Auto Reload Register – ARR}), timer sẽ tạo ra một sự kiện cập nhật (update event), có thể sinh ngắt hoặc kích hoạt các chức năng ngoại vi khác.
+
+Thông thường, tần số hoạt động của timer được xác định thông qua bộ chia tần số \textbf{Prescaler (PSC)} và giá trị ARR theo công thức:
+
+\begin{equation}
+f_{timer} = \frac{f_{clock}}{(PSC + 1)(ARR + 1)}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $f_{clock}$ là tần số xung clock cấp cho timer.
+    \item $PSC$ là giá trị bộ chia tần số.
+    \item $ARR$ là giá trị tự nạp lại của bộ đếm.
+\end{itemize}
+
+Nhờ cơ chế này, timer có thể tạo ra các khoảng thời gian rất chính xác mà không cần CPU phải liên tục kiểm tra bằng phần mềm, giúp giảm tải xử lý và tăng tính thời gian thực của hệ thống.
+
+Trong hệ thống mô phỏng phần cứng trong vòng lặp, timer thường được sử dụng để tạo các chu kỳ mô phỏng định kỳ, quản lý timeout giao tiếp, đo thời gian phản hồi của DUT và đồng bộ các tác vụ trong RTOS.
+
+\textbf{PWM (Pulse Width Modulation)} là một kỹ thuật điều chế độ rộng xung, trong đó tín hiệu đầu ra là một chuỗi xung vuông có tần số cố định nhưng độ rộng xung mức cao thay đổi theo yêu cầu điều khiển. PWM thường được tạo ra bởi ngoại vi timer của vi điều khiển.
+
+Nguyên lý của PWM dựa trên việc so sánh giá trị bộ đếm timer với một thanh ghi so sánh gọi là \texttt{Capture/Compare Register (CCR)}. Khi giá trị đếm nhỏ hơn CCR, tín hiệu đầu ra ở mức cao; khi giá trị đếm lớn hơn hoặc bằng CCR, tín hiệu đầu ra chuyển sang mức thấp. Nhờ đó, độ rộng xung được điều chỉnh thông qua giá trị CCR.
+
+Chu kỳ công tác (\textbf{Duty Cycle}) của PWM được xác định theo công thức:
+
+\begin{equation}
+Duty\ Cycle = \frac{T_{on}}{T_{period}} \times 100\%
+\end{equation}
+
+hoặc tương đương:
+
+\begin{equation}
+Duty\ Cycle = \frac{CCR}{ARR + 1} \times 100\%
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $T_{on}$ là thời gian tín hiệu ở mức cao.
+    \item $T_{period}$ là chu kỳ toàn phần của tín hiệu PWM.
+    \item $CCR$ là giá trị thanh ghi so sánh.
+\end{itemize}
+
+Ví dụ, nếu Duty Cycle là 50\%, tín hiệu sẽ ở mức cao trong một nửa chu kỳ và mức thấp trong nửa chu kỳ còn lại. Nếu Duty Cycle tăng lên 80\%, thời gian mức cao sẽ dài hơn, làm tăng năng lượng trung bình cung cấp cho tải.
+
+PWM được sử dụng rộng rãi trong điều khiển tốc độ động cơ DC, điều chỉnh độ sáng LED, điều khiển servo, phát tín hiệu analog giả lập thông qua lọc RC và nhiều ứng dụng điều khiển công suất khác.
+
+Trong hệ thống mô phỏng phần cứng trong vòng lặp, PWM được sử dụng để mô phỏng các tín hiệu điều khiển từ DUT như điều khiển quạt, động cơ, tạo ra xung vuông. Việc mô phỏng này giúp kiểm thử khả năng xử lý tín hiệu điều khiển của DUT, đánh giá phản ứng của firmware trước các thay đổi về độ rộng xung và kiểm tra các thuật toán điều khiển trong điều kiện gần với thực tế.
 
 \section{Hệ điều hành thời gian thực (Real-time Operating System – RTOS)}
 \subsection{Giới thiệu về RTOS}
