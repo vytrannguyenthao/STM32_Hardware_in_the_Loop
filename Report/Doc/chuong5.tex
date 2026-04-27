@@ -88,5 +88,31 @@ Sau đó phần cứng DMA tự động chuyển sang thu thập dữ liệu cho
 Khi CPU hoàn tất việc truyền tải khối dữ liệu này, biến \texttt{num\_halves} sẽ được cộng thêm 1, bắt kịp vị trí hiện tại của biến \texttt{dma\_halves}. Tiến trình này sẽ diễn ra luân phiên liên tục cho đến khi toàn bộ số lượng mẫu yêu cầu được thu thập và truyền thành công.
 
 Tuy nhiên, hiện tượng tràn bộ đệm vẫn sẽ xảy ra khi có sự mất cân bằng giữa tốc độ lấy mẫu của phần cứng và tốc độ truyền của phần mềm. Do bộ đệm chỉ gồm 2 nửa nên nếu hiệu số giữa 2 biến lớn hơn 1, điều đó chứng minh rằng DMA đã hoạt động quá nhanh, điền đầy cả 2 nửa bộ đệm.
-Khi đó phần cứng sẽ ghi đè lên nửa bộ đệm mà CPU vẫn chưa kịp xử lý, dẫn đến dữ liệu trong bộ đệm không còn chính xác. Để giải quyết vấn đề này, Logic analyzer sẽ chuyển sang trạng thái \texttt{ABORTED} và gửi thông báo lỗi về máy tính, đồng thời tắt ADC, PIO, DMA để ngăn chặn việc thu thập dữ liệu sai lệch.\\
+Khi đó phần cứng sẽ ghi đè lên nửa bộ đệm mà CPU vẫn chưa kịp xử lý, dẫn đến dữ liệu trong bộ đệm không còn chính xác. Để giải quyết vấn đề này, Logic analyzer sẽ chuyển sang trạng thái \texttt{ABORTED} và gửi thông báo lỗi về máy tính, đồng thời tắt ADC, PIO, DMA để ngăn chặn việc thu thập dữ liệu sai lệch.
 
+\subsection{Cơ chế xử lý dữ liệu}
+Khi phần cứng chỉ có duy nhất một đường truyền vật lý để gửi lệnh điều khiển và dữ liệu thô, việc phân biệt giữa các loại dữ liệu trở nên rất quan trọng.
+Nhằm giải quyết bài toán này, Logic analyzer sẽ sử dụng một mốc giá trị là 0x80 để phân loại dữ liệu. Cụ thể, bảng mã ASCII chuẩn chỉ sử dụng 7 bit để biểu diễn các ký tự thông dụng.
+Do đó, tất cả các ký tự dùng làm lệnh giao tiếp, phản hồi giữa phần cứng và phần mềm đều có giá trị từ 0x00 đến 0x7F, tức là luôn nhỏ hơn 0x80.
+
+Theo đó, toàn bộ dữ liệu do Logic analyzer lấy mẫu trước khi được gửi đi sẽ được Raspberry Pi set bit MSB lên mức 1. Để tối ưu hóa tối đa băng thông truyền tải, Logic analyzer chỉ gửi 1 byte cho mỗi mẫu tín hiệu số và 1 byte cho mỗi mẫu tín hiệu tương tự.
+Chính vì thế, đối với tín hiệu số, số kênh được lấy mẫu tối đa là 7 kênh. Đối với tín hiệu tương tự, độ phân giải ADC của Raspberry Pi là 8 bit nên giá trị mẫu sẽ nằm trong khoảng từ 0x00 đến 0xFF.
+Tuy nhiên bit MSB phải được set lên 1, do đó vi điều khiển cần dịch phải 1 bit, loại bỏ bit LSB và chỉ gửi 7 bit còn lại.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{image/LA_analog.jpg}
+    \caption{Xử lý dữ liệu tín hiệu tương tự}
+    \label{fig:LA_analog}
+\end{figure}
+
+Để đánh giá hiệu quả của cơ chế xử lý dữ liệu này, cần xem xét đến các yếu tố về sai số khi giảm độ phân giải của ADC từ 8 bit xuống còn 7 bit, cũng như băng thông đường truyền sẽ ảnh hưởng như nào đối với tốc độ lấy mẫu tối đa của Logic analyzer.
+
+Công thức tính bước nhảy mức điện áp: $V_{step} = \frac{V_{ref}}{2^n}$. Với $V_{ref} = 3.3V$, ADC 8 bit sẽ độ phần giải xấp xỉ 13mV, trong khi ADC 7 bit sẽ có độ phân giải xấp xỉ 26mV.
+Điều này có nghĩa trong trường hợp sử dụng ADC 7 bit, sẽ có sai số lượng tử hóa tăng gấp đôi.
+
+Trong trường hợp nếu dùng ADC 8 bit, mỗi mẫu của tín hiệu tương tự sẽ chiếm 2 byte, tổng số byte cần truyền cho mỗi mẫu là 3 byte (1 byte digital + 2 byte analog).
+Khi đó, băng thông USB sẽ bị chiếm 30\% cho 1 byte của tín hiệu tương tự nhưng trong đó chỉ có 1 bit thực sự mang thông tin.
+Bên cạnh đó, việc tăng số lượng byte cũng làm tăng thời gian truyền tải, điều này sẽ khiến tần số lấy mẫu của Logic analyzer bị giảm để tránh hiện tượng tràn bộ đệm như đã đề cập ở phần trước.
+Ngoài ra việc xử lý dữ liệu trên máy tính cũng sẽ trở nên phức tạp hơn.
+
+Với mục tiêu chính là thu thập dữ liệu từ DUT để phân tích và hiển thị dạng sóng, việc giảm độ phân giải của ADC xuống còn 7 bit là một sự đánh đổi hợp lý để đảm bảo Logic analyzer có thể hoạt động ở tần số lấy mẫu cao mà không bị mất dữ liệu, đồng thời vẫn cung cấp đủ thông tin để người dùng có thể phân tích tín hiệu một cách hiệu quả.
