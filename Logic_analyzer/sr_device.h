@@ -50,7 +50,7 @@
 //MEM_D_MASK is relative to the value written in memory, those may be different depending
 //on how data is shifted from the GPIOs into memory.
   #define GPIO_D_MASK 0x7FFFFC  //Mask of bits for digital inputs
-  #define UART_EN 1
+  #define UART_EN 0
 //Since this mode has all digital inputs contigous, the upper mask isn't needed.
   #define MEM_D_MASK_L 0x007FFFFF  //lower mask of bits for digital inputs
   #define MEM_D_MASK_U 0x0  //upper mask of bits for digital inputs
