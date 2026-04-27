@@ -318,16 +318,30 @@ class LogicTab(QWidget):
                 else:
                     edge_indices = []
         else:
-            # Digital hoàn hảo không có nhiễu, dùng zero-crossing bình thường
-            edge_indices = np.where(np.diff(data_slice) > 0)[0]
+            # Digital hoàn hảo không có nhiễu, tìm cạnh lên (0 chuyển sang 1)
+            # Cộng 1 để con trỏ lấy đúng vào index của điểm bắt đầu mức 1
+            edge_indices = np.where(np.diff(data_slice) > 0)[0] + 1
             
-            # TÍNH TOÁN DUTY CYCLE CHO KÊNH DIGITAL
-            # Đếm tổng số mẫu có giá trị bằng 1 (Mức Cao) chia cho tổng số mẫu vùng được chọn
-            high_samples = np.sum(data_slice == 1)
-            total_samples = len(data_slice)
-            duty_cycle_val = (high_samples / total_samples) * 100.0 if total_samples > 0 else 0.0
-            
-        # Tính toán Freq dựa trên KHOẢNG CÁCH CHÍNH XÁC giữa các cạnh (không phụ thuộc độ rộng box vàng)
+            # TÍNH TOÁN DUTY CYCLE CHUẨN XÁC DỰA TRÊN CHU KỲ TRỌN VẸN
+            if len(edge_indices) >= 2:
+                # Cắt bỏ phần rác ở hai đầu vùng chọn màu vàng
+                # Chỉ lấy dữ liệu từ cạnh lên đầu tiên đến cạnh lên cuối cùng
+                start_cycle = edge_indices[0]
+                end_cycle = edge_indices[-1]
+                
+                perfect_cycles_data = data_slice[start_cycle:end_cycle]
+                
+                high_samples = np.sum(perfect_cycles_data == 1)
+                total_samples = len(perfect_cycles_data)
+                
+                duty_cycle_val = (high_samples / total_samples) * 100.0 if total_samples > 0 else 0.0
+            else:
+                # Vùng bôi vàng quá nhỏ, không chứa đủ 1 chu kỳ trọn vẹn
+                duty_cycle_val = None
+
+        # ==========================================================
+        # TÍNH TOÁN TẦN SỐ (Dùng chung cho cả A0 và D0)
+        # ==========================================================
         if len(edge_indices) >= 2:
             num_cycles = len(edge_indices) - 1
             actual_time_span = (edge_indices[-1] - edge_indices[0]) / self.current_sample_rate
@@ -467,7 +481,7 @@ class LogicTab(QWidget):
             # CHẾ ĐỘ ĐANG CHẠY (LIVE): Chỉ render nối đuôi (sliding window)
             # ---------------------------------------------------------
             if (current_t - self.last_plot_time >= 0.3) and end_i > 0:
-                view_start = max(0, end_i - 100000)
+                view_start = max(0, end_i - 2500)
                 time_view = self.time_arr[view_start:end_i]
 
                 self.curves['D0'].setData(time_view, self.d0_arr[view_start:end_i])
@@ -579,7 +593,7 @@ class LogicTab(QWidget):
             dt = 1.0 / rate
             self.time_arr = np.arange(samples) * dt
             
-            self.plot_timer.start(100) 
+            self.plot_timer.start(30) 
 
             try:
                 # 1. Reset state
