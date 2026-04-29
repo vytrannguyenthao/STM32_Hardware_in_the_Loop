@@ -19,8 +19,9 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{tabularx}
+\usepackage{pifont}
 \setlength{\emergencystretch}{3em}
-
+\setcounter{secnumdepth}{3}
 
 % --- Font size & line spacing ---
 \renewcommand{\normalsize}{\fontsize{13}{19}\selectfont} % font 13pt, dòng 16pt
@@ -72,6 +73,8 @@
 % --- Trang bìa & lời cảm ơn ---
 \pagenumbering{gobble} 
 \input{titlepage}
+\newpage
+\input{nhiemvu.tex}
 
 \cleardoublepage
 \pagenumbering{arabic}
