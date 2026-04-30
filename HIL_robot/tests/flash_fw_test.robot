@@ -15,3 +15,4 @@ Flash Firmware to DUT
 Verify DUT Still Alive with new Firmware
     Connect To DUT
     Verify DUT Alive
+    Disconnect from DUT
