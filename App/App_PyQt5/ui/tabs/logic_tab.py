@@ -274,7 +274,7 @@ class LogicTab(QWidget):
         # Kiểm tra mảng data hợp lệ
         if arr is None or len(arr) == 0 or self.current_idx == 0:
             if ch == 'A0':
-                self.measure_text.setText(" Freq: -- Hz ")
+                self.measure_text.setText(" Freq: -- Hz | Vpp: --V")
             else:
                 self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
             return
@@ -285,18 +285,20 @@ class LogicTab(QWidget):
         
         if end_idx - start_idx < 2:
             if ch == 'A0':
-                self.measure_text.setText(" Freq: -- Hz ")
+                self.measure_text.setText(" Freq: -- Hz | Vpp: --V")
             else:
                 self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
             return
             
         data_slice = arr[start_idx:end_idx]
         duty_cycle_val = None # Biến lưu Duty cycle cho Digital
+        vpp_val = None
         
         # --- THUẬT TOÁN ĐO TẦN SỐ CHỐNG NHIỄU (HYSTERESIS) ---
         if ch == 'A0':
             _min = np.min(data_slice)
             _max = np.max(data_slice)
+            vpp_val = _max - _min
             
             # Khử nhiễu: Nếu sóng quá phẳng (biên độ < 0.1V), coi như không có dao động
             if _max - _min < 0.1:
@@ -348,6 +350,7 @@ class LogicTab(QWidget):
             freq = num_cycles / actual_time_span if actual_time_span > 0 else 0
         else:
             freq = 0
+            vpp_val = 0
             
         # Định dạng chuỗi hiển thị Tần số
         if freq >= 1000000:
@@ -360,8 +363,8 @@ class LogicTab(QWidget):
         # Nối thêm Duty Cycle nếu là kênh Digital
         if ch != 'A0' and duty_cycle_val is not None:
             self.measure_text.setText(f" Freq: {freq_str} | Duty: {duty_cycle_val:.1f}% ")
-        else:
-            self.measure_text.setText(f" Freq: {freq_str} ")
+        elif ch == 'A0' and vpp_val is not None:
+            self.measure_text.setText(f" Freq: {freq_str} | Vpp: {vpp_val:.2f}V")
         
         # Canh chỉnh vị trí nhãn: D0-D6 để ở 1.1, A0 để ở 3.1
         y_pos = 1.1 if ch.startswith('D') else 3.1
