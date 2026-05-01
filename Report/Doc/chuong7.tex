@@ -133,7 +133,47 @@ Sau khi toàn bộ dữ liệu đã được xử lý, phần mềm sẽ kiểm 
 Khi đã dừng nhận dữ liệu, phần mềm sẽ hiển thị toàn bộ dạng sóng đã thu thập được từ mốc thời gian bắt đầu, cho phép người dùng quan sát và phân tích toàn cảnh tín hiệu.
 
 \subsubsection{Lớp Xử lý thao tác chuột}
-Update later
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/App_la_mouse.jpg}
+    \caption{Lưu đồ giải thuật Xử lý thao tác chuột}
+    \label{fig:App_la_mouse}
+\end{figure}
+Logic Analyzer Tab cho phép người dùng thao tác trực tiếp trên không gian đồ thị thông qua các thao tác chuột:
+\begin{itemize}
+    \item[-] \textbf{Thao tác rê chuột:} Khi người dùng di chuyển con trỏ qua không gian đồ thị, hệ thống sẽ điều khiển một đường gióng dọc di chuyển đồng bộ theo tọa độ con trỏ.
+    Cùng lúc đó, phần mềm sẽ truy xuất mảng dữ liệu và hiển thị trực tiếp mức điện áp ngay tại thời điểm tương ứng của kênh tín hiệu Analog. Tính năng này giúp người dùng dễ dàng kiểm tra nhanh dữ liệu tại từng điểm lấy mẫu.
+    \item[-] \textbf{Thao tác nhấn đúp chuột:} Người dùng có thể nhấn đúp chuột vào bất kì kênh tín hiệu nào để có thể xem được các thông số. Thao tác này sẽ tạo ra một vùng quét (cửa sổ) xung quanh vị trí nhấn. Đối với kênh Digital sẽ hiển thị tần số và độ rộng xung, còn đối với kênh Analog sẽ hiển thị tần số và $V_{p-p}$.
+    \item[-] \textbf{Thao tác kéo / giãn vùng quét:} Khi thực hiện kéo / giãn vùng quét, phần mềm sẽ tiến hành trích xuất toàn bộ dữ liệu bên trong ranh giới vùng này.
+    Sau đó sẽ sử dụng các thuật toán để tính các thông số gồm tần số, độ rộng xung (cho kênh Digital), $V_{p-p}$ (cho kênh Analog). Dữ liệu sau khi được xử lý sẽ được cập nhật và hiển thị trực tiếp lên vùng được quét.
+    \item[-] \textbf{Thao tác nhấn chuột ngoài vùng quét:} Khi người dùng nhấn chuột vào bất kỳ khu vực trống nào ngoài phạm vi vùng quét, phần mềm sẽ tự động tắt và ẩn vùng quét đi, đóng vai trò như một lệnh hủy để giải phóng vùng nhìn.
+\end{itemize}
+
+Để vùng quét có thể hiển thị được các thông số, phần mềm cần thực hiện các thuật toán để có thể tính được các thông số này.
+Lưu đồ giải thuật bên dưới sẽ làm rõ cách tính toán tần số, độ rộng xung và $V_{p-p}$.\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/App_la_mouse_pull.jpg}
+    \caption{Lưu đồ giải thuật tính toán tần số, độ rộng xung}
+    \label{fig:App_la_mouse_pull}
+\end{figure}
+Ở giai đoạn đầu, phần mềm sẽ kiểm tra vùng quét và dữ liệu bên trong. Nếu vùng chọn không hợp lệ hoặc không có giá trị, phần mềm sẽ gán giá trị rỗng cho toàn bộ thông số và bỏ qua việc tính toán.
+Nếu hợp lệ, thuật toán sẽ quy đổi tọa độ thời gian lên đồ thị thành các chỉ số \texttt{start\_idx} và \texttt{end\_idx}. Từ đó có thể trích xuất đoạn tín hiệu nằm trong vùng này lưu vào \texttt{data\_slice} để phân tích.
+
+Sau khi đã lấy được dữ liệu trong vùng quét, phần mềm sẽ phân loại kênh để có thể xử lý dữ liệu:
+\begin{itemize}
+    \item[-] \textbf{Kênh Analog:} Phần mềm tiến hành tìm kiếm giá trị cực đại (max) và cực tiểu (min) trong mảng \texttt{data\_slice} để đánh giá biên độ dao động. 
+    Nếu biên độ chênh lệch nhỏ hơn 0.1V, tín hiệu được xem là phẳng không có dao động. Khi đó tổng số cạnh lên và $V_{p-p}$ được gán bằng 0. 
+    Ngược lại, nếu biên độ đạt chuẩn, phần mềm sẽ tính toán điện áp đỉnh-đỉnh ($V_{p-p} = max - min$) và áp dụng thuật toán lọc Schmitt Trigger (Hysteresis) với ngưỡng kích hoạt cao ở 60\% và ngưỡng thấp ở 40\%. Cơ chế này giúp đếm chính xác tổng số cạnh lên của tín hiệu sóng tương tự bằng cách triệt tiêu các gai nhiễu.
+    
+    \item[-] \textbf{Kênh Digital:} Do đặc tính là xung vuông sắc nét với các mức logic 0/1 rõ ràng, phần mềm sẽ trực tiếp đếm tổng số điểm chuyển trạng thái từ 0 sang 1 (cạnh lên). 
+    Nếu mảng dữ liệu quét được chứa ít nhất 2 cạnh lên (tương đương với việc có tối thiểu 1 chu kỳ trọn vẹn), thuật toán sẽ tiếp tục thực thi. 
+    Để đảm bảo độ chính xác, phần mềm sẽ loại bỏ các phần dữ liệu dư thừa ở hai đầu mảng quét, chỉ giữ lại khối dữ liệu giới hạn giữa cạnh lên đầu tiên và cạnh lên cuối cùng (chứa các chu kỳ hoàn hảo). 
+    Từ đó, chu kỳ hoạt động (Duty cycle) được tính toán theo công thức: $\dfrac{\text{Số mẫu ở mức HIGH}}{\text{Tổng số mẫu}} \times 100\%$.
+\end{itemize}
+Cuối cùng là bước tính toán tần số. Đầu tiên thuật toán sẽ tính số chu kỳ bằng cách lấy số cạnh lên trừ 1.
+Sau đó tính toán khoảng thời gian thực tế thông qua tần số lấy mẫu. Tần số của tín hiệu lúc này sẽ được tính bằng công thức: $f = \dfrac{\text{Số chu kỳ}}{\text{Thời gian}}$.
+Kết thúc quá trình, toàn bộ tập thông số bao gồm Tần số, Duty Cycle và $V_{p-p}$ sẽ được định dạng và cập nhật trực tiếp lên nhãn hiển thị tại Vùng quét trên giao diện phần mềm.
 
 \subsection{Peripherals Tab}
 \begin{figure}[H]
