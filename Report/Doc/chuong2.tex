@@ -384,3 +384,160 @@ Ví dụ:
     \item \texttt{thread\_1} giữ mutex A và đợi mutex B.
     \item \texttt{thread\_2} giữ mutex B và đợi mutex A.
 \end{itemize}
+
+\section{Cơ sở lý thuyết về phân tích phổ tần số}
+\subsection{Discrete-Time Fourier Transform - DTFT}
+Trong xử lý tín hiệu số, việc chuyển đổi dữ liệu từ miền thời gian sang miền tần số là bước then chốt để phân tích đặc tính phổ của tín hiệu.
+Phép biến đổi Fourier là công cụ nền tảng cho phép phân tách một tín hiệu liên tục phức tạp thành tổng các thành phần hàm sin và cos.
+Từ đó xác định biên độ và pha của từng tần số cấu thành.
+
+Công thức xác định cặp biến đổi Fourier liên tục được định nghĩa như sau:
+\begin{equation}
+X(\omega) = \int_{-\infty}^{\infty} x(t) e^{-j \omega t} dt
+\end{equation}
+
+Tuy nhiên trong các hệ thống, tín hiệu không tồn tại dưới dạng liên tục mà được thu thập dưới dạng các mẫu rời rạc $x[n]$. Khi đó, phép biến đổi Fourier thời gian rời rạc - Discrete-Time Fourier Transform (DTFT) được sử dụng để phân tích phổ của các chuỗi mẫu này.
+DTFT chuyển đổi chuỗi thời gian rời rạc thành một phổ tần số liên tục và có tính chất đặc trưng là tuần hoàn với chu kỳ $2\pi$. Công thức toán học của DTFT được mô tả qua biểu thức:
+\begin{equation}
+X(\omega_0) = \sum_{n=-\infty}^{\infty} x[n] e^{-j\omega_0 n}
+\end{equation}
+Với $\omega_0$ là tần số góc chuẩn hóa, dựa trên tần số góc và chu kì lấy mẫu $T_s$.
+$$\omega_0 = \omega \times T_s = \dfrac{2\pi f}{f_s}$$
+
+\subsection{Hiện tượng rò rỉ phổ và Kỹ thuật Cửa sổ (Windowing)}
+
+Như đã trình bày ở phần DTFT, công thức tính toán yêu cầu tín hiệu $x(n)$ phải có độ dài vô hạn (từ $-\infty$ đến $+\infty$). Tuy nhiên, trong hệ thống thực tế chỉ có thể thu thập được một lượng mẫu hữu hạn $L$. 
+
+Về mặt toán học, thao tác trích xuất một đoạn dữ liệu độ dài $L$ từ chuỗi vô hạn được coi là quá trình nhân tín hiệu gốc $x(n)$ với một hàm cửa sổ thời gian (time-windowing) $w(n)$. Tín hiệu sau khi đi qua cửa sổ, ký hiệu là $x_L(n)$, được biểu diễn như sau:
+\begin{equation}
+x_L(n) = x(n) \cdot w(n)
+\end{equation}
+
+Nếu hệ thống đơn thuần cắt lấy $L$ mẫu một cách tự nhiên mà không qua xử lý gì thêm, bản chất hệ thống đang áp dụng một \textbf{cửa sổ chữ nhật (Rectangular Window)}. Hàm cửa sổ này giữ nguyên tín hiệu bên trong vùng lấy mẫu và ép tất cả các giá trị bên ngoài về 0:
+\begin{equation}
+w(n) = 
+\begin{cases} 
+1, & \text{nếu } 0 \le n \le L-1 \\ 
+0, & \text{trường hợp khác} 
+\end{cases}
+\end{equation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/rect_window.jpg}
+    \caption{Cửa sổ chữ nhật trong miền thời gian}
+    \label{fig:rect_window}
+\end{figure}
+
+Thực hiện phép biến đổi Fourier cho cửa sổ chữ nhật, phổ của cửa sổ này trong miền tần số mang hình dạng đặc trưng của hàm Sinc.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/rect_spectrum.jpg}
+    \caption{Phổ biên độ của cửa sổ chữ nhật}
+    \label{fig:rect_spectrum}
+\end{figure}
+Búp chính là búp có biên độ cao nhất nằm ngay trung tâm. Ký hiệu $\Delta\omega_w$ biểu thị bề rộng hiệu dụng của búp chính.
+Bề rộng này là thành phần quan trọng quyết định độ phân giải tần số. Búp chính càng hẹp thì khả năng tách biệt hai tần số nằm sát nhau càng tốt.
+Bên cạnh đó, các gợn sóng nhỏ trải dài hai bên búp chính là các búp phụ. Có thể thấy, thay vì năng lượng tập trung toàn bộ ở búp chính thì năng lượng bị tràn ra các búp phụ này.
+Điều này dẫn đến hiện tượng rò rỉ tần số (frequency leakage).
+
+Để giảm thiểu hiện tượng này, các hàm cửa sổ phi chữ nhật (non-rectangular windows) được áp dụng để tránh việc cắt đột ngột của cửa sổ chữ nhật.
+Một trong những loại cửa sổ được ứng dụng rộng rãi nhất là \textbf{Cửa sổ Hamming}, được định nghĩa bởi phương trình:
+\begin{equation}
+w(n) = 
+\begin{cases} 
+0.54 - 0.46 \cos\left(\dfrac{2\pi n}{L-1}\right), & \text{nếu } 0 \le n \le L-1 \\ 
+0, & \text{trường hợp khác} 
+\end{cases}
+\end{equation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/hamming_window.jpg}
+    \caption{Cửa sổ Hamming trong miền thời gian và miền tần số}
+    \label{fig:hamming_window}
+\end{figure}
+Hình \ref{fig:hamming_window} so sánh cửa sổ chữ nhật với cửa sổ Hamming trong mieefnf thời gian và miền tần số.
+Trong miền thời gian, cửa sổ Hamming sẽ không cắt đột ngột như cửa sổ chữ nhật mà giảm dần về phía hai đầu.
+Còn trong miền tần số, có thể thấy các biên độ của các búp phụ rất bé hơn rất nhiều so với búp chính.
+Điều này giúp giảm thiểu hiện tượng rò rỉ tần số. Mặc dù độ rộng của búp chính của cửa sổ Hamming rộng hơn so với cửa sổ chữ nhật và biên độ cũng nhỏ hơn nhưng có thể khắc phục bằng cách lấy nhiều mẫu hơn.
+
+\subsection{Discrete Fourier Transform - DFT}
+Mặc dù DTFT cung cấp cái nhìn chi tiết về phổ tần số nhưng do công thức yêu cầu một tổng vô hạn các mẫu dữ liệu, việc triển khai trực tiếp trên hệ thống là không khả thi.
+Khi đó phép biến đổi Fourier rời rạc - Discrete Fourier Transform (DFT) sẽ giải quyết vấn đề này.
+DFT sẽ thực hiện lấy mẫu phổ liên tục của DTFT và giới hạn tính toán trong một khoảng tín hiệu có chiều dài hữu hạn N mẫu với các điểm cách nhau cách đều nhau trên toàn bộ khoảng Nyquist, $0 \le \omega \le 2\pi$.
+Các “tần số DFT” này được định nghĩa bằng radian trên mỗi mẫu như sau:
+\begin{equation}
+\omega_k = \dfrac{2 \pi k}{N}, \quad k = 0, 1, \dots, N-1
+\end{equation}
+hay với đơn vị Hz:
+\begin{equation}
+f_k = \dfrac{kf_s}{N}, \quad k = 0, 1, \dots, N-1
+\end{equation}
+Từ đó, phép biến đổi Fourier rời rạc N điểm sẽ là:
+\begin{equation}
+X(k) = \sum_{n=0}^{N-1} x(n) e^{-j\frac{2\pi}{N}kn}, \quad k = 0, 1, \dots, N-1
+\end{equation}
+Hoặc có thể viết:
+\begin{equation}
+X(k) = \sum_{n=0}^{N-1} x(n) W_N^{kn}, \quad k = 0, 1, \dots, N-1
+\end{equation}
+Trong đó, $W_N = e^{-j\frac{2\pi}{N}}$ được gọi là hệ số xoay (twiddle factor).\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/dtft_dft.png}
+    \caption{Mối quan hệ giữa DTFT và DFT}
+    \vspace{-1em}
+    \caption*{\textit{Nguồn: \href{https://www.mmjal.com/BLOG/?bmode=view&idx=170653753}{MALMIJAL}}}
+    \label{fig:dtft_dft}
+\end{figure}
+Hình \ref{fig:dtft_dft} thể hiện mối quan hệ giữa DTFT và DFT. Đường màu cam biểu diễn cho DTFT là một phổ tần số liên tục.
+Còn các điểm màu xanh đại diện cho kết quả của phép biến đổi DFT. Có thể thấy DFT thực chất chính là thao tác lấy mẫu đường cong phổ liên tục của DTFT.
+
+\subsection{Fast Fourier Transform - FFT}
+Việc tính tóa DFT đòi hỏi độ phức tạp cao với nhiều phép tính. Khi N lớn sẽ gây quá trình quá tải tính toán.
+Để tối ưu hóa tốc độ, phép biến đổi Fourier nhanh - Fast Fourier Transform (FFT) được triển khai giúp giảm độ phức tạp của thuật toán DFT.
+Thuật toán FFT dựa trên việc chia nhỏ phép tính DFT có độ dài N thành các phép tính DFT có độ dài ngắn hơn (N/2) bằng cách chia dải chỉ số $k$ từ $[0, N-1]$ thành hai khoảng $\left[ 0, \dfrac{N}{2}-1 \right]$ và $\left[k+\dfrac{N}{2}\right]$.
+
+\textbf{Ở nửa đầu}, $X(k)$ được tính như sau:
+\begin{equation}
+X(k) = \sum_{n=0}^{N/2-1} x(2n) W_N^{2kn} + \sum_{n=0}^{N/2-1} x(2n+1) W_N^{(2n+1)k}
+\end{equation}
+Ta có mối quan hệ giữa hệ số góc quay giữa $W_N^2$ và $W_{N/2}$ như sau:
+$$W_{N/2} = e^{-j\frac{2\pi}{N/2}} = (e^{-j\frac{2\pi}{N}})^2 = W_N^2$$
+Từ đó, ta có thể viết:
+\begin{equation}
+\begin{aligned}
+X(k) &= \sum_{n=0}^{N/2-1} x(2n) W_{N/2}^{kn} + W_N^k \sum_{n=0}^{N/2-1} x(2n+1) W_{N/2}^{kn} \\
+     &= G(k) + W_N^k H(k)
+\end{aligned}
+\label{eq:fft_xk}
+\end{equation}
+với $k = 0, 1, \dots, \dfrac{N}{2}-1$
+
+\textbf{Ở nửa sau}, $X(k + N/2)$ được tính như sau:
+\begin{equation}
+X(k + N/2) = G(k + N/2) + W_N^{k + N/2} H(k + N/2)
+\end{equation}
+
+Sử dụng tính chất tuần hoàn rằng bất kỳ DFT nào cũng tuần hoàn theo k với chu kỳ bằng độ dài của nó, ta có $G(k + N/2) = G(k)$ và $H(k + N/2)= H(k)$. Ta cũng có tính chất hệ số xoay:
+$$W_N^{N/2} = e^{-j\frac{2\pi}{N} \cdot \frac{N}{2}} = e^{-j\pi} = -1$$
+Từ đó, ta có:
+\begin{equation}
+X(k + N/2) = G(k) - W_N^k H(k)
+\label{eq:fft_xkn/2}
+\end{equation}
+
+Từ \eqref{eq:fft_xk} và \eqref{eq:fft_xkn/2}, toàn bộ phép DFT có thể được tính chỉ với $k = 0, 1, \dots, \dfrac{N}{2}-1$.
+\begin{equation}
+\begin{aligned}
+X(k) &= G(k) + W_N^k H(k)\\
+X(k + N/2) &= G(k) - W_N^k H(k)
+\end{aligned}
+\end{equation}
+Công thức này còn được biết đến với tên gọi là phương trình hợp nhất hình bướm \textit{(butterfly merging equations)}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/fft_butterfly.png}
+    \caption{FFT - 8 điểm}
+    \label{fig:fft_butterfly}
+\end{figure}
