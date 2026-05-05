@@ -72,7 +72,7 @@ class Logic_Library:
         peak_idx = np.argmax(fft_power)
         peak_freq = freqs[peak_idx]
 
-        window_size = 5  # Lấy 5 vạch bên trái và 5 vạch bên phải đỉnh chính
+        window_size = 10  # Lấy 10 vạch bên trái và 10 vạch bên phải đỉnh chính
         start_idx = max(0, peak_idx - window_size)
         end_idx = min(len(fft_power), peak_idx + window_size + 1)
 
