@@ -541,3 +541,29 @@ Công thức này còn được biết đến với tên gọi là phương trì
     \caption{FFT - 8 điểm}
     \label{fig:fft_butterfly}
 \end{figure}
+
+\subsection{Mật độ phổ năng lượng}
+
+Trong phân tích tín hiệu số, phép biến đổi DFT/FFT cung cấp thông tin về biên độ và pha của các thành phần tần số dưới dạng số phức $X(k) = a + jb$. Trong nhiều ứng dụng thực tế, sự phân bố năng lượng hoặc công suất của tín hiệu theo tần số lại là yếu tố được quan tâm hàng đầu. Khi đó, khái niệm mật độ phổ năng lượng được sử dụng.
+
+Cơ sở toán học của mật độ phổ năng lượng được xây dựng dựa trên \textbf{Định lý Parseval}. Định lý này phát biểu rằng tổng năng lượng của một tín hiệu trong miền thời gian hoàn toàn bằng với tổng năng lượng của nó trong miền tần số. Đối với một chuỗi tín hiệu rời rạc $x(n)$ có chiều dài $N$ và phổ DFT tương ứng là $X(k)$, định lý Parseval được biểu diễn dưới dạng:
+\begin{equation}
+\sum_{n=0}^{N-1} x(n)^2 = \frac{1}{N} \sum_{k=0}^{N-1} |X(k)|^2
+\end{equation}
+
+Phương trình trên cho thấy đại lượng $|X(k)|^2$ là năng lượng mà tần số $k$ đóng góp vào tổng năng lượng của toàn bộ tín hiệu. Do đó, mật độ phổ năng lượng tại một dải tần số thứ $k$ được định nghĩa là bình phương độ lớn (mô-đun) của giá trị phức tại tần số đó:
+\begin{equation}
+E(k) = |X(k)|^2
+\end{equation}
+
+Dựa trên cơ sở lý thuyết về mật độ phổ năng lượng, ta có thể phân tích các dạng sóng khác nhau trong miền thời gian.
+Hình sau minh họa mối quan hệ giữa miền thời gian và miền tần số của sóng sin và sóng tam giác.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/waveform.png}
+    \caption{Sóng sin và sóng tam giác trong miền thời gian và miền tần số}
+    \label{fig:waveform}
+\end{figure}
+\textbf{Sóng tam giác} được tổng hợp từ tần số cơ bản $f$ và các hài bậc lẻ ($3f, 5f, \dots$), các hài bậc chẵn bằng 0. Biên độ của các hài bậc lẻ tuân theo công thức $a_n = \dfrac{4A}{(n\pi)^2}$.
+
+\textbf{Sóng sin / cosin} chỉ có một vạch biên độ duy nhất tại tần số cơ bản $f$, toàn bộ năng lượng của tín hiệu được tập trung tại một vạch phổ này.
