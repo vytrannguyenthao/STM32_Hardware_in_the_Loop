@@ -124,6 +124,7 @@ khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...\\
 
 \begin{table}[H]
 \centering
+\caption{Các ngoại vi và chân tín hiệu trong hệ thống HIL}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{|l|c|X|} 
 \hline
@@ -156,7 +157,6 @@ GPIO Input & PE0 -- PE13 & Đọc tín hiệu số từ DUT \\
 GPIO Output & \parbox[t]{3cm}{\centering PB0 -- PB5, PB10 -- PB15 \vspace{3pt}} & Xuất tín hiệu số điều khiển DUT \\ 
 \hline
 \end{tabularx}
-\caption{Các ngoại vi và chân tín hiệu trong hệ thống HIL}
 \label{tab:hil_peripherals_pins}
 \end{table}
 
@@ -175,6 +175,7 @@ Mạch cũng được bao gồm nút nhấn RESET, debug led, các tụ lọc ng
 
 \begin{table}[H]
 \centering
+\caption{Các ngoại vi và chân tín hiệu trong hệ thống Logic Analyzer}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{|l|c|X|} 
 \hline
@@ -187,7 +188,6 @@ Analog Channel & GPIO26 & Thu thập tín hiệu analog từ DUT \\
 UART & GPIO0 (TX), GPIO1 (RX) & Debug UART \\
 \hline
 \end{tabularx}
-\caption{Các ngoại vi và chân tín hiệu trong hệ thống Logic Analyzer}
 \label{tab:logic_analyzer_pins}
 \end{table}
 

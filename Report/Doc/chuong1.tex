@@ -33,16 +33,35 @@ Bên cạnh các thiết bị HIL chuyên dụng, nhiều nghiên cứu đã s�
 
 Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông qua nghiên cứu và đào tạo, với trọng tâm là ứng dụng các công cụ mô phỏng phần mềm kết hợp với phần cứng nhúng phổ biến. Các giải pháp HIL chuyên dụng vẫn còn hạn chế do chi phí đầu tư cao, trong khi các mô hình HIL linh hoạt dựa trên phần mềm và vi điều khiển được đánh giá là phù hợp hơn với điều kiện nghiên cứu trong nước. Điều này cho thấy tiềm năng phát triển các hệ thống HIL cho thiết bị nhúng theo hướng đơn giản, dễ triển khai và chi phí thấp.
 
-\section{Nhiệm vụ đề tài}
-Từ thực trạng nghiên cứu trong và ngoài nước nêu trên, đề tài tập trung xây dựng một hệ thống mô phỏng phần cứng trong vòng lặp cho thiết bị nhúng, hướng đến mô phỏng các ngoại vi và giao tiếp phổ biến nhằm phục vụ kiểm thử firmware trong giai đoạn phát triển sớm.
-
-Các nhiệm vụ cụ thể bao gồm:
+\section{Phạm vi nghiên cứu và nhiệm vụ đề tài}
+\subsection{Phạm vi nghiên cứu}
 \begin{itemize}
-    \item Lập trình mô phỏng các ngoại vi trên hệ thống HIL: Triển khai các khối mô phỏng và giao tiếp cho các chuẩn phổ biến trong hệ thống nhúng, bao gồm SPI, I2C, CAN, ADC, DAC, GPIO và UART, nhằm tạo ra các tín hiệu đầu vào và xử lý phản hồi từ DUT trong quá trình kiểm thử.
-    \item Đánh giá hoạt động của hệ thống HIL: Thực hiện các kịch bản kiểm thử để đánh giá hiệu năng, độ chính xác và tính ổn định của hệ thống HIL trong việc mô phỏng các ngoại vi và giao tiếp với DUT, từ đó xác định khả năng phát hiện lỗi và hỗ trợ phát triển firmware.
-    \item Thiết kế và phát triển phần mềm giao diện hiển thị: Xây dựng giao diện người dùng trực quan để cấu hình, giám sát và điều khiển quá trình mô phỏng HIL, giúp người dùng dễ dàng thiết lập các kịch bản kiểm thử và theo dõi kết quả.
-    \item Thiết kế và thi công phần cứng bo HIL: Phát triển bo mạch HIL với các thành phần phần cứng cần thiết để kết nối và giao tiếp với DUT, đảm bảo khả năng mở rộng và linh hoạt trong việc tích hợp các ngoại vi mô phỏng.
+    \item \textbf{Phạm vi kỹ thuật:}
+    \begin{itemize}
+        \item[-] Tập trung vào việc thiết kế phần cứng gồm khối HIL để phát tín hiệu, khối Logic analyzer để thu thập các sóng thu thập từ DUT.
+        \item[-] Phát triển firmware sử dụng hệ điều hành thời gian thực quản lý đa nhiệm để mô phỏng các thiết bị ngoại vi, môi trường hoạt động và các giao thức truyền thông phổ biến.
+        \item[-] Xây dựng phần mềm trên máy tính để cấu hình, giám sát truyền thông và tích hợp nền tảng Robot Framework nhằm thực thi, theo dõi các kịch bản kiểm thử tự động.
+        \item[-] Hệ thống tập trung chủ yếu vào việc kiểm thử chức năng và hành vi của firmware trên DUT, không đi sâu vào kiểm thử các giới hạn vật lý hay độ bền của linh kiện phần cứng.
+    \end{itemize}
+
+    \item \textbf{Phạm vi ứng dụng:}
+    \begin{itemize}
+        \item[-] Áp dụng phục vụ cho mục đích nghiên cứu, phát triển (R\&D) và hỗ trợ kiểm thử phần mềm nhúng.
+        \item[-] Cung cấp một nền tảng phần cứng và bộ thư viện phần mềm linh hoạt để người dùng tự do cấu hình các kịch bản kiểm thử tùy chỉnh.
+        \item[-] Chưa triển khai dưới dạng sản phẩm đóng gói thương mại ở quy mô công nghiệp, hoặc áp dụng trực tiếp cho các hệ thống đòi hỏi tiêu chuẩn khắt khe (như hàng không, ô tô, y tế).
+    \end{itemize}
 \end{itemize}
 
-Thông qua việc hoàn thành các nhiệm vụ trên, đề tài kỳ vọng đóng góp một giải pháp mô phỏng phần cứng trong vòng lặp chi phí thấp, linh hoạt và hiệu quả cho việc kiểm thử thiết bị nhúng, hỗ trợ quá trình phát triển firmware trong các giai đoạn đầu.
 
+\subsection{Nhiệm vụ đề tài}
+\textbf{Tìm hiểu cơ sở lý thuyết}
+\begin{itemize}
+    \item[-] Tìm hiểu về kiến trúc, nguyên lý hoạt động của hệ thống kiểm thử phần cứng trong vòng lặp (Hardware-in-the-Loop - HIL).
+    \item[-] Nghiên cứu các chuẩn giao tiếp ngoại vi phổ biến và kỹ thuật lập trình đa nhiệm trong hệ thống nhúng với hệ điều hành thời gian thực.
+    \item[-] Tìm hiểu các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
+    \item[-] Tìm hiểu cơ sở toán học và ứng dụng của thuật toán Biến đổi Fourier nhanh (FFT) trong việc phân tích phổ các dạng sóng tín hiệu.
+    \item[-] Tìm hiểu về Boot mode của STM32 để HIL có thể nạp chương trình cho DUT thông qua giao tiếp USB thay vì sử dụng mạch nạp ST-Link truyền thống.
+    \item[-] Khảo sát các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
+\end{itemize}
+
+\text{}

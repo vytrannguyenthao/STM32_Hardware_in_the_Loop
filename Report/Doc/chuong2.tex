@@ -243,9 +243,10 @@ Lúc này, việc chuyển sang sử dụng \textbf{RTOS} sẽ giúp hệ thốn
     \caption{Task trong Super Loop}
     \label{fig:task_RTOS}
 \end{figure}
-Mỗi thread là một chương tình nhỏ. Nó có điểm bắt đầu và sau đó thường sẽ là một vòng lặp vô hạn và sẽ không trả về bất kỳ giá trị nào hết.
+Mỗi thread là một chương tình nhỏ. Nó có điểm bắt đầu và sau đó thường sẽ là một vòng lặp vô hạn và sẽ không trả về bất kỳ giá trị nào hết.\\
 \begin{table}[H]
 \centering
+\caption{Ví dụ đoạn chương trình của 1 thread}
 \begin{tabular}{|p{13cm}|}
 \hline
 \begin{lstlisting}[language=C,
@@ -262,7 +263,6 @@ void display_thread(void *pvParameters)
 \end{lstlisting}
 \\ \hline
 \end{tabular}
-\caption{Ví dụ đoạn chương trình của 1 thread}
 \label{tab:display_thread}
 \end{table}
 
