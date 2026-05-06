@@ -54,14 +54,33 @@ Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông
 
 
 \subsection{Nhiệm vụ đề tài}
-\textbf{Tìm hiểu cơ sở lý thuyết}
 \begin{itemize}
-    \item[-] Tìm hiểu về kiến trúc, nguyên lý hoạt động của hệ thống kiểm thử phần cứng trong vòng lặp (Hardware-in-the-Loop - HIL).
-    \item[-] Nghiên cứu các chuẩn giao tiếp ngoại vi phổ biến và kỹ thuật lập trình đa nhiệm trong hệ thống nhúng với hệ điều hành thời gian thực.
-    \item[-] Tìm hiểu các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
-    \item[-] Tìm hiểu cơ sở toán học và ứng dụng của thuật toán Biến đổi Fourier nhanh (FFT) trong việc phân tích phổ các dạng sóng tín hiệu.
-    \item[-] Tìm hiểu về Boot mode của STM32 để HIL có thể nạp chương trình cho DUT thông qua giao tiếp USB thay vì sử dụng mạch nạp ST-Link truyền thống.
-    \item[-] Khảo sát các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
-\end{itemize}
+    \item Tìm hiểu cơ sở lý thuyết
+    \begin{itemize}
+        \item[-] Tìm hiểu về kiến trúc, nguyên lý hoạt động của hệ thống kiểm thử phần cứng trong vòng lặp (Hardware-in-the-Loop - HIL).
+        \item[-] Nghiên cứu các chuẩn giao tiếp ngoại vi phổ biến và kỹ thuật lập trình đa nhiệm trong hệ thống nhúng với hệ điều hành thời gian thực.
+        \item[-] Tìm hiểu các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
+        \item[-] Tìm hiểu cơ sở lý thuyết và ứng dụng của thuật toán Biến đổi Fourier nhanh (FFT) trong việc phân tích phổ các dạng sóng tín hiệu.
+        \item[-] Tìm hiểu về Boot mode của STM32 để HIL có thể nạp chương trình cho DUT thông qua giao tiếp USB thay vì sử dụng mạch nạp ST-Link truyền thống.
+        \item[-] Khảo sát các phương pháp kiểm thử phần mềm tự động và nền tảng Robot Framework.
+    \end{itemize}
 
-\text{}
+    \item Từ các yêu cầu trên, thực hiện thiết kế, triển khai phần cứng
+    \begin{itemize}
+        \item[-] Thiết kế sơ đồ khối, sơ đồ nguyên lý và lựa chọn linh kiện.
+        \item[-] HIL có khả năng điều khiển trạng thái của thiết bị kiểm thử như cấp nguồn, kích hoạt chế độ Boot cho DUT.
+        \item[-] Đảm bảo khả năng tương thích và các header mở rộng để linh hoạt kiểm thử thiết bị.
+    \end{itemize}
+
+    \item Tiến hành thi công, lắp ráp hoàn chỉnh. Thực hiện firmware cho HIL và Logic Analyzer để thử nghiệm các chức năng.
+
+    \item Xây dựng bộ thư viện điều khiển HIL và Logic Analyzer bằng Robot Framework để hỗ trợ người dùng có thể sử dụng cho việc kiểm thử cho firmware DUT.
+
+    \item Thiết kế phần mềm trên máy tính có giao diện trực quan để người dùng cấu hình tham số, gửi lệnh điều khiển và giám sát dữ liệu phản hồi.
+
+    \item Thử nghiệm toàn bộ hệ thống sau cùng để đảm bảo tính ổn định và chính xác.
+    \begin{itemize}
+        \item[-] Thu thập, lưu trữ dữ liệu và log của các kịch bản kiểm thử.
+        \item[-] Đối chiếu hành vi thực tế của DUT, phân tích dạng sóng/phổ tín hiệu so với kịch bản kiểm thử, từ đó đánh giá chất lượng của phần mềm nhúng.
+    \end{itemize}
+\end{itemize}
