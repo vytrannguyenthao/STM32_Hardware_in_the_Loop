@@ -80,7 +80,67 @@ Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông
 
     \item Thử nghiệm toàn bộ hệ thống sau cùng để đảm bảo tính ổn định và chính xác.
     \begin{itemize}
+        \item[-] Thực hiện firmware DUT mẫu để thử nghiệm kiểm thử.
         \item[-] Thu thập, lưu trữ dữ liệu và log của các kịch bản kiểm thử.
         \item[-] Đối chiếu hành vi thực tế của DUT, phân tích dạng sóng/phổ tín hiệu so với kịch bản kiểm thử, từ đó đánh giá chất lượng của phần mềm nhúng.
     \end{itemize}
 \end{itemize}
+
+\begingroup
+\renewcommand{\arraystretch}{1.4} 
+% Bảng rút lại còn 2 cột: Cột chi tiết rộng 10.7cm, Cột người thực hiện 2.5cm
+\begin{longtable}{|>{\raggedright\arraybackslash}p{10.7cm} |>{\centering\arraybackslash}p{2.5cm}|}
+    \caption{Bảng phân công nhiệm vụ chi tiết}
+    \label{tab:phan_cong} \\
+    \hline
+    \multicolumn{1}{|c|}{\textbf{Chi tiết công việc}} & \textbf{Người thực hiện} \\
+    \hline
+    \endfirsthead
+    
+    % ĐẦU TRANG TIẾP THEO (Chỉ kẻ 1 đường ngang trên cùng để đóng khung)
+    \hline
+    \endhead
+    
+    % CUỐI TRANG BỊ NGẮT (Để trống hoàn toàn)
+    \endfoot
+    
+    % CUỐI BẢNG (Đóng viền dưới cùng của bảng ở trang cuối)
+    \hline
+    \endlastfoot
+
+    % ================= NỘI DUNG BẢNG =================
+
+    - Nghiên cứu kiến trúc HIL, RTOS, Robot Framework, thuật toán FFT và chế độ Boot của STM32.\newline
+    - Xây dựng cấu trúc firmware cơ bản cho hệ thống mô phỏng HIL và thiết bị cần kiểm thử (DUT).\newline
+    - Thiết kế bộ khung nền tảng cho phần mềm giao diện máy tính (App GUI) sử dụng Python.\newline
+    - Xây dựng bộ thư viện điều khiển tự động bằng Robot Framework và soạn thảo các kịch bản kiểm thử (Test cases). & 
+    \textbf{Chung} \\
+    \hline
+    
+    - Thiết kế phần cứng, sơ đồ khối, sơ đồ nguyên lý, lựa chọn linh kiện và lắp ráp mạch PCB hoàn chỉnh.\newline
+    - Phát triển firmware cho Logic Analyzer để phục vụ công tác đo lường và bắt xung tín hiệu.\newline
+    - Lập trình firmware HIL: Xử lý cấu hình ngoại vi CAN, ADC, DAC và mô phỏng hoạt động của SPI FLASH.\newline
+    - Thiết kế tính năng xuất tín hiệu Analog (phát dạng sóng sin, sóng tam giác).\newline
+    - Triển khai thuật toán Biến đổi Fourier nhanh (FFT) để phân tích phổ tín hiệu số và nhận diện sóng sin.\newline
+    - Cập nhật giao diện trên PC: Tích hợp module cấu hình, gửi lệnh và hiển thị dữ liệu trực quan cho CAN, ADC, SPI. \newline
+    - Vẽ dạng sóng thu thập từ Logic Analyzer lên App. &
+    \textbf{Ve Samy} \\
+    \hline
+
+    - Kiểm tra bản vẽ thiết kế phần cứng trước khi tiến hành gia công.\newline
+    - Lập trình firmware HIL: Xử lý ngoại vi UART, I2C, mô phỏng các thiết bị EEPROM và module thời gian thực (RTC).\newline
+    - Triển khai tính năng điều khiển I/O: Tạo xung PWM, cấu hình các chân GPIO phục vụ đọc/xuất tín hiệu Digital.\newline
+    - Triển khai thuật toán Biến đổi Fourier nhanh (FFT) để phân tích phổ tín hiệu số và nhận diện sóng tam giác.\newline
+    - Xây dựng cơ chế điều khiển phần cứng để kích hoạt tự động chế độ Boot, hỗ trợ nạp firmware cho DUT qua USB.\newline
+    - Cập nhật giao diện trên PC: Tích hợp module cho I2C, UART, điều khiển PWM, Digital. & 
+    \textbf{Thảo Vy} \\
+    \hline
+    
+    - Tích hợp \& Kiểm thử toàn hệ thống\newline
+    - Thực thi firmware DUT mẫu và chạy các kịch bản kiểm thử tự động.\newline
+    - Thu thập log dữ liệu, đối chiếu hành vi thực tế của DUT, phân tích dạng sóng/phổ tín hiệu.\newline
+    - Đánh giá độ kết quả thu thập được từ DUT và chất lượng của phần mềm nhúng. & 
+    \textbf{Chung} \\
+
+\end{longtable}
+\endgroup
