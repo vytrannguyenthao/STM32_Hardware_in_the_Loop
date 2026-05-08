@@ -113,8 +113,11 @@
 % --- Trang bìa & lời cảm ơn ---
 \pagenumbering{gobble} 
 \input{titlepage}
+
 \newpage
-\input{nhiemvu.tex}
+\newgeometry{left=3cm, right=2cm, top=2cm, bottom=2cm}
+\input{nhiemvu}
+\restoregeometry
 
 \cleardoublepage
 \pagenumbering{roman}
