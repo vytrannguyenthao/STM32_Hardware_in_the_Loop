@@ -1,6 +1,9 @@
 \chapter{KẾT QUẢ THỰC HIỆN}
 
 Chương này trình bày các kết quả đạt được sau quá trình thiết kế, xây dựng và triển khai hệ thống Hardware-in-the-Loop cho kiểm thử phần mềm nhúng. Các kết quả được phân tích theo ba thành phần chính của hệ thống bao gồm: phần mềm HIL, phần mềm DUT và phần mềm trên máy tính . Qua đó đánh giá mức độ đáp ứng yêu cầu thiết kế cũng như khả năng ứng dụng thực tế của hệ thống.
+\section{Kết quả thực hiện phần cứng}
+
+(chèn ảnh phần cứng HIL thực tế)
 
 \section{Kết quả thực hiện phần mềm HIL}
 
@@ -15,17 +18,12 @@ Từ những tính năng đó, HIL cho phép người dùng cấu hình linh ho�
 
 Trong quá trình vận hành, hệ thống HIL duy trì kết nối ổn định với cả DUT và PC thông qua các giao thức ngoại vi. Các tín hiệu mô phỏng được truyền nhận chính xác và đúng thời gian, đáp ứng yêu cầu kiểm thử theo thời gian thực. Kết quả này chứng minh tính khả thi của việc sử dụng HIL như một công cụ hỗ trợ kiểm thử phần mềm nhúng.
 
-\section{Kết quả thực hiện phần mềm DUT}
+(bổ sung thêm hình ảnh kết quả từ log của console, putty)
 
-Phần mềm nhúng trên thiết bị cần kiểm thử (DUT) được xây dựng nhằm kiểm tra khả năng tương tác với hệ thống HIL và PC trong các điều kiện mô phỏng khác nhau.
+\section{Kết quả thực hiện phần mềm Logic Analyzer trên HIL}
 
-Tương tự như phần mềm HIL, hệ điều hành FreeRTOS cũng được tích hợp vào DUT để quản lý các chức năng chính của hệ thống. Các task được phân chia rõ ràng, bao gồm task giao tiếp với PC, task giao tiếp với HIL và task xử lý dữ liệu. Cách tiếp cận này giúp cải thiện khả năng đáp ứng thời gian thực và tăng tính ổn định của hệ thống.
 
-Kết quả thử nghiệm cho thấy DUT có thể giao tiếp ổn định với hệ thống HIL thông qua các giao thức UART, I2C và SPI. DUT nhận và xử lý chính xác các tín hiệu mô phỏng do HIL tạo ra, đồng thời phản hồi lại trạng thái hoạt động tương ứng. Việc giao tiếp với PC thông qua USB cũng diễn ra ổn định, cho phép gửi và nhận các lệnh cấu hình, điều khiển trong suốt quá trình kiểm thử.
-
-Nhìn chung, phần mềm DUT đã đáp ứng đầy đủ các yêu cầu thiết kế ban đầu, đồng thời cho thấy khả năng tích hợp tốt với hệ thống HIL trong môi trường kiểm thử.
-
-\section{Kết quả thực hiện phần mềm trên PC}
+\section{Kết quả thực hiện phần mềm trên máy tính}
 
 Phần mềm trên máy tính được phát triển bằng ngôn ngữ Python, sử dụng thư viện PyQt5 để xây dựng giao diện đồ họa người dùng. Phần mềm PC đóng vai trò trung tâm điều phối, cho phép người dùng cấu hình hệ thống, điều khiển mô phỏng và giám sát quá trình kiểm thử.
 
@@ -142,3 +140,5 @@ Sau khi hoàn thành các bước kiểm thử, kết quả sẽ được hiển
 \end{figure}
 Kết quả kiểm thử cho thấy DUT đã thực hiện chính xác các thao tác đọc, ghi và xóa dữ liệu trên thiết bị SPI Flash mô phỏng bởi hệ thống HIL. 
 Dữ liệu đọc được từ DUT hoàn toàn khớp với dữ liệu gốc đã được khởi tạo trên HIL, chứng tỏ tính đúng đắn của quá trình giao tiếp và xử lý dữ liệu giữa DUT và HIL.
+
+\section{Kết quả thực hiện phần mềm kiểm thử tự động trên máy tính}
