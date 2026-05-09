@@ -12,6 +12,7 @@
 #define SAMPLES_NUM 100
 #define DAC_MAX 4094
 #define APB2_CLK 60000000
+#define ARR_MAX   0xFFFFFFFFULL
 
 extern DAC_HandleTypeDef hdac;
 
@@ -80,16 +81,18 @@ void set_freq(uint32_t sine_wave_freq) {
 	sine_wave.freq = sine_wave_freq;
 
 	uint32_t f_sample = sine_wave_freq * SAMPLES_NUM;
-	uint32_t N = APB2_CLK / f_sample;
-	uint32_t prescaler = 6; // Bắt đầu với một giá trị prescaler nhỏ để có độ phân giải cao hơn
-	uint32_t arr;
+	uint64_t psc = 0;
+    uint64_t arr;
 
-	// tìm prescaler sao cho ARR <= 0xFFFF
-	while ((arr = N / prescaler) > 0xFFFF) {
-		prescaler++;
-	}
+    arr = APB2_CLK / f_sample;
 
-	htim2.Init.Prescaler = prescaler - 1;
+    while(arr > ARR_MAX)
+    {
+        psc++;
+        arr = APB2_CLK / ((psc + 1) * f_sample);
+    }
+
+	htim2.Init.Prescaler = psc;
 	htim2.Init.Period = arr - 1;
 	HAL_TIM_Base_Init(&htim2);
 }
