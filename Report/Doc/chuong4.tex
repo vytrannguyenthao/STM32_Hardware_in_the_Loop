@@ -48,26 +48,91 @@ Cơ chế này giúp hệ thống HIL luôn sẵn sàng đáp ứng các yêu c�
 \section{Lưu đồ giải thuật chi tiết mô phỏng thiết bị ngoại vi}
 \subsection{Mô phỏng thiết bị ngoại vi giao tiếp I2C}
 
-Hệ thống HIL hỗ trợ mô phỏng các thiết bị ngoại vi giao tiếp I2C nhằm phục vụ kiểm thử firmware của DUT. Trong phạm vi đề tài, hai thiết bị I2C được lựa chọn để mô phỏng là EEPROM và RTC, do đây là các thiết bị phổ biến trong nhiều hệ thống nhúng.
+Hệ thống HIL hỗ trợ mô phỏng các thiết bị ngoại vi giao tiếp I2C nhằm phục vụ quá trình kiểm thử firmware của DUT. Trong phạm vi đề tài, hai thiết bị I2C được lựa chọn để mô phỏng là EEPROM và RTC do đây là các ngoại vi phổ biến trong nhiều hệ thống nhúng thực tế.
 
-Quy trình mô phỏng thiết bị I2C trong hệ thống HIL được trình bày trong Hình \ref{fig:I2C_device}.
+Trong hệ thống, DUT đóng vai trò master I2C, trong khi HIL hoạt động ở chế độ slave và phản hồi các yêu cầu truy cập từ DUT. Thay vì sử dụng các linh kiện phần cứng riêng biệt, các thiết bị ngoại vi được mô phỏng hoàn toàn bằng phần mềm trên vi điều khiển STM32 của hệ thống HIL.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/I2C_device.png}
-    \caption{Quy trình mô phỏng thiết bị I2C trong hệ thống HIL}
-    \label{fig:I2C_device}
+    \includegraphics[width=0.9\textwidth]{image/i2c_emu_overview.png}
+    \caption{Kiến trúc tổng quát framework mô phỏng thiết bị I2C}
+    \label{fig:i2c_emu_overview}
 \end{figure}
 
-Để khởi tạo một thiết bị I2C mô phỏng, hệ thống HIL cần nhận lệnh cấu hình từ máy tính, bao gồm loại thiết bị và địa chỉ I2C tương ứng. Do số lượng địa chỉ I2C phần cứng trên vi điều khiển bị giới hạn, các thiết bị I2C trong hệ thống HIL được quản lý hoàn toàn ở mức phần mềm.
+Kiến trúc mô phỏng I2C được tổ chức theo dạng module nhằm tăng tính mở rộng và khả năng tái sử dụng mã nguồn. Trong đó, module quản lý thiết bị I2C chịu trách nhiệm tiếp nhận các sự kiện giao tiếp từ ngoại vi I2C của vi điều khiển, xác định địa chỉ truy cập của DUT và định tuyến yêu cầu đến mô hình thiết bị tương ứng.
 
-Khi nhận được yêu cầu khởi tạo, hệ thống kiểm tra xem địa chỉ I2C đã được sử dụng hay chưa. Nếu địa chỉ đã tồn tại trong danh sách quản lý, hệ thống từ chối khởi tạo và gửi thông báo lỗi về máy tính. Ngược lại, nếu địa chỉ hợp lệ, thiết bị mô phỏng được khởi tạo và lưu vào danh sách quản lý thiết bị I2C.
+\subsubsection{Cơ chế quản lý thiết bị I2C}
 
-Trong quá trình DUT giao tiếp trên bus I2C, hệ thống HIL giám sát địa chỉ truy cập và kích hoạt mô hình thiết bị tương ứng. Dữ liệu phản hồi được tạo ra dựa trên mô hình hành vi của thiết bị, đảm bảo tính tương đương với thiết bị thực.
+Các thiết bị I2C mô phỏng được quản lý thông qua một bảng quản lý thiết bị ở mức phần mềm. Mỗi phần tử trong bảng lưu trữ các thông tin như loại thiết bị, địa chỉ I2C và trạng thái hoạt động tương ứng.
 
-Đối với thiết bị EEPROM, hệ thống HIL mô phỏng bộ nhớ lưu trữ theo từng trang, trong đó dữ liệu ghi từ DUT được đệm tạm và chỉ được ghi chính thức vào vùng nhớ mô phỏng khi phiên giao tiếp I2C kết thúc. Cách tiếp cận này đảm bảo hành vi ghi dữ liệu tương đương với EEPROM thực, bao gồm cơ chế tự tăng địa chỉ và giới hạn kích thước trang.
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.5\textheight]{image/I2C_device_init.png}
+    \caption{Quy trình khởi tạo thiết bị I2C mô phỏng}
+    \label{fig:I2C_device_init}
+\end{figure}
 
-Đối với thiết bị RTC, hệ thống HIL mô phỏng tập thanh ghi thời gian theo chuẩn của DS1307 và sử dụng bộ định thời nội để cập nhật giá trị thời gian thực theo chu kỳ 1 giây. DUT có thể thực hiện các thao tác đọc và ghi để lấy hoặc thiết lập thời gian, trong đó dữ liệu được mã hóa theo định dạng BCD giống với thiết bị phần cứng thực tế.
+Khi nhận được lệnh cấu hình từ máy tính, hệ thống tiến hành kiểm tra tính hợp lệ của địa chỉ I2C yêu cầu. Nếu địa chỉ đã tồn tại trong danh sách quản lý, yêu cầu khởi tạo sẽ bị từ chối nhằm tránh xung đột trên bus I2C. Ngược lại, nếu địa chỉ hợp lệ, hệ thống sẽ khởi tạo thiết bị tương ứng và lưu thông tin vào bảng quản lý thiết bị.
+
+Cơ chế này cho phép hệ thống HIL quản lý linh hoạt nhiều thiết bị I2C khác nhau mà không phụ thuộc trực tiếp vào số lượng địa chỉ slave phần cứng được hỗ trợ bởi vi điều khiển.
+
+\subsubsection{Cơ chế xử lý callback và định tuyến thiết bị}
+
+Hệ thống HIL sử dụng cơ chế ngắt và callback của thư viện HAL để xử lý các sự kiện giao tiếp I2C. Vi điều khiển STM32 hoạt động ở chế độ slave listen mode và liên tục chờ yêu cầu truy cập từ DUT.
+
+Khi DUT gửi địa chỉ slave lên bus I2C, callback xử lý địa chỉ sẽ được kích hoạt. Hệ thống tiến hành xác định loại thiết bị tương ứng dựa trên địa chỉ truy cập, sau đó chuyển hướng quá trình xử lý đến module mô phỏng phù hợp như EEPROM hoặc RTC.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth]{image/I2C_dispatch.png}
+    \caption{Cơ chế định tuyến callback trong framework mô phỏng I2C}
+    \label{fig:I2C_dispatch}
+\end{figure}
+
+Kiến trúc này giúp tách biệt lớp giao tiếp phần cứng I2C và logic xử lý của từng thiết bị ngoại vi, từ đó giúp hệ thống dễ dàng mở rộng khi cần bổ sung thêm các thiết bị I2C mới trong tương lai.
+
+\subsubsection{Mô phỏng EEPROM}
+
+Thiết bị EEPROM được mô phỏng nhằm phục vụ kiểm thử các chức năng đọc và ghi dữ liệu không mất nguồn của DUT. Toàn bộ dữ liệu EEPROM được lưu trữ trong vùng nhớ RAM của vi điều khiển HIL nhằm tăng tốc độ truy cập và đơn giản hóa quá trình kiểm thử.
+
+Bộ nhớ EEPROM mô phỏng được tổ chức theo từng trang tương tự các EEPROM thực tế. Trong quá trình ghi dữ liệu, dữ liệu nhận được từ DUT không được ghi trực tiếp vào vùng nhớ chính mà trước tiên được lưu tạm vào bộ đệm ghi trang.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/EEPROM_memory.png}
+    \caption{Cơ chế ghi dữ liệu theo trang của EEPROM mô phỏng}
+    \label{fig:EEPROM_memory}
+\end{figure}
+
+Khi DUT kết thúc phiên giao tiếp I2C, dữ liệu trong bộ đệm mới được ghi chính thức vào vùng nhớ EEPROM mô phỏng. Cơ chế này giúp hành vi ghi dữ liệu của EEPROM mô phỏng tương đương với EEPROM thực tế, bao gồm cơ chế tự tăng địa chỉ và giới hạn kích thước ghi theo từng trang.
+
+Trong quá trình đọc dữ liệu, hệ thống HIL truy xuất dữ liệu trực tiếp từ vùng nhớ mô phỏng và phản hồi lại DUT thông qua giao tiếp I2C. Sau mỗi byte dữ liệu được truyền thành công, địa chỉ truy cập sẽ tự động tăng để mô phỏng cơ chế đọc liên tục của EEPROM thực tế.
+
+\subsubsection{Mô phỏng RTC}
+
+Ngoài EEPROM, hệ thống HIL còn hỗ trợ mô phỏng thiết bị RTC nhằm kiểm thử các chức năng liên quan đến thời gian thực của DUT.
+
+RTC mô phỏng được xây dựng dựa trên cấu trúc thanh ghi tương thích với DS1307. Trong phạm vi đề tài, hệ thống chỉ triển khai các thanh ghi chức năng cơ bản từ địa chỉ 0x00 đến 0x07, bao gồm các thanh ghi thời gian thực và thanh ghi điều khiển. Các vùng RAM mở rộng của DS1307 không được hỗ trợ do không cần thiết cho mục đích kiểm thử firmware trong đề tài.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/RTC_register.png}
+    \caption{Cấu trúc thanh ghi của RTC DS1307 mô phỏng}
+    \label{fig:RTC_register}
+\end{figure}
+
+Dữ liệu thời gian trong RTC mô phỏng được lưu trữ theo định dạng BCD tương tự DS1307 thực tế nhằm đảm bảo tính tương thích với firmware của DUT. Ngoài ra, bit CH (Clock Halt) trong thanh ghi giây cũng được hỗ trợ để cho phép dừng hoặc tiếp tục quá trình cập nhật thời gian nội bộ.
+
+Để đảm bảo khả năng hoạt động tương tự thiết bị thực, hệ thống HIL sử dụng bộ định thời nội của vi điều khiển để cập nhật giá trị thời gian theo chu kỳ 1 giây.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/RTC_tick.png}
+    \caption{Quy trình cập nhật thời gian của RTC mô phỏng}
+    \label{fig:RTC_tick}
+\end{figure}
+
+Khi DUT thực hiện thao tác ghi dữ liệu lên RTC, byte đầu tiên được sử dụng để xác định địa chỉ thanh ghi truy cập. Các byte dữ liệu tiếp theo sẽ được ghi tuần tự vào các thanh ghi tương ứng. Trong trường hợp DUT thực hiện thao tác đọc, hệ thống HIL sẽ phản hồi dữ liệu từ các thanh ghi RTC và tự động tăng con trỏ thanh ghi sau mỗi lần truyền thành công nhằm mô phỏng cơ chế truy cập liên tục của DS1307 thực tế.
 
 \subsection{Mô phỏng thiết bị ngoại vi giao tiếp SPI}
 
@@ -202,4 +267,76 @@ Trong đó, hệ số 0.98 được thêm vào nhằm giảm biên độ cực �
 
 \subsection{Tạo tín hiệu PWM}
 
+Hệ thống HIL hỗ trợ tạo tín hiệu PWM nhằm phục vụ kiểm thử các chức năng điều khiển và đo lường của DUT. Các tín hiệu PWM được tạo bằng bộ định thời phần cứng của vi điều khiển STM32 nhằm đảm bảo khả năng tạo tín hiệu ổn định và có thể cấu hình động trong thời gian thực.
+
+Người dùng có thể điều khiển các kênh PWM thông qua giao diện CLI từ máy tính, bao gồm các thao tác khởi động, dừng, thay đổi tần số và điều chỉnh duty cycle của tín hiệu PWM.
+
+Lưu đồ giải thuật cho chức năng thay đổi tần số và duty cycle của tín hiệu PWM được trình bày trong Hình \ref{fig:hil_pwm_set_freq} và Hình \ref{fig:hil_pwm_set_duty}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/hil_pwm_set_freq.png}
+    \caption{Lưu đồ giải thuật thay đổi tần số của tín hiệu PWM}
+    \label{fig:hil_pwm_set_freq}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/hil_pwm_set_duty.png}
+    \caption{Lưu đồ giải thuật thay đổi duty cycle của tín hiệu PWM}
+    \label{fig:hil_pwm_set_duty}
+\end{figure}
+
+Khi nhận được lệnh thay đổi tần số PWM, hệ thống sẽ tiến hành kiểm tra giá trị tần số đầu vào nhằm đảm bảo nằm trong dải hoạt động cho phép của phần cứng Timer. Nếu giá trị không hợp lệ, hệ thống sẽ từ chối thực thi và gửi thông báo lỗi về giao diện console.
+
+Trong trường hợp giá trị hợp lệ, hệ thống sẽ tính toán giá trị thanh ghi Auto Reload Register (ARR) dựa trên tần số mong muốn theo công thức:
+\begin{equation}
+    ARR = \dfrac{f_{timer}}{PSC \cdot f_{PWM}} - 1
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $f_{timer}$ là tần số clock cấp cho Timer.
+    \item $PSC$ là hệ số chia prescaler của Timer.
+    \item $f_{PWM}$ là tần số PWM mong muốn.
+\end{itemize}
+
+Sau khi tính toán hoàn tất, giá trị ARR mới sẽ được cập nhật vào Timer để thay đổi chu kỳ tín hiệu PWM.
+
+Đối với chức năng thay đổi duty cycle, hệ thống sẽ kiểm tra giá trị phần trăm duty cycle đầu vào nhằm đảm bảo nằm trong khoảng từ 0\% đến 100\%. Nếu giá trị vượt ngoài giới hạn cho phép, hệ thống sẽ trả về thông báo lỗi và không thực hiện cập nhật.
+
+Khi giá trị duty cycle hợp lệ, hệ thống sẽ tính toán giá trị Compare Register (CCR) tương ứng theo công thức:
+\begin{equation}
+    CCR = \dfrac{Duty \cdot (ARR + 1)}{100}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $Duty$ là duty cycle mong muốn theo đơn vị phần trăm.
+    \item $ARR$ là giá trị chu kỳ hiện tại của Timer.
+\end{itemize}
+
+Giá trị CCR sau đó được ghi vào thanh ghi compare của Timer để cập nhật độ rộng xung PWM tương ứng. Cơ chế này cho phép hệ thống thay đổi linh hoạt tần số và duty cycle của tín hiệu PWM trong thời gian thực mà không cần dừng hoạt động của Timer.
+
 \subsection{Xử lý GPIO}
+
+Hệ thống HIL hỗ trợ chức năng điều khiển và giám sát các chân GPIO nhằm phục vụ kiểm thử các tín hiệu số của DUT. Các chân GPIO được cấu hình sẵn theo hai chế độ input và output tùy theo mục đích sử dụng trong hệ thống.
+
+Người dùng có thể thực hiện các thao tác đọc trạng thái GPIO, ghi mức logic hoặc liệt kê danh sách các chân GPIO khả dụng thông qua giao diện CLI. Toàn bộ các chân GPIO được quản lý thông qua một bảng cấu hình ở mức phần mềm, trong đó lưu trữ thông tin về cổng GPIO, số chân và hướng hoạt động tương ứng.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{image/hil_gpio.png}
+    \caption{Lưu đồ giải thuật xử lý GPIO}
+    \label{fig:hil_gpio}
+\end{figure}
+
+Khi nhận được lệnh GPIO từ máy tính, hệ thống sẽ tiến hành phân tích cú pháp để xác định loại thao tác tương ứng bao gồm đọc GPIO, ghi GPIO hoặc liệt kê danh sách GPIO.
+
+Đối với lệnh ghi GPIO, hệ thống trước tiên sẽ kiểm tra tính hợp lệ của cổng GPIO và số chân yêu cầu. Sau đó, hệ thống tìm kiếm chân GPIO tương ứng trong bảng quản lý cấu hình. Nếu chân GPIO không tồn tại hoặc đang được cấu hình ở chế độ input, yêu cầu ghi dữ liệu sẽ bị từ chối nhằm tránh xung đột điều khiển phần cứng.
+
+Trong trường hợp chân GPIO hợp lệ và được cấu hình ở chế độ output, hệ thống sẽ cập nhật mức logic của chân GPIO tương ứng thông qua các thanh ghi điều khiển phần cứng của vi điều khiển STM32. Sau khi hoàn tất cập nhật, hệ thống gửi thông báo trạng thái thực thi về giao diện console.
+
+Đối với lệnh đọc GPIO, hệ thống thực hiện kiểm tra tính hợp lệ của chân GPIO và tiến hành đọc trạng thái hiện tại của chân tương ứng. Nếu chân được cấu hình ở chế độ input, hệ thống đọc trực tiếp trạng thái logic từ thanh ghi input. Ngược lại, nếu chân ở chế độ output, trạng thái được đọc từ thanh ghi output nhằm phản ánh chính xác mức logic đang được xuất ra phần cứng.
+
+Ngoài ra, hệ thống còn hỗ trợ chức năng liệt kê toàn bộ GPIO khả dụng trong bảng quản lý cấu hình. Với mỗi chân GPIO, hệ thống sẽ hiển thị thông tin về cổng GPIO, số chân, hướng hoạt động và trạng thái logic hiện tại. Cơ chế này giúp người dùng dễ dàng giám sát trạng thái hoạt động của toàn bộ GPIO trong quá trình kiểm thử firmware.
