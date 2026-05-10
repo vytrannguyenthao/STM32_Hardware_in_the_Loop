@@ -162,37 +162,29 @@ Trong suốt quá trình giao tiếp SPI, hệ thống HIL gửi các byte dummy
 Việc mô phỏng thiết bị SPI trong hệ thống HIL cho phép kiểm thử đầy đủ các chức năng liên quan đến bộ nhớ ngoài của DUT mà không cần sử dụng phần cứng Flash thật. Điều này giúp giảm chi phí phần cứng, đồng thời tăng tính linh hoạt và khả năng tự động hóa trong quá trình phát triển và kiểm thử firmware nhúng.
 
 \section{Lưu đồ giải thuật xử lý các ngoại vi}
-\subsection{Xử lý UART/CAN}
+
+\subsection{Xử lý GPIO}
+
+Hệ thống HIL hỗ trợ chức năng điều khiển và giám sát các chân GPIO nhằm phục vụ kiểm thử các tín hiệu số của DUT. Các chân GPIO được cấu hình sẵn theo hai chế độ input và output tùy theo mục đích sử dụng trong hệ thống.
+
+Người dùng có thể thực hiện các thao tác đọc trạng thái GPIO, ghi mức logic hoặc liệt kê danh sách các chân GPIO khả dụng thông qua giao diện CLI. Toàn bộ các chân GPIO được quản lý thông qua một bảng cấu hình ở mức phần mềm, trong đó lưu trữ thông tin về cổng GPIO, số chân và hướng hoạt động tương ứng.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/hil_uart_can.jpg}
-    \caption{Lưu đồ giải thuật giao tiếp UART và CAN}
-    \label{fig:hil_uart_can}
+    \includegraphics[width=0.75\textwidth]{image/hil_gpio.png}
+    \caption{Lưu đồ giải thuật xử lý GPIO}
+    \label{fig:hil_gpio}
 \end{figure}
-Lưu đồ giải thuật trên mô tả quá trình xử lý truyền và nhận dữ liệu của khối giao tiếp UART và CAN trong hệ thống.
-Khi hệ thống hoạt động, chương trình sẽ kiểm tra lệnh cần xử lý. Nếu là lệnh truyền dữ liệu, hệ thống sẽ xác định kiểu dữ liệu cần gửi.
-Đối với dữ liệu dạng buffer, HIL sẽ gửi toàn bộ khối dữ liệu có kích thước 256 byte thông qua giao thức UART hoặc CAN với các giá trị tăng dần từ 0x00 $\rightarrow$ 0xFF và lặp lại.
-Trong trường hợp dữ liệu cần truyền là chuỗi ký tự, hệ thống sẽ gửi chuỗi được nhập đó đến DUT. Sau khi hoàn tất quá trình truyền, hệ thống chuyển sang trạng thái kết thúc truyền và sẵn sàng cho các yêu cầu tiếp theo.
 
-Đối với lệnh truyền dữ liệu, chương trình sẽ kiểm tra trạng thái của buffer nhận để xác định có dữ liệu mới hay không. Nếu buffer chưa có dữ liệu, quá trình đọc sẽ kết thúc.
-Nếu buffer đã chứa dữ liệu, chương trình sẽ lấy dữ liệu từ buffer và hiển thị ra console nhằm phục vụ cho mục đích giám sát.
-Dữ liệu sẽ được ghi vào buffer trong quá trinh ngắt. Nếu buffer chưa đầy, dữ liệu mới sẽ được lưu vào buffer đồng thời cập nhật các pointer quản lý vị trí đọc và ghi.
-Trong trường hợp buffer bị tràn, hệ thống sẽ ghi đè dữ liệu cũ của buffer.
+Khi nhận được lệnh GPIO từ máy tính, hệ thống sẽ tiến hành phân tích cú pháp để xác định loại thao tác tương ứng bao gồm đọc GPIO, ghi GPIO hoặc liệt kê danh sách GPIO.
 
-Cơ chế ngắt nhận dữ liệu sẽ được phần cứng tự động kích hoạt mỗi khi có một khung truyền được gửi đến. Tuy nhiên dựa vào Hình \ref{fig:uart_frame} và Hình \ref{fig:can_frame} có thể thấy UART và CAN có khung truyền khác nhau.
-Với UART, mỗi khung truyền chỉ có 1 byte dữ liệu nhưng giao thức CAN có thể linh hoạt độ dài của dữ liệu bằng trường DLC cho phép độ dài vùng dữ liệu dao động từ 0 - 8 byte.
-Chính vì thế quá trình xử lý ngắt cho UART và CAN được thiết kế với vài điểm khác biệt.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.65\textwidth]{image/hil_can.jpg}
-    \caption{Lưu đồ giải thuật xử lý ngắt nhận của giao thức CAN}
-    \label{fig:hil_can}
-\end{figure}
-Hình \ref{fig:hil_can} mô tả thuật toán xử lý dữ liệu cho giao thức CAN khi có ngắt nhận. Khi một frame CAN được nhận, HIL sẽ trước tiên đọc giá trị từ trường DLC (Data Length Code) để xác định số byte dữ liệu cần xử lý. 
-Dựa trên giá trị này, hệ thống thực hiện vòng lặp để lần lượt đọc từng byte dữ liệu và lưu vào buffer. Sau mỗi lần lưu, con trỏ buffer sẽ được tăng lên để chuẩn bị cho vị trí lưu trữ tiếp theo.
-Quá trình này tiếp tục cho đến khi toàn bộ số byte tương ứng với giá trị DLC được xử lý hoàn tất, sau đó chương trình sẽ thoát khỏi trình phục vụ ngắt.
+Đối với lệnh ghi GPIO, hệ thống trước tiên sẽ kiểm tra tính hợp lệ của cổng GPIO và số chân yêu cầu. Sau đó, hệ thống tìm kiếm chân GPIO tương ứng trong bảng quản lý cấu hình. Nếu chân GPIO không tồn tại hoặc đang được cấu hình ở chế độ input, yêu cầu ghi dữ liệu sẽ bị từ chối nhằm tránh xung đột điều khiển phần cứng.
 
-Đối với giao tiếp UART, cơ chế xử lý đơn giản hơn do dữ liệu được nhận theo từng byte riêng lẻ. Mỗi khi xảy ra ngắt nhận, hệ thống sẽ đọc một byte dữ liệu và lưu trực tiếp vào buffer. Sau đó, con trỏ buffer được tăng lên để chuẩn bị cho lần nhận tiếp theo.
+Trong trường hợp chân GPIO hợp lệ và được cấu hình ở chế độ output, hệ thống sẽ cập nhật mức logic của chân GPIO tương ứng thông qua các thanh ghi điều khiển phần cứng của vi điều khiển STM32. Sau khi hoàn tất cập nhật, hệ thống gửi thông báo trạng thái thực thi về giao diện console.
+
+Đối với lệnh đọc GPIO, hệ thống thực hiện kiểm tra tính hợp lệ của chân GPIO và tiến hành đọc trạng thái hiện tại của chân tương ứng. Nếu chân được cấu hình ở chế độ input, hệ thống đọc trực tiếp trạng thái logic từ thanh ghi input. Ngược lại, nếu chân ở chế độ output, trạng thái được đọc từ thanh ghi output nhằm phản ánh chính xác mức logic đang được xuất ra phần cứng.
+
+Ngoài ra, hệ thống còn hỗ trợ chức năng liệt kê toàn bộ GPIO khả dụng trong bảng quản lý cấu hình. Với mỗi chân GPIO, hệ thống sẽ hiển thị thông tin về cổng GPIO, số chân, hướng hoạt động và trạng thái logic hiện tại. Cơ chế này giúp người dùng dễ dàng giám sát trạng thái hoạt động của toàn bộ GPIO trong quá trình kiểm thử firmware.
 
 \subsection{Xử lý ADC/DAC}
 \begin{figure}[H]
@@ -318,25 +310,36 @@ Trong đó:
 
 Giá trị CCR sau đó được ghi vào thanh ghi compare của Timer để cập nhật độ rộng xung PWM tương ứng. Cơ chế này cho phép hệ thống thay đổi linh hoạt tần số và duty cycle của tín hiệu PWM trong thời gian thực mà không cần dừng hoạt động của Timer.
 
-\subsection{Xử lý GPIO}
 
-Hệ thống HIL hỗ trợ chức năng điều khiển và giám sát các chân GPIO nhằm phục vụ kiểm thử các tín hiệu số của DUT. Các chân GPIO được cấu hình sẵn theo hai chế độ input và output tùy theo mục đích sử dụng trong hệ thống.
-
-Người dùng có thể thực hiện các thao tác đọc trạng thái GPIO, ghi mức logic hoặc liệt kê danh sách các chân GPIO khả dụng thông qua giao diện CLI. Toàn bộ các chân GPIO được quản lý thông qua một bảng cấu hình ở mức phần mềm, trong đó lưu trữ thông tin về cổng GPIO, số chân và hướng hoạt động tương ứng.
-
+\subsection{Xử lý UART/CAN}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/hil_gpio.png}
-    \caption{Lưu đồ giải thuật xử lý GPIO}
-    \label{fig:hil_gpio}
+    \includegraphics[width=1\textwidth]{image/hil_uart_can.jpg}
+    \caption{Lưu đồ giải thuật giao tiếp UART và CAN}
+    \label{fig:hil_uart_can}
 \end{figure}
+Lưu đồ giải thuật trên mô tả quá trình xử lý truyền và nhận dữ liệu của khối giao tiếp UART và CAN trong hệ thống.
+Khi hệ thống hoạt động, chương trình sẽ kiểm tra lệnh cần xử lý. Nếu là lệnh truyền dữ liệu, hệ thống sẽ xác định kiểu dữ liệu cần gửi.
+Đối với dữ liệu dạng buffer, HIL sẽ gửi toàn bộ khối dữ liệu có kích thước 256 byte thông qua giao thức UART hoặc CAN với các giá trị tăng dần từ 0x00 $\rightarrow$ 0xFF và lặp lại.
+Trong trường hợp dữ liệu cần truyền là chuỗi ký tự, hệ thống sẽ gửi chuỗi được nhập đó đến DUT. Sau khi hoàn tất quá trình truyền, hệ thống chuyển sang trạng thái kết thúc truyền và sẵn sàng cho các yêu cầu tiếp theo.
 
-Khi nhận được lệnh GPIO từ máy tính, hệ thống sẽ tiến hành phân tích cú pháp để xác định loại thao tác tương ứng bao gồm đọc GPIO, ghi GPIO hoặc liệt kê danh sách GPIO.
+Đối với lệnh truyền dữ liệu, chương trình sẽ kiểm tra trạng thái của buffer nhận để xác định có dữ liệu mới hay không. Nếu buffer chưa có dữ liệu, quá trình đọc sẽ kết thúc.
+Nếu buffer đã chứa dữ liệu, chương trình sẽ lấy dữ liệu từ buffer và hiển thị ra console nhằm phục vụ cho mục đích giám sát.
+Dữ liệu sẽ được ghi vào buffer trong quá trinh ngắt. Nếu buffer chưa đầy, dữ liệu mới sẽ được lưu vào buffer đồng thời cập nhật các pointer quản lý vị trí đọc và ghi.
+Trong trường hợp buffer bị tràn, hệ thống sẽ ghi đè dữ liệu cũ của buffer.
 
-Đối với lệnh ghi GPIO, hệ thống trước tiên sẽ kiểm tra tính hợp lệ của cổng GPIO và số chân yêu cầu. Sau đó, hệ thống tìm kiếm chân GPIO tương ứng trong bảng quản lý cấu hình. Nếu chân GPIO không tồn tại hoặc đang được cấu hình ở chế độ input, yêu cầu ghi dữ liệu sẽ bị từ chối nhằm tránh xung đột điều khiển phần cứng.
+Cơ chế ngắt nhận dữ liệu sẽ được phần cứng tự động kích hoạt mỗi khi có một khung truyền được gửi đến. Tuy nhiên dựa vào Hình \ref{fig:uart_frame} và Hình \ref{fig:can_frame} có thể thấy UART và CAN có khung truyền khác nhau.
+Với UART, mỗi khung truyền chỉ có 1 byte dữ liệu nhưng giao thức CAN có thể linh hoạt độ dài của dữ liệu bằng trường DLC cho phép độ dài vùng dữ liệu dao động từ 0 - 8 byte.
+Chính vì thế quá trình xử lý ngắt cho UART và CAN được thiết kế với vài điểm khác biệt.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{image/hil_can.jpg}
+    \caption{Lưu đồ giải thuật xử lý ngắt nhận của giao thức CAN}
+    \label{fig:hil_can}
+\end{figure}
+Hình \ref{fig:hil_can} mô tả thuật toán xử lý dữ liệu cho giao thức CAN khi có ngắt nhận. Khi một frame CAN được nhận, HIL sẽ trước tiên đọc giá trị từ trường DLC (Data Length Code) để xác định số byte dữ liệu cần xử lý. 
+Dựa trên giá trị này, hệ thống thực hiện vòng lặp để lần lượt đọc từng byte dữ liệu và lưu vào buffer. Sau mỗi lần lưu, con trỏ buffer sẽ được tăng lên để chuẩn bị cho vị trí lưu trữ tiếp theo.
+Quá trình này tiếp tục cho đến khi toàn bộ số byte tương ứng với giá trị DLC được xử lý hoàn tất, sau đó chương trình sẽ thoát khỏi trình phục vụ ngắt.
 
-Trong trường hợp chân GPIO hợp lệ và được cấu hình ở chế độ output, hệ thống sẽ cập nhật mức logic của chân GPIO tương ứng thông qua các thanh ghi điều khiển phần cứng của vi điều khiển STM32. Sau khi hoàn tất cập nhật, hệ thống gửi thông báo trạng thái thực thi về giao diện console.
+Đối với giao tiếp UART, cơ chế xử lý đơn giản hơn do dữ liệu được nhận theo từng byte riêng lẻ. Mỗi khi xảy ra ngắt nhận, hệ thống sẽ đọc một byte dữ liệu và lưu trực tiếp vào buffer. Sau đó, con trỏ buffer được tăng lên để chuẩn bị cho lần nhận tiếp theo.
 
-Đối với lệnh đọc GPIO, hệ thống thực hiện kiểm tra tính hợp lệ của chân GPIO và tiến hành đọc trạng thái hiện tại của chân tương ứng. Nếu chân được cấu hình ở chế độ input, hệ thống đọc trực tiếp trạng thái logic từ thanh ghi input. Ngược lại, nếu chân ở chế độ output, trạng thái được đọc từ thanh ghi output nhằm phản ánh chính xác mức logic đang được xuất ra phần cứng.
-
-Ngoài ra, hệ thống còn hỗ trợ chức năng liệt kê toàn bộ GPIO khả dụng trong bảng quản lý cấu hình. Với mỗi chân GPIO, hệ thống sẽ hiển thị thông tin về cổng GPIO, số chân, hướng hoạt động và trạng thái logic hiện tại. Cơ chế này giúp người dùng dễ dàng giám sát trạng thái hoạt động của toàn bộ GPIO trong quá trình kiểm thử firmware.
