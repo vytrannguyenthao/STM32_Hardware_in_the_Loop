@@ -288,9 +288,9 @@ class PeripheralTab(QWidget):
     
     # --- LOGIC PWM ---
     def on_pwm_set_freq(self):
-        if not self.uart_dut: return
+        if not self.uart_hil: return
         freq = self.spin_pwm_freq.value()
-        self.uart_dut.send(f"pwm_set_freq {freq}")
+        self.uart_hil.send(f"pwm_set_freq {freq}")
         
         self._is_freq_set = True
         # Mở khóa toàn bộ các nút Start nếu chúng đang dừng
@@ -299,7 +299,7 @@ class PeripheralTab(QWidget):
                 self.pwm_btns[i].setEnabled(True)
 
     def on_pwm_toggle(self, ch_idx):
-        if not self.uart_dut: return
+        if not self.uart_hil: return
         if not self._is_freq_set: return
 
         is_running = self.pwm_states[ch_idx]
@@ -308,12 +308,12 @@ class PeripheralTab(QWidget):
         channel = ch_idx + 1 
 
         if not is_running:
-            self.uart_dut.send(f"pwm_set_duty_cycle {channel} {duty}")
-            self.uart_dut.send(f"pwm_start {channel}")
+            self.uart_hil.send(f"pwm_set_duty_cycle {channel} {duty}")
+            self.uart_hil.send(f"pwm_start {channel}")
             btn.setText("Stop")
             self.pwm_states[ch_idx] = True
         else:
-            self.uart_dut.send(f"pwm_stop {channel}")
+            self.uart_hil.send(f"pwm_stop {channel}")
             btn.setText("Start")
             self.pwm_states[ch_idx] = False
 
@@ -326,9 +326,9 @@ class PeripheralTab(QWidget):
 
     def on_pwm_duty_changed(self, ch_idx, value, label_widget):
         label_widget.setText(f"{value}%")
-        if self.pwm_states[ch_idx] and self.uart_dut:
+        if self.pwm_states[ch_idx] and self.uart_hil:
             channel = ch_idx + 1
-            self.uart_dut.send(f"pwm_set_duty_cycle {channel} {value}")
+            self.uart_hil.send(f"pwm_set_duty_cycle {channel} {value}")
 
     # --- LOGIC WAVE ---
     def on_toggle_sine(self):
@@ -338,9 +338,9 @@ class PeripheralTab(QWidget):
             # Đang dừng -> Chạy Sine
             # Kiểm tra tần số nằm trong range 1-10000
             if 1 <= freq <= 10000:
-                if self.uart_dut:
-                    self.uart_dut.send(f"set_freq {freq}")
-                    self.uart_dut.send("sine_wave 1")
+                if self.uart_hil:
+                    self.uart_hil.send(f"set_freq {freq}")
+                    self.uart_hil.send("sine_wave 1")
                 
                 self._wave_running = "SINE"
                 self.btn_wave_sine.setText("Stop Sine")
@@ -353,8 +353,8 @@ class PeripheralTab(QWidget):
             
         elif self._wave_running == "SINE":
             # Đang chạy Sine -> Dừng
-            if self.uart_dut:
-                self.uart_dut.send("sine_wave 0")
+            if self.uart_hil:
+                self.uart_hil.send("sine_wave 0")
             
             self._wave_running = "NONE"
             self.btn_wave_sine.setText("Start Sine")
@@ -372,9 +372,9 @@ class PeripheralTab(QWidget):
             # Đang dừng -> Chạy Triangle
             # Kiểm tra tần số nằm trong range 1-10000
             if 1 <= freq <= 10000:
-                if self.uart_dut:
-                    self.uart_dut.send(f"set_freq {freq}")
-                    self.uart_dut.send("triangle_wave 1")
+                if self.uart_hil:
+                    self.uart_hil.send(f"set_freq {freq}")
+                    self.uart_hil.send("triangle_wave 1")
                 
                 self._wave_running = "TRIANGLE"
                 self.btn_wave_tri.setText("Stop Triangle")
@@ -387,8 +387,8 @@ class PeripheralTab(QWidget):
             
         elif self._wave_running == "TRIANGLE":
             # Đang chạy Triangle -> Dừng
-            if self.uart_dut:
-                self.uart_dut.send("triangle_wave 0")
+            if self.uart_hil:
+                self.uart_hil.send("triangle_wave 0")
             
             self._wave_running = "NONE"
             self.btn_wave_tri.setText("Start Triangle")
