@@ -38,25 +38,14 @@ Chương này trình bày các kết quả đạt được sau quá trình thi�
 \section{Kết quả thực hiện phần mềm Logic Analyzer trên HIL}
 
 \section{Kết quả thực hiện phần mềm trên máy tính}
-
-Phần mềm trên máy tính được phát triển bằng ngôn ngữ Python, sử dụng thư viện PyQt5 để xây dựng giao diện đồ họa người dùng. Phần mềm PC đóng vai trò trung tâm điều phối, cho phép người dùng cấu hình hệ thống, điều khiển mô phỏng và giám sát quá trình kiểm thử.
-
-Về mặt kiến trúc, phần mềm PC được chia thành các khối chức năng chính như sau:
-\begin{itemize}
-    \item Khối giao tiếp nối tiếp (Serial Terminal), đảm nhiệm việc kết nối và trao đổi dữ liệu với DUT và HIL.
-    \item Khối điều phối và thực thi kịch bản kiểm thử, cho phép tự động hóa quá trình kiểm thử theo các kịch bản định trước.
-    \item Khối giao diện dòng lệnh và giao diện đồ họa, hỗ trợ người dùng nhập lệnh và theo dõi kết quả.
-\end{itemize}
-
 Giao diện chính của phần mềm được tổ chức dưới dạng các tab riêng biệt nhằm tăng tính trực quan và thuận tiện trong quá trình sử dụng, bao gồm:
 \begin{itemize}
-    \item \textbf{Tab Memory}: Hỗ trợ người dùng thao tác với thiết bị bộ nhớ mô phỏng trên HIL như SPI Flash và I2C EEPROM.
-    \item \textbf{Tab Logic Analyzer}: Hiển thị tín hiệu digital, analog giúp người dùng có thể quan sát và phân tích các tín hiệu như tần số, dạng sóng,...
-    \item \textbf{Tab Peripheral}: Hỗ trợ người dùng thao tác với các thiết bị ngoại vi mô phỏng khác như GPIO, ADC, DAC,... trên HIL.
+    \item \textbf{Serial Tab}: Cấu hình các  thông số cho Serial port (cổng COM, baudrate).
+    \item \textbf{Terminal Tab}: Hỗ trợ giao diện dòng lệnh cho người dùng nhập lệnh thủ công.
+    \item \textbf{Memory EMU Tab}: Hỗ trợ người dùng thao tác với thiết bị bộ nhớ mô phỏng trên HIL như SPI Flash và I2C EEPROM.
+    \item \textbf{Logic Analyzer Tab}: Hiển thị tín hiệu digital, analog giúp người dùng có thể quan sát và phân tích các tín hiệu như tần số, dạng sóng,...
+    \item \textbf{Peripherals Tab}: Hỗ trợ người dùng thao tác với các thiết bị ngoại vi khác như GPIO, ADC, DAC,... để kiểm thử DUT.
 \end{itemize}
-
-Mỗi tab đảm nhiệm một chức năng riêng, giúp người dùng dễ dàng chuyển đổi giữa các chế độ kiểm thử và theo dõi trạng thái hoạt động của toàn bộ hệ thống. Giao diện chính của phần mềm trên máy tính được minh họa trong Hình \ref{fig:PC_GUI}.\\
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{image/PC_GUI.png}
@@ -64,25 +53,29 @@ Mỗi tab đảm nhiệm một chức năng riêng, giúp người dùng dễ d�
     \label{fig:PC_GUI}
 \end{figure}
 
-Bên cạnh việc cung cấp giao diện dòng lệnh cho phép thực thi các lệnh điều khiển hệ thống, phần mềm PC còn hỗ trợ xây dựng và thực thi các kịch bản kiểm thử tự động. Khả năng này giúp chuẩn hóa quy trình kiểm thử, đồng thời đảm bảo tính lặp lại và độ tin cậy của các kết quả thu được. Nhờ đó, hiệu quả kiểm thử phần mềm nhúng được nâng cao đáng kể, đặc biệt trong các giai đoạn phát triển và tích hợp hệ thống.
-
 \subsection{Kết quả điều khiển nguồn cho DUT}
-Người dùng sẽ được cung cập một số command để điều khiển và theo dõi nguồn cho DUT thông qua HIL.\\
+Người dùng sẽ được cung cấp các nút nhấn trên giao diện để điều khiển nguồn cho DUT.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{image/power_on.png}
-    \caption{Bật nguồn và kết nối DUT vào App}
+    \includegraphics[width=0.7\textwidth]{image/power_on.png}
+    \caption{Bật nguồn DUT}
     \label{fig:power_on}
 \end{figure}
-\textbf{Nhận xét:} HIL đã bật nguồn cho DUT thành công, Serial port của DUT đã được tìm thấy và kết nối vào phần mềm trên máy tính.\\
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{image/power_off.png}
+    \includegraphics[width=0.7\textwidth]{image/power_off.png}
     \caption{Tắt nguồn DUT}
     \label{fig:power_off}
 \end{figure}
-\textbf{Nhận xét:} HIL đã tắt nguồn cho DUT thành công nên Serial port của DUT đã bị mất kết nối trên phần mềm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{image/power_app.jpg}
+    \caption{Trạng thái nguồn của DUT trong giao diện dòng lệnh}
+    \label{fig:power_app}
+\end{figure}
+\textbf{Nhận xét:} Dựa trên các kết quả từ giao diện UI và giao diện dòng lệnh, có thể thấy nguồn của DUT đã được bật/tắt và trạng thái nguồn được cập nhật qua led trên phần mềm.
 
 \subsection{Kết quả mô phỏng SPI Flash}
 Người dùng có thể dùng giao diện dòng lệnh để gửi các command thủ công cho DUT để thực hiện các thao tác đọc ghi dữ liệu vào SPI Flash mô phỏng. Ngoài ra, phần mềm trên máy tính được thiết kế để thực hiện 1 bài kiểm thử tự động để kiểm tra chức năng đọc/ghi dữ liệu của DUT với thiết bị SPI Flash mô phỏng trên hệ thống HIL. Các bước thực hiện bao gồm:
