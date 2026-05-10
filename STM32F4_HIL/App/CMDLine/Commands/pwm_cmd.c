@@ -36,11 +36,11 @@ int Cmd_PWM_Duty_Cycle(int argc, char *argv[])
 	uint8_t ch = atoi(argv[1]);
 	uint8_t duty = atoi(argv[2]);
 
-	if(ch < 2 || ch > 4)
-	{
-		Console_Write("\r\nInvalid channel (2-4)\r\n");
-		return CMDLINE_INVALID_ARG;
-	}
+	// if(ch < 2 || ch > 4)
+	// {
+	// 	Console_Write("\r\nInvalid channel (2-4)\r\n");
+	// 	return CMDLINE_INVALID_ARG;
+	// }
 
 	set_pwm_duty_cycle(ch, duty);
 	Console_Write("\r\nCH%d duty cycle set to %u %\r\n",ch, duty);

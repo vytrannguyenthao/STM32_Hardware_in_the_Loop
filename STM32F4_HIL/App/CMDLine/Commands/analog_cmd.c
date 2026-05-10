@@ -12,8 +12,8 @@
 
 static int cmd_adc_read(int argc, char *argv[])
 {
-	if (argc != 1)
-	    return (argc < 1) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
 	float v = adc_read_voltage();
 	uint16_t meas = v * 1000;

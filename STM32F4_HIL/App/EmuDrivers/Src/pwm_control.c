@@ -17,9 +17,9 @@ static TIM_HandleTypeDef *pwm_tim = &htim5;
 int pwm_start(uint8_t ch)
 {
 	switch (ch) {
-//		case 1:
-//		    HAL_TIM_PWM_Start(pwm_tim, TIM_CHANNEL_1);
-//			break;
+		case 1:
+		    HAL_TIM_PWM_Start(pwm_tim, TIM_CHANNEL_1);
+			break;
 		case 2:
 		    HAL_TIM_PWM_Start(pwm_tim, TIM_CHANNEL_2);
 			break;
@@ -38,9 +38,9 @@ int pwm_start(uint8_t ch)
 int pwm_stop(uint8_t ch)
 {
 	switch (ch) {
-//		case 1:
-//		    HAL_TIM_PWM_Stop(pwm_tim, TIM_CHANNEL_1);
-//			break;
+		case 1:
+		    HAL_TIM_PWM_Stop(pwm_tim, TIM_CHANNEL_1);
+			break;
 		case 2:
 			HAL_TIM_PWM_Stop(pwm_tim, TIM_CHANNEL_2);
 			break;
@@ -84,9 +84,9 @@ void set_pwm_voltage(uint8_t ch, uint16_t voltage_mv)
 
     switch(ch)
     {
-//        case 1:
-//            __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_1, ccr);
-//            break;
+        case 1:
+            __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_1, ccr);
+            break;
         case 2:
             __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_2, ccr);
             break;
@@ -108,9 +108,9 @@ void set_pwm_duty_cycle(uint8_t ch, uint8_t duty)
 
     switch(ch)
     {
-//      case 1:
-//            __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_1, ccr);
-//            break;
+        case 1:
+            __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_1, ccr);
+            break;
         case 2:
             __HAL_TIM_SET_COMPARE(pwm_tim, TIM_CHANNEL_2, ccr);
             break;
