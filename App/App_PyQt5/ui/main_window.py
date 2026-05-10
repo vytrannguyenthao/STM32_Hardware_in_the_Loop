@@ -154,9 +154,9 @@ class MainWindow(QMainWindow):
 
     def build_center(self):
         tabs = QTabWidget()
-        tabs.addTab(self.memory_tab, "Memory")
+        tabs.addTab(self.peripheral_tab, "Generator")
         tabs.addTab(self.logic_tab, "Logic Analyzer")
-        tabs.addTab(self.peripheral_tab, "Peripherals")
+        tabs.addTab(self.memory_tab, "Memory Emu")
         return tabs
 
     # ================== UI HELPER WIDGETS ==================

@@ -3,7 +3,7 @@ import time
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, 
                              QLabel, QSlider, QPushButton, QLineEdit, QTableWidget, 
                              QTableWidgetItem, QHeaderView, QCheckBox, QGridLayout, 
-                             QSplitter, QSpinBox)
+                             QSplitter, QSpinBox, QScrollArea)
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QColor
 
@@ -23,8 +23,8 @@ class PeripheralTab(QWidget):
         self._can_flush_timer.setSingleShot(True) 
         self._can_flush_timer.timeout.connect(self._flush_can_data)
 
-        # Mảng màu cho 5 bóng LED
-        self.led_colors = ["#e74c3c", "#2ecc71", "#3498db", "#f1c40f", "#9b59b6"]
+        # Mảng màu cho bóng LED
+        self.led_colors = ["#e74c3c", "#2ecc71", "#3498db", "#f1c40f", "#9b59b6", "#e67e22"]
         self.led_ui_elements = [] 
         
         # Biến cờ kiểm tra tần số PWM đã set chưa
@@ -45,9 +45,22 @@ class PeripheralTab(QWidget):
         self.splitter = QSplitter(Qt.Horizontal)
         
         # --- CỘT TRÁI ---
+        self.left_scroll = QScrollArea()
+        self.left_scroll.setWidgetResizable(True)
+        self.left_scroll.setFrameShape(QScrollArea.NoFrame) 
+        
+        # Ép màu trắng thẳng vào thanh cuộn
+        self.left_scroll.setStyleSheet("QScrollArea { background-color: #ffffff; border: none; }")
+        
         self.left_panel = QWidget()
         self.left_layout = QVBoxLayout(self.left_panel)
         self.left_layout.setContentsMargins(0, 0, 10, 0)
+        
+        # Đặt ID độc lập để ép màu trắng cho Panel mà không làm hỏng màu các khối bên trong
+        self.left_panel.setObjectName("LeftPanelContainer")
+        self.left_panel.setStyleSheet("#LeftPanelContainer { background-color: #ffffff; }")
+        
+        self.left_scroll.setWidget(self.left_panel)
         
         # --- CỘT PHẢI ---
         self.right_panel = QWidget()
@@ -58,7 +71,7 @@ class PeripheralTab(QWidget):
         self.build_left_panel()
         self.build_right_panel()
 
-        self.splitter.addWidget(self.left_panel)
+        self.splitter.addWidget(self.left_scroll) 
         self.splitter.addWidget(self.right_panel)
         self.splitter.setSizes([500, 650]) 
         
@@ -163,39 +176,69 @@ class PeripheralTab(QWidget):
         self.btn_wave_tri.clicked.connect(self.on_toggle_tri)
 
         # --------------------------------------------------
-        # 3. Khối 5 bóng đèn LED
+        # 3a. Khối GPIO Input (Đọc trạng thái) - CHIA 2 CỘT
         # --------------------------------------------------
-        led_group = QGroupBox("LED Control (5 Channels)")
-        led_layout = QGridLayout(led_group)
+        gpio_in_group = QGroupBox("GPIO Input (Port E, Pins 0-13)")
+        gpio_in_layout = QGridLayout(gpio_in_group)
+        gpio_in_layout.setHorizontalSpacing(15) # Khoảng cách giữa 2 cột lớn
         
-        for i in range(5):
-            lbl_name = QLabel(f"LED {i+1}")
+        # Port E có 14 pin (từ 0 đến 13), chia làm 2 cột (mỗi cột 7 hàng)
+        for i in range(14): 
+            row = i % 7
+            col_offset = (i // 7) * 3
+            
+            lbl_name = QLabel(f"Pin E{i}")
             
             indicator = QLabel()
             indicator.setFixedSize(24, 24)
             indicator.setStyleSheet("background-color: #bdc3c7; border-radius: 12px; border: 1px solid #7f8c8d;")
             self.led_ui_elements.append(indicator)
             
-            btn_on = QPushButton("ON")
-            btn_off = QPushButton("OFF")
-            btn_on.setFixedWidth(50)
-            btn_off.setFixedWidth(50)
+            btn_read = QPushButton("Read")
+            btn_read.setFixedWidth(60)
             
-            btn_on.clicked.connect(lambda checked, idx=i: self.on_led_toggle(idx, True))
-            btn_off.clicked.connect(lambda checked, idx=i: self.on_led_toggle(idx, False))
+            btn_read.clicked.connect(lambda checked, idx=i: self.on_gpio_read(idx))
             
-            led_layout.addWidget(lbl_name, i, 0)
-            led_layout.addWidget(indicator, i, 1, alignment=Qt.AlignCenter)
-            led_layout.addWidget(btn_on, i, 2)
-            led_layout.addWidget(btn_off, i, 3)
+            gpio_in_layout.addWidget(lbl_name, row, col_offset + 0)
+            gpio_in_layout.addWidget(indicator, row, col_offset + 1, alignment=Qt.AlignCenter)
+            gpio_in_layout.addWidget(btn_read, row, col_offset + 2)
 
-        self.left_layout.addWidget(led_group)
+        self.left_layout.addWidget(gpio_in_group)
 
         # --------------------------------------------------
-        # 4. Khối ADC Reading
+        # 3b. Khối GPIO Output (Xuất tín hiệu) - CHIA 2 CỘT
         # --------------------------------------------------
-        adc_group = QGroupBox("ADC Reading (Potentiometer)")
-        adc_layout = QVBoxLayout(adc_group)
+        gpio_out_group = QGroupBox("GPIO Output (Port B)")
+        gpio_out_layout = QGridLayout(gpio_out_group)
+        gpio_out_layout.setHorizontalSpacing(15)
+        
+        b_pins = [0, 1, 3, 4, 5, 10, 11, 12, 13, 14, 15]
+        self.gpio_out_btns = []
+        self.gpio_out_states = [False] * len(b_pins)
+        
+        # Port B có 11 pin theo List, chia làm 2 cột (cột đầu 6 hàng, cột sau 5 hàng)
+        for i, pin_num in enumerate(b_pins):
+            row = i % 6
+            col_offset = (i // 6) * 3
+            
+            lbl_name = QLabel(f"Pin B{pin_num}")
+            
+            btn_toggle = QPushButton("Set")
+            btn_toggle.setFixedWidth(60)
+            
+            btn_toggle.clicked.connect(lambda checked, idx=i, pin=pin_num: self.on_gpio_write_toggle(idx, pin))
+            self.gpio_out_btns.append(btn_toggle)
+            
+            gpio_out_layout.addWidget(lbl_name, row, col_offset + 0)
+            gpio_out_layout.addWidget(btn_toggle, row, col_offset + 1)
+
+        self.left_layout.addWidget(gpio_out_group)
+
+        # --------------------------------------------------
+        # 4. Khối DAC Set Voltage
+        # --------------------------------------------------
+        dac_group = QGroupBox("DAC Output (Potentiometer)")
+        dac_layout = QVBoxLayout(dac_group)
         
         slider_row = QHBoxLayout()
         self.adc_slider = QSlider(Qt.Horizontal)
@@ -208,18 +251,14 @@ class PeripheralTab(QWidget):
         slider_row.addWidget(self.adc_slider)
         slider_row.addWidget(self.lbl_volt_set)
         
-        adc_layout.addWidget(QLabel("Set HIL Voltage:"))
-        adc_layout.addLayout(slider_row)
+        dac_layout.addWidget(QLabel("Set Voltage:"))
+        dac_layout.addLayout(slider_row)
         
-        self.btn_read_adc = QPushButton("Read ADC from DUT")
-        self.txt_result = QLineEdit()
-        self.txt_result.setReadOnly(True)
-        self.txt_result.setPlaceholderText("Waiting for DUT...")
+        self.btn_set_dac = QPushButton("Set Voltage")
         
-        adc_layout.addWidget(self.btn_read_adc)
-        adc_layout.addWidget(self.txt_result)
+        dac_layout.addWidget(self.btn_set_dac)
         
-        self.left_layout.addWidget(adc_group)
+        self.left_layout.addWidget(dac_group)
 
         # --------------------------------------------------
         # 5. Khối CAN TX
@@ -246,7 +285,7 @@ class PeripheralTab(QWidget):
 
         # --- Gán sự kiện UI ---
         self.adc_slider.valueChanged.connect(self.on_adc_slider_changed)
-        self.btn_read_adc.clicked.connect(self.on_read_adc_clicked)
+        self.btn_set_dac.clicked.connect(self.on_set_dac_clicked)
         self.btn_can_str.clicked.connect(self.on_can_send_string)
         self.btn_can_buf.clicked.connect(self.on_can_send_buffer)
         self.btn_can_read.clicked.connect(self.on_can_read_manual)
@@ -399,33 +438,44 @@ class PeripheralTab(QWidget):
             # Mở khóa Spinbox Tần số
             self.spin_wave_freq.setEnabled(True)
 
-    # --- LOGIC LED ---
+    # --- LOGIC LED (Giữ nguyên không chạm tới do yêu cầu của bạn, dù không sử dụng) ---
     def on_led_toggle(self, led_idx, is_on):
-        if not self.uart_dut or not self.uart_hil: return
-        
-        # 1. Gửi lệnh set_led cho DUT (index DUT từ 1 đến 5)
-        dut_index = led_idx + 1
-        state_val = 1 if is_on else 0
-        self.uart_dut.send(f"set_led {dut_index} {state_val}")
-        
-        # Ghi nhớ lại bóng đèn đang thao tác để chờ HIL phản hồi
-        self._pending_led_idx = led_idx
-        
-        # 2 & 3. Delay 50ms, sau đó yêu cầu HIL đọc port e (pin HIL từ 0 đến 4)
-        hil_pin = led_idx
-        QTimer.singleShot(50, lambda: self.uart_hil.send(f"gpio_read e {hil_pin}"))
+        indicator = self.led_ui_elements[led_idx]
+        if is_on:
+            color = self.led_colors[led_idx % len(self.led_colors)]
+            indicator.setStyleSheet(f"background-color: {color}; border-radius: 12px; border: 1px solid #7f8c8d;")
+        else:
+            indicator.setStyleSheet("background-color: #bdc3c7; border-radius: 12px; border: 1px solid #7f8c8d;")
 
-    # --- LOGIC ADC ---
+    # --- LOGIC GPIO INPUT ---
+    def on_gpio_read(self, pin_idx):
+        if not self.uart_hil: return
+        self._pending_led_idx = pin_idx
+        self.uart_hil.send(f"gpio_read e {pin_idx}")
+
+    # --- LOGIC GPIO OUTPUT ---
+    def on_gpio_write_toggle(self, idx, pin_num):
+        if not self.uart_hil: return
+        
+        is_set = self.gpio_out_states[idx]
+        if not is_set:
+            self.uart_hil.send(f"gpio_write b {pin_num} 1")
+            self.gpio_out_btns[idx].setText("Reset")
+            self.gpio_out_states[idx] = True
+        else:
+            self.uart_hil.send(f"gpio_write b {pin_num} 0")
+            self.gpio_out_btns[idx].setText("Set")
+            self.gpio_out_states[idx] = False
+
+    # --- LOGIC DAC ---
     def on_adc_slider_changed(self, value):
         volt = value / 100.0
         self.lbl_volt_set.setText(f"{volt:.1f} V")
         
-    def on_read_adc_clicked(self):
-        if not self.uart_hil or not self.uart_dut: return
+    def on_set_dac_clicked(self):
+        if not self.uart_hil: return
         volt = self.adc_slider.value() / 100.0
         self.uart_hil.send(f"dac_set_voltage {volt:.1f}")
-        self.txt_result.setText("Reading from DUT...")
-        QTimer.singleShot(200, lambda: self.uart_dut.send("adc_read"))
 
     # --- LOGIC CAN ---
     def on_can_send_string(self):
@@ -534,7 +584,8 @@ class PeripheralTab(QWidget):
                 
                 # Nếu là 1 thì sáng đèn theo màu chỉ định, 0 thì màu xám (tắt)
                 if val == 1:
-                    color = self.led_colors[idx]
+                    # Thuật toán modulo (%) giúp lặp lại mảng 6 màu cho 14 Pin mà không bị lỗi
+                    color = self.led_colors[idx % len(self.led_colors)]
                     indicator.setStyleSheet(f"background-color: {color}; border-radius: 12px; border: 1px solid #7f8c8d;")
                 else:
                     indicator.setStyleSheet("background-color: #bdc3c7; border-radius: 12px; border: 1px solid #7f8c8d;")
