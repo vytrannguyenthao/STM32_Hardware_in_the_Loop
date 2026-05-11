@@ -9,9 +9,9 @@ Thông qua phần mềm trên máy tính, người dùng có thể gửi các l�
 Các yêu cầu thiết kế chính cho phần mềm trên máy tính bao gồm:
 
 \begin{itemize}
-    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa (GUI), dễ sử dụng, cho phép người dùng thao tác trực tiếp với DUT và hệ thống HIL.
+    \item Phần mềm phải cung cấp giao diện dòng lệnh (CLI) kết hợp giao diện đồ họa (GUI), dễ sử dụng, cho phép người dùng thao tác trực tiếp với HIL (Generator, Collector) và DUT.
     \item Hỗ trợ giao diện điều khiển các tín hiệu HIL cho người dùng có thể sử dụng cho quá trình kiểm thử thiết bị DUT.
-    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp serial, phục vụ việc điều khiển DUT và HIL song song.
+    \item Phần mềm cần hỗ trợ kết nối đồng thời với nhiều cổng giao tiếp serial, phục vụ việc điều khiển HIL và DUT.
     \item Hệ thống phải cho phép gửi các lệnh cấu hình và điều khiển mô phỏng đến HIL, đồng thời nhận và hiển thị phản hồi từ DUT và HIL theo thời gian thực.
     \item Dữ liệu giao tiếp phải được ghi nhận đầy đủ để phục vụ mục đích debug và đánh giá kết quả kiểm thử.
 \end{itemize}
@@ -60,7 +60,7 @@ Các luồng nền này tiến hành giao tiếp vật lý với phần cứng v
 \subsection{Serial Tab}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{image/App_serial.jpg}
+    \includegraphics[width=0.65\textwidth]{image/App_serial.jpg}
     \caption{Lưu đồ giải thuật cấu hình cổng COM trong Serial Tab}
     \label{fig:App_serial}
 \end{figure}
@@ -84,7 +84,7 @@ Chỉ khi chuỗi dữ liệu phản hồi trùng khớp với ID đã được 
 \subsection{Logic Analyzer Tab}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.35\textwidth]{image/App_la_overview.jpg}
+    \includegraphics[width=0.3\textwidth]{image/App_la_overview.jpg}
     \caption{Mô hình xử lý tác vụ trong Logic Analyzer Tab}
     \label{fig:App_la_overview}
 \end{figure}
@@ -196,7 +196,7 @@ Khối \textbf{CAN Controller \& Monitor} hỗ trợ người dùng thao tác tr
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{image/App_per_ui.jpg}
+    \includegraphics[width=1\textwidth]{image/App_per_ui.jpg}
     \caption{Giao diện của Peripherals Tab}
     \label{fig:App_per_ui}
 \end{figure}
@@ -204,8 +204,8 @@ Khối \textbf{CAN Controller \& Monitor} hỗ trợ người dùng thao tác tr
 \subsubsection{Khối PWM Generator}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{image/App_per_pwm.jpg}
-    \caption{Sơ đồ khối chức năng PWM Generator}
+    \includegraphics[width=0.65\textwidth]{image/App_per_pwm.jpg}
+    \caption{Lưu đồ giải thuật khối PWM Generator}
     \label{fig:App_per_pwm}
 \end{figure}
 Khối \textbf{PWM Generator} cho phép người dùng điều khiển 4 kênh PWM của HIL (Generator). Khi phần mềm khởi động, các nút "Start" của các kênh sẽ tạm thời bị khóa để đảm bảo quá trình cấu hình được thực hiện trước khi phát tín hiệu.
@@ -221,8 +221,8 @@ Quy trình này đảm bảo việc điều khiển PWM được thực hiện m
 \subsubsection{Khối Waveform Generator}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{image/App_per_wave.jpg}
-    \caption{Sơ đồ khối chức năng Waveform Generator}
+    \includegraphics[width=0.7\textwidth]{image/App_per_wave.jpg}
+    \caption{Sơ đồ máy trạng thái khối Waveform Generator}
     \label{fig:App_per_wave}
 \end{figure}
 Khối \textbf{Waveform Generator} được thiết kế và quản lý thông qua mô hình state machine gồm 3 trạng thái chính: \texttt{IDLE} (chờ), \texttt{SINE} (phát sóng sine), \texttt{TRIANGLE} (phát sóng tam giác).
@@ -238,10 +238,40 @@ Nguyên nhân là do HIL chỉ sử dụng một bộ DAC duy nhất thông qua 
 Cơ chế này giúp tránh xung đột khi có nhiều luồng điều khiển truy cập vào phần cứng của HIL cùng lúc.
 
 \subsubsection{Khối GPIO Control}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/App_per_gpio.jpg}
+    \caption{Lưu đồ giải thuật khối GPIO Control}
+    \label{fig:App_per_gpio}
+\end{figure}
+Hình \ref{fig:App_per_gpio} mô tả lưu đồ giải thuật của khối \textbf{GPIO Control} trên phần mềm, cho phép người dùng thực hiện đọc và ghi trạng thái của HIL thông qua giao diện điều khiển.
+Sau khi hệ thống bắt đầu hoạt động, chương trình sẽ kiểm tra hành động của người dùng để xác định thao tác cần thực hiện là đọc GPIO hay ghi GPIO.
 
+Đối với chức năng đọc GPIO, thao tác này được kích hoạt khi người dùng nhấn nút \textbf{Read} trong khối GPIO Input trong giao diện.
+Ứng dụng sẽ lưu lại vị trí chân GPIO đang được chọn thông qua biến \texttt{pin\_idx}, sau đó gửi lệnh đọc xuống HIL theo câu lệnh \texttt{gpio\_read <port> <pin\_idx>} với \textbf{port E} là port mà HIL hỗ trợ.
+Khi nhận được phản hồi từ HIL, hệ thống sẽ tiến hành phân tích dữ liệu để xác định trạng thái logic của chân GPIO. Nếu giá trị nhận được là mức cao, giao diện sẽ cập nhật bằng cách bật đèn hiển thị tại vị trí chân tương ứng. Ngược lại, nếu giá trị là mức thấp thì đèn sẽ được tắt.
+Sau khi hoàn tất quá trình cập nhật giao diện, thông tin vị trí chân đang chờ sẽ được xóa để chuẩn bị cho lần thao tác tiếp theo.
+
+Đối với chức năng ghi GPIO, thao tác được thực hiện thông qua hai nút Set và Reset trên giao diện điều khiển. Khi người dùng nhấn Set, phần mềm sẽ gửi lệnh \texttt{gpio\_write <pin> 1} xuống cho HIL để điều khiển GPIO tương ứng lên mức logic cao.
+Sau khi lệnh được gửi thành công, trạng thái nút trên giao diện sẽ được cập nhật từ Set sang Reset để phản ánh trạng thái hiện tại của chân GPIO. Ngược lại, khi người dùng nhấn nút Reset, ứng dụng sẽ gửi lệnh \texttt{gpio\_write <pin> 0} để đưa chân GPIO về mức logic thấp và chuyển trạng thái nút từ Reset về Set.
 
 \subsubsection{Khối Potentiometer Simulation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\textwidth]{image/App_per_dac.jpg}
+    \caption{Lưu đồ giải thuật khối Potentiometer Simulation}
+    \label{fig:App_per_dac}
+\end{figure}
+Khối \textbf{Potentiometer Simulation} được xây dựng trên phần mềm nhằm mô phỏng hoạt động của một biến trở thông qua DAC của HIL.
+Khối này cho phép người dùng thay đổi mức điện áp đầu ra bằng cách thao tác trực tiếp với thanh trượt trên giao diện điều khiển, từ đó tạo ra tín hiệu điện áp tương tự giống với hành vi của biến trở thực tế.
 
+Khi chương trình hoạt động, người dùng có thể kéo thanh trượt để thay đổi giá trị điện áp mong muốn. Giá trị đọc được từ thanh trượt sẽ được phần mềm quy đổi sang mức điện áp thực theo công thức $volt = \frac{value}{100.0}$, trong đó $value$ là giá trị hiện tại của thanh trượt.
+Sau quá trình quy đổi, giao diện sẽ cập nhật và hiển thị mức điện áp tương ứng để người dùng có thể quan sát trực tiếp giá trị đang được thiết lập.
+
+Sau khi lựa chọn được mức điện áp phù hợp, người dùng nhấn nút Set Voltage để xác nhận việc xuất tín hiệu. Ứng dụng sẽ gửi lệnh xuống HIL theo câu lệnh \texttt{dac\_set\_voltage <volt>}, yêu cầu hệ thống DAC của HIL xuất ra mức điện áp tương ứng tại chân analog.
+Trong trường hợp người dùng chưa nhấn nút xác nhận, hệ thống sẽ tiếp tục quay lại trạng thái chờ thao tác trên thanh trượt để cho phép điều chỉnh giá trị điện áp mới.
+
+Thông qua cơ chế này, khối \textbf{Potentiometer Simulation} có thể mô phỏng linh hoạt hành vi của biến trở bằng tín hiệu analog tạo ra từ DAC, hỗ trợ kiểm thử các chức năng đọc ADC trên DUT mà không cần sử dụng phần cứng biến trở thực tế.
 
 \subsubsection{Khối CAN Controller \& Monitor}
 \begin{figure}[H]
