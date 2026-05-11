@@ -11,7 +11,7 @@ extern UART_HandleTypeDef huart1;
 UART_HandleTypeDef *uart = &huart1;
 
 uint8_t uart_rx_byte;
-uint8_t uart_rx_buffer[UART_RX_BUF_LEN];
+static uint8_t uart_rx_buffer[UART_RX_BUF_LEN];
 volatile uint16_t uart_rx_head = 0;
 volatile uint16_t uart_rx_tail = 0;
 volatile uint8_t uart_overflow = 0;
@@ -38,6 +38,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void UART_Init(void)
 {
+	UART_Clear();
     HAL_UART_Receive_IT(uart, &uart_rx_byte, 1);
 }
 

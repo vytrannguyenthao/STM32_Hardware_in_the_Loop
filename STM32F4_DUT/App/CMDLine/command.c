@@ -711,29 +711,31 @@ int Cmd_Triangle_Wave(int argc, char *argv[]) {
 
 int Cmd_UART_Init(int argc, char *argv[])
 {
-    if (argc > 2)
-        return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     UART_Init();
     UART_Clear();
-    Console_Write("UART Initialized\r\n");
-
+    Console_Write("\r\nUART Initialized\r\n");
     return CMDLINE_OK;
 }
 
 int Cmd_UART_Dump_Buffer(int argc, char *argv[])
 {
-    if (argc > 2) return CMDLINE_TOO_MANY_ARGS;
+	if (argc != 2)
+	    return (argc < 2) ? CMDLINE_TOO_FEW_ARGS : CMDLINE_TOO_MANY_ARGS;
 
     uint8_t buf[256];
     for (uint16_t i = 0; i < 256; i++)
     {
         buf[i] = i;
         Console_Write("%02X ", buf[i]);
+        if ((i + 1) % 16 == 0)
+            Console_Write("\r\n");
     }
 
     UART_Send(buf, 256);
-
+    Console_Write("\r\nUART TX 256 bytes DONE\r\n");
     return CMDLINE_OK;
 }
 
@@ -774,7 +776,7 @@ int Cmd_UART_Send_String(int argc, char *argv[])
 
     UART_Send_String("\r\n");
 
-    Console_Write("UART string sent\r\n");
+    Console_Write("\r\nUART string sent\r\n");
 
     return CMDLINE_OK;
 }
