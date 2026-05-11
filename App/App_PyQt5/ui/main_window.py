@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
         cb_port = QComboBox()
         cb_baud = QComboBox()
         cb_baud.addItems(["9600", "19200", "38400", "57600", "115200","921600"])
-        cb_baud.setCurrentText("921600")
+        cb_baud.setCurrentText("115200")
 
         btn_refresh = QPushButton("Refresh COM")
         btn_scan = QPushButton("Scan Device") if needs_scan else None
