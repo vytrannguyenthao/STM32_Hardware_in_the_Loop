@@ -21,12 +21,12 @@ Quá trình trao đổi này diễn ra liên tục theo thời gian thực hoặ
 \subsection{Giao thức UART}
 UART (Universal Asynchronous Receiver Transmitter) là giao thức truyền thông nối tiếp không đồng bộ, sử dụng hai đường tín hiệu chính là TX (Transmit) và RX (Receive). Không giống như các giao thức đồng bộ, UART không sử dụng xung clock chung mà thay vào đó hai thiết bị phải thống nhất trước các tham số truyền thông như tốc độ truyền nhận (baud rate), số bit dữ liệu (Data Bits), bit kiểm tra chẵn lẻ (Parity Bit) và bit dừng (Stop Bit).
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{image/uart.png}
-    \caption{Giao thức UART}
-    \label{fig:uart}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{image/uart.png}
+%     \caption{Giao thức UART}
+%     \label{fig:uart}
+% \end{figure}
 
 Nguyên lý hoạt động của UART dựa trên việc truyền dữ liệu theo từng khung. Mỗi khung dữ liệu bao gồm một bit bắt đầu (Start Bit), các bit dữ liệu (Data), bit kiểm tra (Parity Bit) nếu có và bit kết thúc (Stop Bit). Thiết bị nhận sẽ sử dụng tốc độ truyền nhận đã cấu hình để lấy mẫu tín hiệu và khôi phục dữ liệu ban đầu.\\
 
@@ -46,7 +46,7 @@ I2C (Inter-Integrated Circuit) là giao thức truyền thông nối tiếp đ�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/i2c.png}
+    \includegraphics[width=0.5\textwidth]{image/i2c.png}
     \caption{Giao thức I2C}
     \label{fig:i2c}
 \end{figure}
@@ -86,12 +86,12 @@ SPI (Serial Peripheral Interface) là giao thức truyền thông nối tiếp �
 Nguyên lý hoạt động của SPI dựa trên việc master kích hoạt tín hiệu CS của slave cần giao tiếp. Khi CS được kích hoạt, dữ liệu sẽ được truyền song công trên hai đường MOSI và MISO theo từng xung clock. Do không sử dụng cơ chế địa chỉ như I2C, mỗi thiết bị slave SPI thường cần một đường CS riêng để được lựa chọn.
 
 Trong hệ thống mô phỏng phần cứng trong vòng lặp này, SPI được dùng để mô phỏng Flash để hỗ trợ kiểm thử phần mềm của DUT.
-\subsection{Giao thức USB}
-USB (Universal Serial Bus) là giao thức truyền thông nối tiếp tốc độ cao, được thiết kế để kết nối và trao đổi dữ liệu giữa thiết bị chủ (host) và các thiết bị ngoại vi (device). USB hoạt động theo mô hình host–device, trong đó host quản lý quá trình kết nối, cấu hình và truyền dữ liệu.
+% \subsection{Giao thức USB}
+% USB (Universal Serial Bus) là giao thức truyền thông nối tiếp tốc độ cao, được thiết kế để kết nối và trao đổi dữ liệu giữa thiết bị chủ (host) và các thiết bị ngoại vi (device). USB hoạt động theo mô hình host–device, trong đó host quản lý quá trình kết nối, cấu hình và truyền dữ liệu.
 
-Nguyên lý hoạt động của USB dựa trên các giai đoạn như phát hiện thiết bị, cấp địa chỉ, cấu hình và trao đổi dữ liệu thông qua các endpoint. Dữ liệu USB được truyền theo các gói tin với cấu trúc chặt chẽ, đảm bảo tính toàn vẹn và độ tin cậy trong quá trình giao tiếp.
+% Nguyên lý hoạt động của USB dựa trên các giai đoạn như phát hiện thiết bị, cấp địa chỉ, cấu hình và trao đổi dữ liệu thông qua các endpoint. Dữ liệu USB được truyền theo các gói tin với cấu trúc chặt chẽ, đảm bảo tính toàn vẹn và độ tin cậy trong quá trình giao tiếp.
 
-Trong hệ thống mô phỏng phần cứng trong vòng lặp này, USB được sử dụng làm kênh giao tiếp giữa hệ thống mô phỏng và máy tính, hệ thống và DUT. Thông qua USB, dữ liệu mô phỏng, trạng thái DUT và kết quả kiểm thử có thể được truyền lên phần mềm giám sát, đồng thời cho phép người dùng điều khiển và cấu hình quá trình mô phỏng một cách thuận tiện.
+% Trong hệ thống mô phỏng phần cứng trong vòng lặp này, USB được sử dụng làm kênh giao tiếp giữa hệ thống mô phỏng và máy tính, hệ thống và DUT. Thông qua USB, dữ liệu mô phỏng, trạng thái DUT và kết quả kiểm thử có thể được truyền lên phần mềm giám sát, đồng thời cho phép người dùng điều khiển và cấu hình quá trình mô phỏng một cách thuận tiện.
 
 \subsection{Giao thức CAN (Controller Area Network)}
 CAN (Controller Area Network) là một giao thức truyền thông nối tiếp được phát triển cho phép các vi điều khiển và các thiết bị giao tiếp với nhau trong một mạng lưới mà không cần máy chủ trung tâm.
@@ -195,45 +195,45 @@ Hệ điều hành thời gian thực (Real-time Operating System – RTOS) là 
 Khác với các hệ điều hành thông dụng như Windows, macOS hay Linux, vốn ưu tiên hiệu suất tổng thể và tính đa dụng, RTOS tập trung đảm bảo các tác vụ được thực hiện đúng thời hạn hoặc trong khoảng thời gian giới hạn. 
 Với khả năng quản lý đa nhiệm hiệu quả, RTOS ưu tiên các tác vụ quan trọng thông qua cơ chế lập lịch, đồng thời giảm thiểu độ trễ để phản hồi nhanh các sự kiện hoặc ngắt. Hệ điều hành này thường nhẹ, sử dụng ít tài nguyên, phù hợp với các thiết bị có phần cứng hạn chế.
 
-RTOS có thể được chia làm 2 loại dựa vào độ trễ:
-\begin{itemize}[leftmargin=2.5cm]
-    \item Thời gian thực cứng (hard real-time).
-    \item Thời gian thực mềm (soft real-time).
-\end{itemize}
+% RTOS có thể được chia làm 2 loại dựa vào độ trễ:
+% \begin{itemize}[leftmargin=2.5cm]
+%     \item Thời gian thực cứng (hard real-time).
+%     \item Thời gian thực mềm (soft real-time).
+% \end{itemize}
 
-Hard real-time là loại hệ điều hành yêu cầu các tác vụ phải được thực hiện chính xác trong khoảng thời gian quy định mà không có bất kỳ độ trễ nào. 
-Vì việc không tuân thủ thời hạn (deadline) có thể dẫn đến những hậu quả nghiêm trọng cho hệ thống hoặc thậm chí gây nguy hiểm đến tính mạng con người. 
-Ví dụ như hệ thống túi khí trên xe ô tô, nếu cảm biến va chạm phát hiện sự cố và kích hoạt túi khí trong khoảng thời gian cực ngắn, thường dưới 0,1 giây. 
-Nếu hệ thống không đáp ứng được thời gian này, túi khí có thể không bung kịp, dẫn đến nguy cơ tai nạn nghiêm trọng cho người trên xe.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{image/hard_real_time.jpg}
-    \caption{Đồ thị thời gian của Hard real-time}
-    \label{fig:hard_real_time}
-\end{figure}
+% Hard real-time là loại hệ điều hành yêu cầu các tác vụ phải được thực hiện chính xác trong khoảng thời gian quy định mà không có bất kỳ độ trễ nào. 
+% Vì việc không tuân thủ thời hạn (deadline) có thể dẫn đến những hậu quả nghiêm trọng cho hệ thống hoặc thậm chí gây nguy hiểm đến tính mạng con người. 
+% Ví dụ như hệ thống túi khí trên xe ô tô, nếu cảm biến va chạm phát hiện sự cố và kích hoạt túi khí trong khoảng thời gian cực ngắn, thường dưới 0,1 giây. 
+% Nếu hệ thống không đáp ứng được thời gian này, túi khí có thể không bung kịp, dẫn đến nguy cơ tai nạn nghiêm trọng cho người trên xe.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{image/hard_real_time.jpg}
+%     \caption{Đồ thị thời gian của Hard real-time}
+%     \label{fig:hard_real_time}
+% \end{figure}
 
-Soft real-time là loại hệ điều hành được thiết kế để xử lý các tác vụ với yêu cầu thời gian linh hoạt hơn so với Hard Real-Time, nơi độ trễ nhỏ có thể được chấp nhận mà không gây ra hậu quả nghiêm trọng. 
-Trong Soft Real-Time, các tác vụ vẫn cần được hoàn thành trong khoảng thời gian mong muốn, nhưng nếu thỉnh thoảng vượt quá thời hạn một chút, hệ thống vẫn hoạt động bình thường và không dẫn đến thiệt hại lớn. 
-Đặc điểm này khiến Soft Real-Time phù hợp cho các ứng dụng ưu tiên hiệu suất nhưng không đòi hỏi tính chính xác tuyệt đối về thời gian. Tuy nhiên cần lưu ý, thời gian đáp ứng càng trễ thì thiệt hại càng lớn. 
-Ví dụ như hệ thống tưới tiêu tự động, hệ thống được lập trình tưới nước vào những khung giờ cố định trong ngày. Nếu hệ thống bắt đầu tưới trễ hơn vài phút so với lịch trình, điều này thường không gây hại nghiêm trọng, cây vẫn nhận được nước và tiếp tục sinh trưởng bình thường. 
-Tuy nhiên, nếu thời gian trễ kéo dài quá lâu, ví dụ hàng giờ, cây trồng có thể bị thiếu nước, dẫn đến nguy cơ héo úa hoặc chết dần.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{image/soft_real_time.jpg}
-    \caption{Đồ thị thời gian của Soft real-time}
-    \label{fig:soft_real_time}
-\end{figure}
+% Soft real-time là loại hệ điều hành được thiết kế để xử lý các tác vụ với yêu cầu thời gian linh hoạt hơn so với Hard Real-Time, nơi độ trễ nhỏ có thể được chấp nhận mà không gây ra hậu quả nghiêm trọng. 
+% Trong Soft Real-Time, các tác vụ vẫn cần được hoàn thành trong khoảng thời gian mong muốn, nhưng nếu thỉnh thoảng vượt quá thời hạn một chút, hệ thống vẫn hoạt động bình thường và không dẫn đến thiệt hại lớn. 
+% Đặc điểm này khiến Soft Real-Time phù hợp cho các ứng dụng ưu tiên hiệu suất nhưng không đòi hỏi tính chính xác tuyệt đối về thời gian. Tuy nhiên cần lưu ý, thời gian đáp ứng càng trễ thì thiệt hại càng lớn. 
+% Ví dụ như hệ thống tưới tiêu tự động, hệ thống được lập trình tưới nước vào những khung giờ cố định trong ngày. Nếu hệ thống bắt đầu tưới trễ hơn vài phút so với lịch trình, điều này thường không gây hại nghiêm trọng, cây vẫn nhận được nước và tiếp tục sinh trưởng bình thường. 
+% Tuy nhiên, nếu thời gian trễ kéo dài quá lâu, ví dụ hàng giờ, cây trồng có thể bị thiếu nước, dẫn đến nguy cơ héo úa hoặc chết dần.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{image/soft_real_time.jpg}
+%     \caption{Đồ thị thời gian của Soft real-time}
+%     \label{fig:soft_real_time}
+% \end{figure}
 
 \subsection{Thread (Task) trong RTOS}
 Trong hệ điều hành thời gian thực (RTOS), thread (hay còn gọi là task) là những tác vụ thực thi những nhiệm vụ riêng biệt. 
 Trong các hệ thống nhúng đơn giản, mô hình \textbf{Super Loop} thường được sử dụng để điều khiển toàn bộ chương trình. 
 Trong mô hình này, các tác vụ được thực hiện tuần tự theo một vòng lặp vô hạn, không có khái niệm ưu tiên hay xử lý đồng thời.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{image/superloop.jpg}
-    \caption{Task trong Super Loop}
-    \label{fig:superloop}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.7\textwidth]{image/superloop.jpg}
+%     \caption{Task trong Super Loop}
+%     \label{fig:superloop}
+% \end{figure}
 
 Tuy nhiên, khi hệ thống phức tạp hơn, với nhiều task hơn, yêu cầu thời gian thực nghiêm ngặt hoặc xử lý những sự kiện bất đồng bộ thì \textbf{Super Loop} trở nên khó kiểm soát và thiếu hiệu quả. 
 Lúc này, việc chuyển sang sử dụng \textbf{RTOS} sẽ giúp hệ thống có thể quản lý nhiều task độc lập, hỗ trợ ưu tiên, đa luồng, và đáp ứng thời gian thực một cách chính xác và linh hoạt hơn.
@@ -273,36 +273,36 @@ Trong quá trình này, toàn bộ trạng thái hiện thời của thread A ba
 Sau đó, bộ lập lịch nạp các giá trị thanh ghi đã được lưu từ trước của thread B vào CPU, khôi phục lại chính xác ngữ cảnh của thread B tại thời điểm nó bị tạm dừng. 
 Đặc biệt, thanh ghi bộ đếm chương trình (PC) sẽ xác định vị trí tiếp theo trong mã nguồn mà thread B sẽ tiếp tục thực thi. 
 Nhờ vào cơ chế này, các thread trong hệ thống có thể được chuyển đổi qua lại một cách liền mạch và nhất quán, đảm bảo tính đồng thời và đáp ứng thời gian thực trong hệ điều hành. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\textwidth]{image/thread_overview.jpg}
-    \caption{Tổng quan thread}
-    \label{fig:thread_overview}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{image/thread_overview.jpg}
+%     \caption{Tổng quan thread}
+%     \label{fig:thread_overview}
+% \end{figure}
 
-\noindent
-Trong quá trình thực thi, mỗi tác vụ sẽ có những trạng thái chính sau:
+% \noindent
+% Trong quá trình thực thi, mỗi tác vụ sẽ có những trạng thái chính sau:
 
-\begin{itemize}
-    \item \textbf{Ready:} Tác vụ đã sẵn sàng để thực thi nhưng một tác vụ có mức độ ưu tiên bằng hoặc cao hơn đang chạy.
+% \begin{itemize}
+%     \item \textbf{Ready:} Tác vụ đã sẵn sàng để thực thi nhưng một tác vụ có mức độ ưu tiên bằng hoặc cao hơn đang chạy.
     
-    \item \textbf{Running:} Tác vụ đang được thực thi.
+%     \item \textbf{Running:} Tác vụ đang được thực thi.
     
-    \item \textbf{Blocked:} Tác vụ đang chờ một số sự kiện:
-    \begin{itemize}
-        \item \textbf{Time:} Nếu một tác vụ gọi \texttt{vTaskDelay()} thì nó sẽ bị chặn cho đến khi hết thời gian delay.
-        \item \textbf{Resource:} Các tác vụ cũng có thể chặn chờ queue và semaphore…
-    \end{itemize}
+%     \item \textbf{Blocked:} Tác vụ đang chờ một số sự kiện:
+%     \begin{itemize}
+%         \item \textbf{Time:} Nếu một tác vụ gọi \texttt{vTaskDelay()} thì nó sẽ bị chặn cho đến khi hết thời gian delay.
+%         \item \textbf{Resource:} Các tác vụ cũng có thể chặn chờ queue và semaphore…
+%     \end{itemize}
 
-    \item \textbf{Suspended:} Giống với Block, nhưng không chờ sự kiện. Các tác vụ sẽ chỉ được chạy hoặc ngưng trạng thái bị treo khi được gọi thông qua API \texttt{vTaskSuspend()} và \texttt{vTaskResume()} tương ứng.
-\end{itemize}
+%     \item \textbf{Suspended:} Giống với Block, nhưng không chờ sự kiện. Các tác vụ sẽ chỉ được chạy hoặc ngưng trạng thái bị treo khi được gọi thông qua API \texttt{vTaskSuspend()} và \texttt{vTaskResume()} tương ứng.
+% \end{itemize}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.55\textwidth]{image/thread_state.jpg}
-    \caption{Trạng thái của thread}
-    \label{fig:thread_state}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.55\textwidth]{image/thread_state.jpg}
+%     \caption{Trạng thái của thread}
+%     \label{fig:thread_state}
+% \end{figure}
 
 \subsection{Bộ lập lịch (Scheduler)}
 Bộ lập lịch (\textbf{Scheduler}) là một thành phần quan trọng trong hệ điều hành thời gian thực hoặc các hệ điều hành khác, chịu trách nhiệm quyết định thứ tự và thời điểm các thread hoặc task được thực thi trên bộ xử lý. 
@@ -318,71 +318,71 @@ Nhờ có bộ lập lịch, chúng ta có thể kiểm soát việc thực thi 
 
 Để thực hiện được điều này, RTOS sử dụng các thuật toán lập lịch nhằm xác định thứ tự và thời điểm mà mỗi task được phép truy cập CPU. Mỗi thuật toán sẽ có nguyên lý hoạt động, ưu điểm và hạn chế riêng, từ đó ảnh hưởng trực tiếp đến độ trễ, hiệu năng và tính đáp ứng thời gian thực của hệ thống. Một số thuật toán phổ biến có thể kể đến như \textbf{Round Robin}, \textbf{Preemptive Scheduling} và \textbf{Cooperative Scheduling}.
 
-\textbf{Round Robin} là một thuật toán lập lịch đơn giản, trong đó mỗi thread được cấp CPU trong một khoảng thời gian thực thi giới hạn được gọi là \textbf{time slice}. Khi time slice hết, task hiện tại bị tạm dừng và đưa vào trạng thái \texttt{BLOCKED} và nhường CPU cho các thread khác ở trạng thái \texttt{READY} trong hàng đợi bắt đầu chạy. Thuật toán này sẽ cho các thread đều có cơ hội được thực thi và lặp lại theo vòng tròn.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{image/round_robin.jpg}
-    \caption{Thuật toán lập lịch Round Robin}
-    \label{fig:round_robin}
-\end{figure}
+% \textbf{Round Robin} là một thuật toán lập lịch đơn giản, trong đó mỗi thread được cấp CPU trong một khoảng thời gian thực thi giới hạn được gọi là \textbf{time slice}. Khi time slice hết, task hiện tại bị tạm dừng và đưa vào trạng thái \texttt{BLOCKED} và nhường CPU cho các thread khác ở trạng thái \texttt{READY} trong hàng đợi bắt đầu chạy. Thuật toán này sẽ cho các thread đều có cơ hội được thực thi và lặp lại theo vòng tròn.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{image/round_robin.jpg}
+%     \caption{Thuật toán lập lịch Round Robin}
+%     \label{fig:round_robin}
+% \end{figure}
 
-\textbf{Preemptive Scheduling} là thuật toán khá tương đồng với \textbf{Round Robin}, các thread sẽ được CPU chạy trong khoảng thời gian giới hạn. Tuy nhiên \textbf{Preemptive Scheduling} sẽ cho phép các thread có những mức độ ưu tiên khác nhau. Các thread có mức độ ưu tiên cao hơn trong trạng thái \texttt{READY} có thể chiếm quyền CPU của thread đang thực thi ngay lập tức và đưa thread đó vào trạng thái \texttt{BLOCKED}. Điều này cho phép hệ thống phản hồi một cách nhanh chóng khi có sự kiện quan trọng. Nếu các thread có cùng mức độ ưu tiên thì Scheduler sẽ dùng thuật toán Round Robin. Nhược điểm của thuật toán này là nếu các thread có mức ưu tiên cao hơn luôn được chạy thì các thread có mức ưu tiên thấp hơn có thể sẽ bị “đói” (starvation).
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{image/preemptive.jpg}
-    \caption{Thuật toán lập lịch Preemptive Scheduling}
-    \label{fig:preemptive}
-\end{figure}
+% \textbf{Preemptive Scheduling} là thuật toán khá tương đồng với \textbf{Round Robin}, các thread sẽ được CPU chạy trong khoảng thời gian giới hạn. Tuy nhiên \textbf{Preemptive Scheduling} sẽ cho phép các thread có những mức độ ưu tiên khác nhau. Các thread có mức độ ưu tiên cao hơn trong trạng thái \texttt{READY} có thể chiếm quyền CPU của thread đang thực thi ngay lập tức và đưa thread đó vào trạng thái \texttt{BLOCKED}. Điều này cho phép hệ thống phản hồi một cách nhanh chóng khi có sự kiện quan trọng. Nếu các thread có cùng mức độ ưu tiên thì Scheduler sẽ dùng thuật toán Round Robin. Nhược điểm của thuật toán này là nếu các thread có mức ưu tiên cao hơn luôn được chạy thì các thread có mức ưu tiên thấp hơn có thể sẽ bị “đói” (starvation).
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{image/preemptive.jpg}
+%     \caption{Thuật toán lập lịch Preemptive Scheduling}
+%     \label{fig:preemptive}
+% \end{figure}
 
-\textbf{Cooperative Scheduling} là thuật toán cho phép các thread được thực thi đến khi nó chủ động nhường CPU bằng cách gọi \texttt{yield()} hoặc \texttt{suspend()}.  Điều này sẽ giúp cho các thread không bị gián đoạn bởi các thread khác. Tuy nhiên các thread cần được quản lý tốt vì thuật toán này có thể cho phép một thread thực thi quá lâu dẫn đến các thread khác rơi vào tình trạng “đói”.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{image/cooperative.jpg}
-    \caption{Thuật toán lập lịch Cooperative Scheduling}
-    \label{fig:cooperative}
-\end{figure}
+% \textbf{Cooperative Scheduling} là thuật toán cho phép các thread được thực thi đến khi nó chủ động nhường CPU bằng cách gọi \texttt{yield()} hoặc \texttt{suspend()}.  Điều này sẽ giúp cho các thread không bị gián đoạn bởi các thread khác. Tuy nhiên các thread cần được quản lý tốt vì thuật toán này có thể cho phép một thread thực thi quá lâu dẫn đến các thread khác rơi vào tình trạng “đói”.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{image/cooperative.jpg}
+%     \caption{Thuật toán lập lịch Cooperative Scheduling}
+%     \label{fig:cooperative}
+% \end{figure}
 
-\subsection{Queue (hàng đợi)}
-Queue (hàng đợi) trong hệ điều hành thời gian thực (RTOS) là một cơ chế dữ liệu được sử dụng để truyền thông giữa các thread hoặc task một cách an toàn và có tổ chức. Queue hoạt động theo nguyên tắc FIFO (First In, First Out), nghĩa là phần tử được thêm vào đầu tiên sẽ được xử lý đầu tiên. Trong RTOS, queue thường được dùng để truyền thông điệp, dữ liệu hoặc tín hiệu giữa các task, chẳng hạn như gửi thông tin từ một task đọc cảm biến đến task điều khiển trong hệ thống nhúng. Cơ chế này giúp đồng bộ hóa và tránh xung đột tài nguyên, với các thao tác như \texttt{enqueue} (thêm phần tử) và \texttt{dequeue} (lấy phần tử) được quản lý bởi RTOS để đảm bảo tính chính xác và thời gian thực
-\begin{figure}[H]
-    \centering
-    \begin{minipage}{0.48\textwidth}
-        \centering
-        \captionsetup{width=6cm, justification=centering}
-        \includegraphics[width=\textwidth]{image/enqueue.jpg}
-        \vspace{1pt}
-        \caption{Thêm phần tử vào queue (enqueue)}
-        \label{fig:enqueue}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.48\textwidth}
-        \vspace{-8pt}
-        \centering
-        \captionsetup{width=6cm, justification=centering}
-        \includegraphics[width=\textwidth]{image/dequeue.jpg}
-        \caption{Lấy phần tử từ queue (dequeue)}
-        \label{fig:dequeue}
-    \end{minipage}
-\end{figure}
+% \subsection{Queue (hàng đợi)}
+% Queue (hàng đợi) trong hệ điều hành thời gian thực (RTOS) là một cơ chế dữ liệu được sử dụng để truyền thông giữa các thread hoặc task một cách an toàn và có tổ chức. Queue hoạt động theo nguyên tắc FIFO (First In, First Out), nghĩa là phần tử được thêm vào đầu tiên sẽ được xử lý đầu tiên. Trong RTOS, queue thường được dùng để truyền thông điệp, dữ liệu hoặc tín hiệu giữa các task, chẳng hạn như gửi thông tin từ một task đọc cảm biến đến task điều khiển trong hệ thống nhúng. Cơ chế này giúp đồng bộ hóa và tránh xung đột tài nguyên, với các thao tác như \texttt{enqueue} (thêm phần tử) và \texttt{dequeue} (lấy phần tử) được quản lý bởi RTOS để đảm bảo tính chính xác và thời gian thực
+% \begin{figure}[H]
+%     \centering
+%     \begin{minipage}{0.48\textwidth}
+%         \centering
+%         \captionsetup{width=6cm, justification=centering}
+%         \includegraphics[width=\textwidth]{image/enqueue.jpg}
+%         \vspace{1pt}
+%         \caption{Thêm phần tử vào queue (enqueue)}
+%         \label{fig:enqueue}
+%     \end{minipage}
+%     \hfill
+%     \begin{minipage}{0.48\textwidth}
+%         \vspace{-8pt}
+%         \centering
+%         \captionsetup{width=6cm, justification=centering}
+%         \includegraphics[width=\textwidth]{image/dequeue.jpg}
+%         \caption{Lấy phần tử từ queue (dequeue)}
+%         \label{fig:dequeue}
+%     \end{minipage}
+% \end{figure}
 \subsection{Semaphore và Mutex}
 \textbf{Semaphore} trong hệ điều hành thời gian thực (RTOS) là một cơ chế đồng bộ hóa dùng để kiểm soát truy cập vào các tài nguyên chung hoặc quản lý giao tiếp giữa các thread. Semaphore có thể là \textbf{binary semaphore} chỉ có hai trạng thái 0 hoặc 1 tương tự như khóa hoặc \textbf{counting semaphore} cho phép quản lý nhiều tài nguyên với giá trị đếm lớn hơn. Ví dụ nếu có 1 tài nguyên như buffer và có 3 task có thể truy cập vào buffer đó, counting semaphore lúc này được khởi tạo giá trị là 2 thì semaphore sẽ như 2 chiếc “chìa khóa”, thread nào lấy được sẽ được phép truy cập
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/couting_sem.jpg}
+    \includegraphics[width=0.5\textwidth]{image/couting_sem.jpg}
     \caption{Couting Semaphore}
     \label{fig:couting_sem}
 \end{figure}
-\textbf{Mutex} hoạt động tương tự \textbf{binary semaphore}, là một cơ chế đồng bộ dùng để bảo vệ vùng tài nguyên dùng chung, đảm bảo rằng chỉ một thread được phép truy cập tài nguyên đó tại một thời điểm. 
-Tuy nhiên \textbf{binary semaphore} không có tính sở hữu tức bất kì thread nào cũng đều có thể give (giải phóng) semphore. Đối với mutex, chỉ có một thread được sở hữu tại một thời điểm và chỉ có thread đó mới có thể giải phóng được mutex. 
-Đồng thời mutex có tính \textbf{priority inheritance}, tức là nếu thread có mức ưu tiên thấp giữ mutex và thread có mức ưu tiên cao đang chờ thì RTOS sẽ tạm thời nâng mức ưu tiên của thread thấp lên bằng thread cao. 
-Điều này giúp tránh hiện tượng \textbf{priority inheritance}, khi thread cao đang đợi semaphore của thread thấp mà có một thread có mức ưu tiên trung bình \texttt{READY} dẫn đến thread thấp không giải phóng được semaphore.
+% \textbf{Mutex} hoạt động tương tự \textbf{binary semaphore}, là một cơ chế đồng bộ dùng để bảo vệ vùng tài nguyên dùng chung, đảm bảo rằng chỉ một thread được phép truy cập tài nguyên đó tại một thời điểm. 
+% Tuy nhiên \textbf{binary semaphore} không có tính sở hữu tức bất kì thread nào cũng đều có thể give (giải phóng) semphore. Đối với mutex, chỉ có một thread được sở hữu tại một thời điểm và chỉ có thread đó mới có thể giải phóng được mutex. 
+% Đồng thời mutex có tính \textbf{priority inheritance}, tức là nếu thread có mức ưu tiên thấp giữ mutex và thread có mức ưu tiên cao đang chờ thì RTOS sẽ tạm thời nâng mức ưu tiên của thread thấp lên bằng thread cao. 
+% Điều này giúp tránh hiện tượng \textbf{priority inheritance}, khi thread cao đang đợi semaphore của thread thấp mà có một thread có mức ưu tiên trung bình \texttt{READY} dẫn đến thread thấp không giải phóng được semaphore.
 
-Việc sử dụng semaphore đôi khi có thể dẫn đến tình trạng nhiều thread chờ đợi vô thời hạn để nhận được một semaphore. Tuy nhiên semaphore đó lại chỉ có thể được giải phóng bởi chính một trong các thread bị chặn. Điều này tạo ra một vòng lặp phụ thuộc lẫn nhau khiến tất cả các thread đều bị treo và không thể tiếp tục thực thi, tình trạng này được gọi là deadlock. Điều này tương tự với mutex.
+Việc sử dụng semaphore đôi khi có thể dẫn đến tình trạng nhiều thread chờ đợi vô thời hạn để nhận được một semaphore. Tuy nhiên semaphore đó lại chỉ có thể được giải phóng bởi chính một trong các thread bị chặn. Điều này tạo ra một vòng lặp phụ thuộc lẫn nhau khiến tất cả các thread đều bị treo và không thể tiếp tục thực thi, tình trạng này được gọi là deadlock. %Điều này tương tự với mutex.
 
 Ví dụ:
-\begin{itemize}[leftmargin=2.5cm, label=\textendash]
-    \item \texttt{thread\_1} giữ mutex A và đợi mutex B.
-    \item \texttt{thread\_2} giữ mutex B và đợi mutex A.
+\begin{itemize}
+    \item \texttt{thread\_1} giữ semaphore A và đợi semaphore B.
+    \item \texttt{thread\_2} giữ semaphore B và đợi semaphore A.
 \end{itemize}
 
 \section{Cơ sở lý thuyết về phân tích phổ tần số}
