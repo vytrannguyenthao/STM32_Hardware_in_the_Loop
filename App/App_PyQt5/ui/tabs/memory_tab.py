@@ -220,13 +220,17 @@ class MemoryTab(QWidget):
             self.uart_hil.send(f"i2c_dev_active 0x{dev:02X}")
             QTimer.singleShot(2000, self.run_i2c_step)
         elif self.i2c_step == 2:
+            self.pc_log_append(f"[DUT] Init EEPROM 0x{dev:02X}")
+            self.uart_dut.send(f"eeprom_init 0x{dev:02X} 1024 256")
+            QTimer.singleShot(2000, self.run_i2c_step)
+        elif self.i2c_step == 3:
             self.pc_log_append(f"[DUT] Fill EEPROM 0x{dev:02X}")
             self.uart_dut.send(f"eeprom_fill 0 256")
             QTimer.singleShot(2000, self.run_i2c_step)
-        elif self.i2c_step == 3:
+        elif self.i2c_step == 4:
             self.pc_log_append(f"[DUT] Read EEPROM 0x{dev:02X}")
             self.uart_dut.send(f"eeprom_read 0 256")
-        elif self.i2c_step == 4:
+        elif self.i2c_step == 5:
             self.pc_log_append(f"[HIL] Deinit EEPROM 0x{dev:02X}")
             self.uart_hil.send(f"eeprom_deinit 0x{dev:02X}")
             self.i2c_dev_index += 1
