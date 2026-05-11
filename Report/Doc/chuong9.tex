@@ -5,23 +5,528 @@ Chương này trình bày các kết quả đạt được sau quá trình thi�
 \section{Kết quả thực hiện phần mềm HIL}
 
 \subsection{Kết quả mô phỏng ngoại vi}
-\subsubsection{Kêt quả mô phỏng GPIO}
-(thêm bảng số lượng chân GPIO support, các chế độ hoạt động, mức điện áp logic)
+
+Phần này trình bày kết quả thực nghiệm của các khối ngoại vi được tích hợp trong hệ thống HIL, bao gồm GPIO, ADC, DAC, PWM, UART và CAN. Các kết quả được đánh giá dựa trên khả năng tạo và thu nhận tín hiệu, độ chính xác cũng như tính ổn định trong quá trình hoạt động thực tế.
+
+\subsubsection{Kết quả mô phỏng GPIO}
+
+Hệ thống HIL hỗ trợ mô phỏng và kiểm thử tín hiệu GPIO nhằm đánh giá các chức năng điều khiển và đọc tín hiệu số của DUT. Khối GPIO được xây dựng trên vi điều khiển STM32F407VET6 với mức điện áp logic 3.3V.
+
+Bảng \ref{tab:gpio_support} trình bày đặc tính GPIO của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính GPIO của hệ thống HIL}
+\label{tab:gpio_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng GPIO Input 
+& 14 chân 
+& Hỗ trợ đọc tín hiệu số từ DUT thông qua các chân PE0 -- PE13 \\
+\hline
+
+Số lượng GPIO Output 
+& 12 chân 
+& Hỗ trợ xuất tín hiệu số điều khiển DUT thông qua các chân PB0 -- PB5 và PB10 -- PB15 \\
+\hline
+
+Mức điện áp hoạt động 
+& 3.3V 
+& \\
+\hline
+
+Chế độ hỗ trợ 
+& Input / Output 
+& Hỗ trợ kiểm thử tín hiệu số theo cả hai chiều giao tiếp \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Do sử dụng vi điều khiển STM32F407VET6, các chân GPIO của hệ thống HIL tuân theo đặc tính điện áp logic của dòng vi điều khiển này. Theo tài liệu kỹ thuật của STM32F407VET6 tại mức điện áp hoạt động 3.3V, các ngưỡng điện áp logic được trình bày trong Bảng \ref{tab:gpio_logic_level}.
+
+\begin{table}[H]
+\centering
+\caption{Ngưỡng điện áp logic GPIO của STM32F407VET6}
+\label{tab:gpio_logic_level}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Mức logic} & \textbf{Điện áp} \\
+\hline
+
+Logic Low ($V_{IL}$) 
+& $\le 0.3V_{DD}$ ($\approx 0.99V$ tại $V_{DD}=3.3V$) \\
+\hline
+
+Logic High ($V_{IH}$) 
+& $\ge 0.7V_{DD}$ ($\approx 2.31V$ tại $V_{DD}=3.3V$) \\
+\hline
+
+Vùng chuyển mức 
+& Khoảng từ $0.99V$ đến $2.31V$ \\
+\hline
+
+\end{tabular}
+
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{image/gpio_pcb.png}
+    \caption{Vị trí các chân GPIO trên hệ thống HIL}
+    \label{fig:gpio_pcb}
+\end{figure}
 
 \subsubsection{Kết quả mô phỏng ADC}
-(thêm bảng số lượng chân ADC support, dải điện áp đo được, độ phân giải ADC)
+
+Hệ thống HIL hỗ trợ cả chức năng đọc và tạo tín hiệu tương tự nhằm phục vụ các bài kiểm thử liên quan đến xử lý tín hiệu tương tự trên DUT. Khối ADC được sử dụng để đọc điện áp tương tự từ DUT hoặc môi trường mô phỏng, trong khi khối DAC đảm nhiệm việc tạo tín hiệu tương tự đầu vào theo yêu cầu kiểm thử.
+
+Các chức năng ADC/DAC được xây dựng trên vi điều khiển STM32F407VET6 với điện áp tham chiếu 3.3V và hỗ trợ hoạt động trong dải điện áp từ 0V đến 3.3V. Bảng \ref{tab:adc_support} trình bày đặc tính hỗ trợ ADC của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính hỗ trợ ADC của hệ thống HIL}
+\label{tab:adc_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng kênh ADC hỗ trợ 
+& 1 kênh 
+& Hỗ trợ đọc tín hiệu tương tự thông qua chân PC0 \\
+\hline
+
+Dải điện áp hoạt động 
+& 0V -- 3.3V 
+& Hỗ trợ đọc và tạo tín hiệu tương tự trong toàn bộ dải điện áp hoạt động \\
+\hline
+
+Độ phân giải ADC/DAC 
+& 12-bit 
+& Độ phân giải tương ứng với ngoại vi ADC và DAC của STM32F407VET6 \\
+\hline
+
+Điện áp tham chiếu 
+& 3.3V 
+& Điện áp tham chiếu sử dụng cho quá trình chuyển đổi ADC/DAC \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Giá trị ADC lý thuyết được xác định theo công thức:
+
+\[
+ADC_{value} = \frac{V_{in}}{V_{ref}} \times (2^{12}-1)
+\]
+
+Trong đó:
+
+\begin{itemize}
+    \item $V_{in}$ là điện áp đầu vào cần đo.
+    \item $V_{ref}$ là điện áp tham chiếu ADC (3.3V).
+    \item ADC có độ phân giải 12-bit nên giá trị tối đa là 4095.
+\end{itemize}
+
+Để đánh giá khả năng hoạt động của khối ADC, hệ thống tiến hành đọc các mức điện áp lần lượt từ 0.5V đến 3V bằng ADC. Kết quả kiểm thử được trình bày trong Bảng \ref{tab:adc_test_result}.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử ADC}
+\label{tab:adc_test_result}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Điện áp đầu vào} & \textbf{ADC lý thuyết} & \textbf{ADC đọc được} & \textbf{Sai số toàn thang} \\
+\hline
+
+0.5V & 620  & 639  & 0.46\% \\
+\hline
+
+1.0V & 1240 & 1261 & 0.51\% \\
+\hline
+
+1.5V & 1861 & 1907 & 1.12\% \\
+\hline
+
+2.0V & 2481 & 2524 & 1.05\% \\
+\hline
+
+2.5V & 3102 & 3163 & 1.49\% \\
+\hline
+
+3.0V & 3722 & 3796 & 1.81\% \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Kết quả kiểm thử cho thấy giá trị ADC đo được có sai số nhỏ hơn 2\% so với giá trị lý thuyết. Sai số tăng nhẹ theo điện áp đầu vào nhưng vẫn nằm trong giới hạn cho phép, cho thấy hệ thống có khả năng xử lý tín hiệu tương tự ổn định trong quá trình kiểm thử DUT.
 
 \subsubsection{Kết quả mô phỏng DAC}
-(thêm bảng số lượng chân DAC support, dải điện áp đầu ra, độ phân giải DAC)
-(kết quả tạo sóng sine wave, triangle wave)
+
+Hệ thống HIL hỗ trợ tạo và xuất tín hiệu tương tự thông qua bộ DAC tích hợp trên vi điều khiển nhằm phục vụ kiểm thử ADC hoặc các chức năng xử lý tín hiệu tương tự của DUT.
+
+Ngoài khả năng xuất điện áp DC cố định, hệ thống còn hỗ trợ phát các dạng sóng tương tự như sóng sine và sóng tam giác để mô phỏng tín hiệu cảm biến hoặc tín hiệu điều khiển trong quá trình kiểm thử firmware. Bảng \ref{tab:dac_support} trình bày đặc tính DAC của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính DAC của hệ thống HIL}
+\label{tab:dac_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng DAC 
+& 2 kênh 
+& Hỗ trợ xuất tín hiệu tương tự thông qua chân PA4(sóng sine và sóng tam giác) và PA5 (điện áp DCs)\\
+\hline
+
+Độ phân giải 
+& 12-bit 
+& Giá trị DAC nằm trong khoảng từ 0 đến 4095 \\
+\hline
+
+Dải điện áp đầu ra 
+& 0V -- 3.3V 
+& Điện áp đầu ra tương ứng với điện áp hoạt động của vi điều khiển \\
+\hline
+
+Điện áp tham chiếu 
+& 3.3V 
+& \\
+\hline
+
+Dạng sóng hỗ trợ 
+& DC / Sine / Triangle 
+& Hỗ trợ phát điện áp cố định và các dạng sóng phục vụ kiểm thử \\
+\hline
+
+Tần số dạng sóng hỗ trợ
+& 1Hz -- 10kHz
+& Giá trị tần số hỗ trợ phát các dạng sóng tương tự \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Để đánh giá khả năng xuất điện áp DC của DAC, hệ thống tiến hành thiết lập nhiều mức giá trị DAC khác nhau và đo điện áp đầu ra thực tế bằng thiết bị đo ngoài. Kết quả kiểm thử được trình bày trong Bảng \ref{tab:dac_voltage_result}.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử điện áp đầu ra DAC}
+\label{tab:dac_voltage_result}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Giá trị DAC} & \textbf{Điện áp lý thuyết} & \textbf{Điện áp đo được} & \textbf{Sai số (\%)} \\
+\hline
+
+620  & 0.5V & 0.516V & 0.48\% \\
+\hline
+
+1240 & 1.0V & 1.025V & 0.76\% \\
+\hline
+
+1861 & 1.5V & 1.535V & 1.06\% \\
+\hline
+
+2481 & 2.0V & 2.031V & 0.94\% \\
+\hline
+
+3102 & 2.5V & 2.553V & 1.61\% \\
+\hline
+
+3722 & 3.0V & 3.059V & 1.79\% \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Kết quả đo cho thấy điện áp đầu ra có sai số nhỏ và thay đổi tuyến tính theo giá trị DAC thiết lập. Sai số đo được nhỏ hơn 2\%, cho thấy hệ thống có khả năng tạo tín hiệu tương tự ổn định phục vụ cho các bài kiểm thử firmware.
+
+Bên cạnh khả năng xuất điện áp DC, hệ thống còn hỗ trợ tạo các dạng sóng sine và tam giác nhằm phục vụ kiểm thử chức năng ADC, xử lý tín hiệu hoặc các thuật toán điều khiển trên DUT. Hình \ref{fig:dac_sine_wave} và \ref{fig:dac_triangle_wave} trình bày tín hiệu sóng sine và sóng tam giác được tạo bởi hệ thống HIL.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{image/dac_sine_wave.jpg}
+    \caption{Tín hiệu sóng sine được tạo bởi DAC trên hệ thống HIL}
+    \label{fig:dac_sine_wave}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{image/dac_triangle_wave.jpg}
+    \caption{Tín hiệu sóng tam giác được tạo bởi DAC trên hệ thống HIL}
+    \label{fig:dac_triangle_wave}
+\end{figure}
+
+Chất lượng tín hiệu đầu ra được đánh giá thông qua việc so sánh tần số và điện áp đỉnh-đỉnh ($V_{pp}$) giữa giá trị thiết lập và giá trị đo được bằng oscilloscope. Kết quả được trình bày trong Bảng \ref{tab:dac_wave_result}.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử tín hiệu DAC dạng sóng}
+\label{tab:dac_wave_result}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Dạng sóng} 
+& \textbf{Tần số mong đợi} 
+& \textbf{Tần số đo được} 
+& \textbf{$V_{pp}$ mong đợi} 
+& \textbf{$V_{pp}$ đo được} \\
+\hline
+
+Sóng sine
+& 10kHz 
+& 9.998kHz 
+& 3.3V 
+& 3.33V \\
+\hline
+
+Sóng tam giác
+& 2.5kHz 
+& 2.5003kHz 
+& 3.3V 
+& 3.36V \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Kết quả thực nghiệm cho thấy các tín hiệu sóng sine và sóng tam giác được tạo bởi hệ thống HIL có tần số và biên độ gần với giá trị thiết lập. Điều này cho thấy hệ thống có khả năng tạo tín hiệu tương tự ổn định và đáp ứng tốt yêu cầu kiểm thử các chức năng xử lý tín hiệu tương tự trên DUT.s
 
 \subsubsection{Kết quả mô phỏng PWM}
-(thêm bảng số lượng chân PWM support, dải tần số, kết quả tạo tín hiệu PWM với tần số và duty cycle khác nhau)
+
+Hệ thống HIL hỗ trợ tạo tín hiệu PWM nhằm phục vụ các bài kiểm thử điều khiển động cơ, điều chỉnh độ sáng LED hoặc kiểm thử các thuật toán xử lý tín hiệu số trên DUT.
+
+Tín hiệu PWM được tạo bởi các bộ timer của STM32F407VET6 và được xuất ra các chân GPIO tương ứng trên hệ thống HIL. Bảng \ref{tab:pwm_support} trình bày đặc tính PWM của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính PWM của hệ thống HIL}
+\label{tab:pwm_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng kênh PWM 
+& 4 kênh 
+& Hỗ trợ xuất tín hiệu PWM thông qua các chân PA0, PA1, PA2 và PA3 \\
+\hline
+
+Độ phân giải PWM 
+& 16-bit Timer 
+& Giá trị duty cycle được điều khiển thông qua bộ định thời của STM32F407VET6 \\
+\hline
+
+Dải tần số hỗ trợ 
+& 1Hz -- 100kHz 
+& Hỗ trợ tạo tín hiệu PWM với nhiều mức tần số khác nhau phục vụ kiểm thử \\
+\hline
+
+Duty cycle hỗ trợ 
+& 0\% -- 100\% 
+& Hỗ trợ điều chỉnh duty cycle linh hoạt \\
+\hline
+
+Điện áp đầu ra 
+& 0V -- 3.3V 
+& Tương thích mức điện áp logic của STM32F407VET6 \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Để đánh giá khả năng hoạt động của khối PWM, hệ thống tiến hành tạo các tín hiệu PWM với nhiều mức tần số và duty cycle khác nhau. Tín hiệu đầu ra được đo bằng máy đo sóng thực tếnhằm kiểm tra độ chính xác của tần số và duty cycle thực tế. Bảng \ref{tab:pwm_result} trình bày kết quả kiểm thử tín hiệu PWM của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử tín hiệu PWM}
+\label{tab:pwm_result}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Tần số đặt} 
+& \textbf{Tần số đo được} 
+& \textbf{Duty cycle đặt} 
+& \textbf{Duty cycle đo được} 
+& \textbf{Sai số tần số} \\
+\hline
+
+200Hz 
+& 200.02Hz 
+& 30\% 
+& 29.998\% 
+& 0.01\% \\
+\hline
+
+1kHz 
+& 1.0001kHz 
+& 65\% 
+& 65.001\% 
+& 0.01\% \\
+\hline
+
+\end{tabular}
+\end{table}
+
+Hình \ref{fig:pwm_waveform_30} và \ref{fig:pwm_waveform_65} trình bày tín hiệu PWM được tạo bởi hệ thống HIL và đo bằng oscilloscope thực tế.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/pwm_waveform_30.jpg}
+    \caption{Tín hiệu PWM được tạo bởi hệ thống HIL với tần số 200Hz, duty cycle 30\%}
+    \label{fig:pwm_waveform_30}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/pwm_waveform_65.jpg}
+    \caption{Tín hiệu PWM được tạo bởi hệ thống HIL với tần số 1kHz, duty cycle 65\%}
+    \label{fig:pwm_waveform_65}
+\end{figure}
+
+Kết quả thực nghiệm cho thấy hệ thống có khả năng tạo tín hiệu PWM ổn định với sai số tần số và duty cycle rất nhỏ. Các giá trị đo được gần như trùng khớp với giá trị thiết lập ban đầu.
 
 \subsubsection{Kết quả mô phỏng UART}
-(thêm bảng số lượng cổng UART support, tốc độ baud rate hỗ trợ, kết quả gửi nhận dữ liệu qua UART)
+
+Hệ thống HIL hỗ trợ giao tiếp UART nhằm phục vụ các bài kiểm thử truyền nhận dữ liệu serial giữa DUT và môi trường mô phỏng. UART thường được sử dụng trong các hệ thống nhúng cho mục đích debug, cấu hình thiết bị hoặc trao đổi dữ liệu giữa các vi điều khiển.
+
+Khối UART được xây dựng dựa trên ngoại vi USART2 của STM32F407VET6 và hỗ trợ truyền nhận dữ liệu thông qua hai chân TX và RX. Bảng \ref{tab:uart_support} trình bày đặc tính UART của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính UART của hệ thống HIL}
+\label{tab:uart_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng cổng UART
+& 1 cổng
+& Sử dụng USART2 của STM32F407VET6 \\
+\hline
+
+Chân giao tiếp
+& PD5 (TX), PD6 (RX)
+& Hỗ trợ truyền và nhận dữ liệu UART \\
+\hline
+
+Mức điện áp
+& 3.3V
+& Tương thích mức điện áp logic của STM32F407VET6 \\
+\hline
+
+Baud rate hỗ trợ
+& 115200bps
+& Chỉ hỗ trợ một tốc độ truyền dữ liệu phục vụ kiểm thử \\
+\hline
+
+Định dạng dữ liệu
+& 8N1
+& 8 data bit, no parity, 1 stop bit \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Hình \ref{fig:uart_hil_to_dut} và Hình \ref{fig:uart_dut_to_hil} trình bày kết quả truyền nhận dữ liệu UART giữa DUT và hệ thống HIL.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/uart_hil_to_dut.png}
+    \caption{Kết quả truyền dữ liệu UART}
+    \label{fig:uart_hil_to_dut}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/uart_dut_to_hil.png}
+    \caption{Kết quả nhận dữ liệu UART}
+    \label{fig:uart_dut_to_hil}
+\end{figure}
+
+Kết quả kiểm thử cho thấy hệ thống có thể truyền và nhận dữ liệu UART ổn định ở tốc độ 115200bps. Dữ liệu trao đổi giữa HIL và DUT được nhận đúng nội dung và đúng thứ tự, không ghi nhận hiện tượng mất dữ liệu hoặc lỗi framing trong quá trình kiểm thử.
+
 \subsubsection{Kết quả mô phỏng CAN}
-(thêm bảng số lượng cổng CAN support, tốc độ baud rate hỗ trợ, kết quả gửi nhận dữ liệu qua CAN)
+
+Hệ thống HIL hỗ trợ giao tiếp CAN nhằm phục vụ các bài kiểm thử truyền nhận dữ liệu giữa DUT và môi trường mô phỏng. CAN là giao thức truyền thông phổ biến trong các hệ thống công nghiệp và ô tô nhờ độ tin cậy cao, khả năng phát hiện lỗi tốt và hoạt động ổn định trong môi trường nhiễu.
+
+Khối CAN được xây dựng dựa trên ngoại vi CAN1 của STM32F407VET6 kết hợp với CAN transceiver, hỗ trợ giao tiếp theo chuẩn CAN 2.0B.
+
+Trong hệ thống, HIL hoạt động như một node CAN có khả năng truyền và nhận dữ liệu với DUT thông qua cơ chế interrupt kết hợp buffer vòng nhằm hạn chế mất dữ liệu khi lưu lượng truyền tăng cao. Bảng \ref{tab:can_support} trình bày đặc tính CAN của hệ thống HIL.
+
+\begin{table}[H]
+\centering
+\caption{Đặc tính CAN của hệ thống HIL}
+\label{tab:can_support}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|c|X|}
+\hline
+\textbf{Thông số} & \textbf{Giá trị} & \textbf{Mô tả} \\
+\hline
+
+Số lượng CAN 
+& 1 cổng 
+& Sử dụng CAN1 của STM32F407VET6 \\
+\hline
+
+Chân giao tiếp 
+& PB9 (TX), PB8 (RX) 
+& Kết nối thông qua CAN transceiver để giao tiếp bus CAN \\
+\hline
+
+Chuẩn CAN hỗ trợ 
+& CAN 2.0B 
+& Hỗ trợ Standard ID (11-bit) và Extended ID \\
+\hline
+
+Tốc độ truyền 
+& 500 kbps
+& Chỉ hỗ trợ một tốc độ truyền dữ liệu phục vụ kiểm thử  \\
+\hline
+
+Kích thước dữ liệu 
+& 0 -- 8 byte 
+& Hỗ trợ CAN data frame tiêu chuẩn \\
+\hline
+
+\end{tabularx}
+\end{table}
+
+Kết quả kiểm thử cho thấy hệ thống có thể truyền và nhận dữ liệu CAN ổn định ở tốc độ 500kbps. Dữ liệu truyền và phản hồi từ DUT được ghi nhận chính xác theo đúng thứ tự, đảm bảo tính toàn vẹn dữ liệu trong quá trình kiểm thử. Hệ thống cũng có khả năng xử lý các tình huống lỗi như lỗi bit hoặc lỗi CRC thông qua cơ chế phát hiện lỗi tích hợp của CAN, giúp đảm bảo độ tin cậy trong quá trình kiểm thử DUT.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{image/can_transmission.png}
+    \caption{Kết quả truyền nhận dữ liệu CAN giữa DUT và hệ thống HIL}
+    \label{fig:can_transmission}
+\end{figure}
 
 \subsection{Kết quả mô phỏng thiết bị}
 \subsubsection{Kết quả mô phỏng I2C EEPROM}
@@ -32,8 +537,98 @@ Chương này trình bày các kết quả đạt được sau quá trình thi�
 \subsubsection{Kết quả mô phỏng SPI Flash}
 (thêm bảng kết quả kiểm thử đọc ghi dữ liệu vào SPI Flash mô phỏng, bao gồm địa chỉ, dữ liệu đã ghi, dữ liệu đã đọc và kết quả so sánh)
 
-\subsection{Đánh giá kết quả}
-(thêm bảng các pin support)
+\subsection{Tổng hợp khả năng hỗ trợ ngoại vi của hệ thống HIL}
+\begin{table}[H]
+\centering
+\caption{Các ngoại vi và chân tín hiệu được hỗ trợ trong hệ thống HIL}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\textbf{Ngoại vi} & \textbf{Chức năng} & \textbf{Chân tín hiệu} \\
+\hline
+
+\multicolumn{3}{|c|}{\textbf{Digital}} \\
+\hline
+
+Power Control 
+& Điều khiển nguồn của DUT 
+& PE14 \\
+\hline
+
+Power Status Input 
+& Đọc trạng thái nguồn của DUT 
+& PD1 \\
+\hline
+
+BOOT CTRL 
+& Điều khiển chân BOOT0 để nạp firmware cho DUT 
+& PD0 \\
+\hline
+
+GPIO Input 
+& Đọc tín hiệu số từ DUT 
+& PE0 -- PE13 \\
+\hline
+
+GPIO Output 
+& Xuất tín hiệu số điều khiển DUT 
+& PB0 -- PB5, PB10 -- PB15 \\
+\hline
+
+PWM 
+& Xuất tín hiệu PWM điều khiển 
+& PA0, PA1, PA2, PA3 \\
+\hline
+
+\multicolumn{3}{|c|}{\textbf{Analog}} \\
+\hline
+
+ADC 
+& Đọc tín hiệu tương tự từ DUT 
+& PC0 \\
+\hline
+
+DAC 
+& Xuất tín hiệu tương tự 
+& PA5 \\
+\hline
+
+Waveform Analog 
+& Phát tín hiệu dạng sóng sin và tam giác 
+& PA4 \\
+\hline
+
+\multicolumn{3}{|c|}{\textbf{Communication}} \\
+\hline
+
+USART2 
+& Giao tiếp UART 
+& PD5 (TX), PD6 (RX) \\
+\hline
+
+CAN1 
+& Giao tiếp CAN bus 
+& PB9 (TX), PB8 (RX) \\
+\hline
+
+\multicolumn{3}{|c|}{\textbf{Device Emulation}} \\
+\hline
+
+I2C1 
+& Mô phỏng I2C EEPROM và I2C RTC 
+& PB6 (SCL), PB7 (SDA) \\
+\hline
+
+SPI3 
+& Mô phỏng SPI Flash 
+& PC10 (SCK), PC11 (MISO), PC12 (MOSI), PA15 (NSS) \\
+\hline
+
+\end{tabularx}
+
+\label{tab:hil_peripherals_pins}
+\end{table}
 
 \section{Kết quả thực hiện phần mềm Logic Analyzer trên HIL}
 
@@ -347,19 +942,19 @@ HIL Set DAC Voltage
 \hline
 
 HIL Generate Sine Wave
-& Tạo tín hiệu sine wave phục vụ kiểm thử DAC hoặc ADC. \\
+& Tạo tín hiệu sóng sine phục vụ kiểm thử DAC hoặc ADC. \\
 \hline
 
 HIL Stop Sine Wave
-& Dừng phát tín hiệu sine wave. \\
+& Dừng phát tín hiệu sóng sine. \\
 \hline
 
 HIL Generate Triangle Wave
-& Tạo tín hiệu triangle wave phục vụ kiểm thử DAC hoặc ADC. \\
+& Tạo tín hiệu tam giác phục vụ kiểm thử DAC hoặc ADC. \\
 \hline
 
 HIL Stop Triangle Wave
-& Dừng phát tín hiệu triangle wave. \\
+& Dừng phát tín hiệu tam giác. \\
 \hline
 
 \end{longtable}
@@ -388,15 +983,15 @@ LA Read Data
 \hline
 
 LA Verify Sine Wave
-& Phân tích FFT để xác minh tín hiệu analog dạng sine wave và kiểm tra tần số tín hiệu. \\
+& Phân tích FFT để xác minh tín hiệu tương tự dạng sóng sine và kiểm tra tần số tín hiệu. \\
 \hline
 
 LA Verify Pulse Wave
-& Phân tích tín hiệu số nhằm xác định tần số và duty cycle của tín hiệu PWM hoặc pulse wave. \\
+& Phân tích tín hiệu số nhằm xác định tần số và duty cycle của tín hiệu PWM hoặc sóng vuông. \\
 \hline
 
 LA Verify Triangle Wave
-& Phân tích phổ hài để xác minh tín hiệu analog dạng triangle wave. \\
+& Phân tích phổ hài để xác minh tín hiệu tương tự dạng sóng tam giác. \\
 \hline
 
 \end{tabular}
