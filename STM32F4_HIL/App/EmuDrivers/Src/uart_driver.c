@@ -10,8 +10,8 @@
 extern UART_HandleTypeDef huart2;
 UART_HandleTypeDef *uart = &huart2;
 
-uint8_t uart_rx_byte;
-uint8_t uart_rx_buffer[UART_RX_BUF_LEN];
+static uint8_t uart_rx_byte;
+static uint8_t uart_rx_buffer[UART_RX_BUF_LEN];
 volatile uint16_t uart_rx_head = 0;
 volatile uint16_t uart_rx_tail = 0;
 volatile uint8_t uart_overflow = 0;

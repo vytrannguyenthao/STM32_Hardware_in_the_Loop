@@ -18,7 +18,7 @@ static int Cmd_UART_Init(int argc, char *argv[])
 
     UART_Init();
     UART_Clear();
-    Console_Write("UART Initialized\r\n");
+    Console_Write("\r\nUART Initialized\r\n");
     return CMDLINE_OK;
 }
 
@@ -32,10 +32,12 @@ static int Cmd_UART_Dump_Buffer(int argc, char *argv[])
     {
         buf[i] = i;
         Console_Write("%02X ", buf[i]);
+        if ((i + 1) % 16 == 0)
+            Console_Write("\r\n");
     }
 
     UART_Send(buf, 256);
-    Console_Write("UART TX 256 bytes DONE\r\n");
+    Console_Write("\r\nUART TX 256 bytes DONE\r\n");
     return CMDLINE_OK;
 }
 
@@ -76,7 +78,7 @@ static int Cmd_UART_Send_String(int argc, char *argv[])
 
     UART_Send_String("\r\n");
 
-    Console_Write("UART string sent\r\n");
+    Console_Write("\r\nUART string sent\r\n");
 
     return CMDLINE_OK;
 }
