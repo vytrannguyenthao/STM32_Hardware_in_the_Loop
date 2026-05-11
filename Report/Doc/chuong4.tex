@@ -54,7 +54,7 @@ Trong hệ thống, DUT đóng vai trò master I2C, trong khi HIL hoạt động
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{image/i2c_emu_overview.png}
+    \includegraphics[width=0.8\textwidth]{image/i2c_emu_overview.png}
     \caption{Kiến trúc tổng quát framework mô phỏng thiết bị I2C}
     \label{fig:i2c_emu_overview}
 \end{figure}
@@ -67,7 +67,7 @@ Các thiết bị I2C mô phỏng được quản lý thông qua một bảng qu
 
 \begin{figure}[H]
     \centering
-    \includegraphics[height=0.5\textheight]{image/I2C_device_init.png}
+    \includegraphics[height=0.45\textheight]{image/I2C_device_init.png}
     \caption{Quy trình khởi tạo thiết bị I2C mô phỏng}
     \label{fig:I2C_device_init}
 \end{figure}
@@ -84,7 +84,7 @@ Khi DUT gửi địa chỉ slave lên bus I2C, callback xử lý địa chỉ s�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.55\textwidth]{image/I2C_dispatch.png}
+    \includegraphics[width=0.5\textwidth]{image/I2C_dispatch.png}
     \caption{Cơ chế định tuyến callback trong framework mô phỏng I2C}
     \label{fig:I2C_dispatch}
 \end{figure}
@@ -99,7 +99,7 @@ Bộ nhớ EEPROM mô phỏng được tổ chức theo từng trang tương t�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/EEPROM_memory.png}
+    \includegraphics[width=0.5\textwidth]{image/EEPROM_memory.png}
     \caption{Cơ chế ghi dữ liệu theo trang của EEPROM mô phỏng}
     \label{fig:EEPROM_memory}
 \end{figure}
@@ -144,7 +144,7 @@ Quy trình mô phỏng thiết bị SPI trong hệ thống HIL được trình b
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.35\textwidth]{image/SPI_flash.png}
+    \includegraphics[width=0.28\textwidth]{image/SPI_flash.png}
     \caption{Quy trình mô phỏng bộ nhớ SPI flash trong hệ thống HIL}
     \label{fig:SPI_flash}
 \end{figure}
@@ -267,14 +267,14 @@ Lưu đồ giải thuật cho chức năng thay đổi tần số và duty cycle
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/hil_pwm_set_freq.png}
+    \includegraphics[width=0.65\textwidth]{image/hil_pwm_set_freq.png}
     \caption{Lưu đồ giải thuật thay đổi tần số của tín hiệu PWM}
     \label{fig:hil_pwm_set_freq}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{image/hil_pwm_set_duty.png}
+    \includegraphics[width=0.35\textwidth]{image/hil_pwm_set_duty.png}
     \caption{Lưu đồ giải thuật thay đổi duty cycle của tín hiệu PWM}
     \label{fig:hil_pwm_set_duty}
 \end{figure}

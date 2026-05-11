@@ -221,7 +221,7 @@ Quy trình này đảm bảo việc điều khiển PWM được thực hiện m
 \subsubsection{Khối Waveform Generator}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/App_per_wave.jpg}
+    \includegraphics[width=0.6\textwidth]{image/App_per_wave.jpg}
     \caption{Sơ đồ máy trạng thái khối Waveform Generator}
     \label{fig:App_per_wave}
 \end{figure}
@@ -258,7 +258,7 @@ Sau khi lệnh được gửi thành công, trạng thái nút trên giao diện
 \subsubsection{Khối Potentiometer Simulation}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3\textwidth]{image/App_per_dac.jpg}
+    \includegraphics[width=0.25\textwidth]{image/App_per_dac.jpg}
     \caption{Lưu đồ giải thuật khối Potentiometer Simulation}
     \label{fig:App_per_dac}
 \end{figure}
@@ -271,12 +271,12 @@ Sau quá trình quy đổi, giao diện sẽ cập nhật và hiển thị mức
 Sau khi lựa chọn được mức điện áp phù hợp, người dùng nhấn nút Set Voltage để xác nhận việc xuất tín hiệu. Ứng dụng sẽ gửi lệnh xuống HIL theo câu lệnh \texttt{dac\_set\_voltage <volt>}, yêu cầu hệ thống DAC của HIL xuất ra mức điện áp tương ứng tại chân analog.
 Trong trường hợp người dùng chưa nhấn nút xác nhận, hệ thống sẽ tiếp tục quay lại trạng thái chờ thao tác trên thanh trượt để cho phép điều chỉnh giá trị điện áp mới.
 
-Thông qua cơ chế này, khối \textbf{Potentiometer Simulation} có thể mô phỏng linh hoạt hành vi của biến trở bằng tín hiệu analog tạo ra từ DAC, hỗ trợ kiểm thử các chức năng đọc ADC trên DUT mà không cần sử dụng phần cứng biến trở thực tế.
+% Thông qua cơ chế này, khối \textbf{Potentiometer Simulation} có thể mô phỏng linh hoạt hành vi của biến trở bằng tín hiệu analog tạo ra từ DAC, hỗ trợ kiểm thử các chức năng đọc ADC trên DUT mà không cần sử dụng phần cứng biến trở thực tế.
 
 \subsubsection{Khối CAN Controller \& Monitor}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/App_per_can.jpg}
+    \includegraphics[width=0.6\textwidth]{image/App_per_can.jpg}
     \caption{Sơ đồ khối chức năng CAN Controller \& Monitor}
     \label{fig:App_per_can}
 \end{figure}
