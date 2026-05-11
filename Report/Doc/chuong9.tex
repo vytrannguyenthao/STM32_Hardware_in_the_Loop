@@ -672,76 +672,8 @@ Người dùng sẽ được cung cấp các nút nhấn trên giao diện để
 \end{figure}
 \textbf{Nhận xét:} Dựa trên các kết quả từ giao diện UI và giao diện dòng lệnh, có thể thấy nguồn của DUT đã được bật/tắt và trạng thái nguồn được cập nhật qua led trên phần mềm.
 
-\subsection{Kết quả mô phỏng SPI Flash}
+\subsection{Kết quả giao diện Memory EMU Tab}
 Người dùng có thể dùng giao diện dòng lệnh để gửi các command thủ công cho DUT để thực hiện các thao tác đọc ghi dữ liệu vào SPI Flash mô phỏng. Ngoài ra, phần mềm trên máy tính được thiết kế để thực hiện 1 bài kiểm thử tự động để kiểm tra chức năng đọc/ghi dữ liệu của DUT với thiết bị SPI Flash mô phỏng trên hệ thống HIL. Các bước thực hiện bao gồm:
-\begin{itemize}
-    \item \textbf{Bước 1:} PC gửi lệnh đến \textbf{DUT} đọc ID của thiết bị SPI Flash (HIL đang mô phỏng W25Q128 với ID: 0xEF4018).\\
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_read_id.jpg}
-        \caption{DUT đọc ID của thiết bị SPI Flash mô phỏng trên HIL}
-        \label{fig:spi_read_id}
-    \end{figure}
-
-    \item \textbf{Bước 2:} PC gửi lệnh đến \textbf{HIL} để khởi tạo bộ nhớ từ địa chỉ 0 - 255 với giá trị tăng dần từ 0x00 đến 0xFF.\\
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_hil_prepare_mem.jpg}
-        \caption{HIL khởi tạo bộ nhớ SPI Flash mô phỏng}
-        \label{fig:spi_hil_prepare_mem}
-    \end{figure}
-
-    \item \textbf{Bước 3:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 255 mà thiết bị SPI Flash mô phỏng trên HIL. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu gốc.\\
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=1\textwidth]{image/spi_read_256.jpg}
-        \caption{DUT đọc dữ liệu từ SPI Flash mô phỏng}
-        \label{fig:spi_read_256}
-    \end{figure}
-
-    \item \textbf{Bước 4:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT ghi giá trị vào SPI Flash mô phỏng từ địa chỉ 0 - 1023 với giá trị tăng dần từ 0x00 đến 0xFF lặp lại.\\
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{image/spi_write.jpg}
-        \caption{DUT ghi dữ liệu vào SPI Flash mô phỏng}
-        \label{fig:spi_write}
-    \end{figure}
-
-    \item \textbf{Bước 5:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023. Dữ liệu đọc được sẽ được gửi lại PC để so sánh với dữ liệu DUT vừa ghi vào.
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=1\textwidth]{image/spi_read_after_write.jpg}
-        \caption{DUT đọc dữ liệu sau khi ghi vào SPI Flash mô phỏng}
-        \label{fig:spi_read_after_write}
-    \end{figure}
-
-    \item \textbf{Bước 6:} PC gửi lệnh đến \textbf{DUT} xóa toàn bộ dữ liệu trên SPI Flash mô phỏng.\\
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.65\textwidth]{image/spi_erase.jpg}
-        \caption{DUT xóa dữ liệu trên SPI Flash mô phỏng}
-        \label{fig:spi_erase}
-    \end{figure}
-
-    \item \textbf{Bước 7:} PC gửi lệnh đến \textbf{DUT}, yêu cầu DUT đọc vào vùng nhớ từ 0 - 1023 (toàn bộ giá trị đều là 0xFF sau khi xóa).
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=1\textwidth]{image/spi_read_after_erase.jpg}
-        \caption{DUT đọc dữ liệu sau khi xóa trên SPI Flash mô phỏng}
-        \label{fig:spi_read_after_erase}
-    \end{figure}
-\end{itemize}
-
-Sau khi hoàn thành các bước kiểm thử, kết quả sẽ được hiển thị trên giao diện chính của phần mềm PC như Hình \ref{fig:spi_test_result}.\\
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{image/spi_result.jpg}
-    \caption{Kết quả kiểm thử SPI Flash trên phần mềm PC}
-    \label{fig:spi_test_result}
-\end{figure}
-Kết quả kiểm thử cho thấy DUT đã thực hiện chính xác các thao tác đọc, ghi và xóa dữ liệu trên thiết bị SPI Flash mô phỏng bởi hệ thống HIL. 
-Dữ liệu đọc được từ DUT hoàn toàn khớp với dữ liệu gốc đã được khởi tạo trên HIL, chứng tỏ tính đúng đắn của quá trình giao tiếp và xử lý dữ liệu giữa DUT và HIL.
 
 
 \section{Kết quả thực hiện phần mềm kiểm thử tự động trên máy tính}
