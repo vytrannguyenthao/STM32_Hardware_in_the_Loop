@@ -62,12 +62,16 @@ class MainWindow(QMainWindow):
         # Đèn trạng thái nguồn (Tròn)
         self.power_indicator = QLabel()
         self.power_indicator.setFixedSize(20, 20)
-        self.set_power_indicator_state(False) # Mặc định Tắt (Màu đỏ)
+        self.set_power_indicator_unknown() # Mặc định là màu xám (chưa biết trạng thái)
         
         # Các nút bấm
         self.btn_power_on = QPushButton("ON")
         self.btn_power_off = QPushButton("OFF")
         self.btn_power_status = QPushButton("Status")
+
+        # Chỉ enable nút bấm khi HIL connect
+        self.btn_power_on.setEnabled(False)
+        self.btn_power_off.setEnabled(False)
         
         # Setup UI layout cho khối nguồn
         power_lay.addWidget(self.btn_power_on)
@@ -76,9 +80,14 @@ class MainWindow(QMainWindow):
         power_lay.addWidget(self.power_indicator)
         
         # Gán sự kiện tạm thời để đổi màu đèn
-        self.btn_power_on.clicked.connect(lambda: self.set_power_indicator_state(True))
-        self.btn_power_off.clicked.connect(lambda: self.set_power_indicator_state(False))
-        
+        self.btn_power_on.clicked.connect(
+            lambda: self.uart_hil.send("dut_power 1")
+        )
+
+        self.btn_power_off.clicked.connect(
+            lambda: self.uart_hil.send("dut_power 0")
+        )
+
         lay_com.addWidget(power_box)
         # ===============================================
 
@@ -203,10 +212,34 @@ class MainWindow(QMainWindow):
             if uart.isRunning():
                 uart.close()
                 uart.wait()
-                btn_connect.setText("Connect")
             else:
                 uart.open(cb_port.currentText(), int(cb_baud.currentText()))
-                btn_connect.setText("Disconnect")
+
+        def update_connect_button():
+            connected = uart.isRunning()
+
+            btn_connect.setText(
+                "Disconnect" if connected else "Connect"
+            )
+
+            cb_port.setEnabled(not connected)
+            cb_baud.setEnabled(not connected)
+
+            if needs_scan and btn_scan:
+                btn_scan.setEnabled(not connected)
+
+            hil_connected = self.uart_hil.isRunning()
+
+            self.btn_power_on.setEnabled(hil_connected)
+            self.btn_power_off.setEnabled(hil_connected)
+
+            if not hil_connected:
+                self.set_power_indicator_unknown()
+
+        # Cập nhật trạng thái nút Connect mỗi 1s để phản ánh đúng trạng thái kết nối (đặc biệt khi rút cáp đột ngột)
+        timer = QTimer(box)
+        timer.timeout.connect(update_connect_button)
+        timer.start(1000)
 
         # Khi rút cáp, luồng bị lỗi và dừng lại, nó sẽ tự động kích hoạt tín hiệu 'finished'
         uart.finished.connect(lambda: btn_connect.setText("Connect"))
@@ -230,15 +263,20 @@ class MainWindow(QMainWindow):
         lay.addWidget(btn_connect)
         return box
 
+    def set_power_indicator_unknown(self):
+        self.power_indicator.setStyleSheet(
+            "background-color: #95a5a6; "
+            "border-radius: 10px; "
+            "border: 1px solid #7f8c8d;"
+        )
+
     def set_power_indicator_state(self, is_on):
         """Hàm cập nhật màu sắc cho đèn báo nguồn (Xanh = ON, Đỏ = OFF)"""
         if is_on:
-            self.uart_hil.send("dut_power 1")
             self.power_indicator.setStyleSheet(
                 "background-color: #2ecc71; border-radius: 10px; border: 1px solid #27ae60;"
             )
         else:
-            self.uart_hil.send("dut_power 0")
             self.power_indicator.setStyleSheet(
                 "background-color: #e74c3c; border-radius: 10px; border: 1px solid #c0392b;"
             )
@@ -250,7 +288,16 @@ class MainWindow(QMainWindow):
 
     def append_hil_log(self, text):
         self.hil_log_text.append(text)
-        self.hil_log_text.moveCursor(self.hil_log_text.textCursor().End)
+        self.hil_log_text.moveCursor(
+            self.hil_log_text.textCursor().End
+        )
+
+        # ===== DUT POWER STATUS =====
+        if "ON" in text:
+            self.set_power_indicator_state(True)
+
+        elif "OFF" in text:
+            self.set_power_indicator_state(False)
 
     def closeEvent(self, e):
         self.uart_dut.close()
