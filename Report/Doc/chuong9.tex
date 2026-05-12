@@ -36,7 +36,6 @@ Phần này trình bày kết quả thực nghiệm của các khối ngoại vi
 
 Hệ thống HIL hỗ trợ mô phỏng và kiểm thử tín hiệu GPIO nhằm đánh giá các chức năng điều khiển và đọc tín hiệu số của DUT. Khối GPIO được xây dựng trên vi điều khiển STM32F407VET6 với mức điện áp logic 3.3V.
 
-Bảng \ref{tab:gpio_support} trình bày đặc tính GPIO của hệ thống HIL.
 
 \begin{table}[H]
 \centering
@@ -420,14 +419,14 @@ Hình \ref{fig:pwm_waveform_30} và \ref{fig:pwm_waveform_65} trình bày tín h
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{image/pwm_waveform_30.jpg}
-    \caption{Tín hiệu PWM được tạo bởi hệ thống HIL với tần số 200Hz, duty cycle 30\%}
+    \caption{PWM được tạo bởi hệ thống HIL với tần số 200Hz, duty cycle 30\%}
     \label{fig:pwm_waveform_30}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{image/pwm_waveform_65.jpg}
-    \caption{Tín hiệu PWM được tạo bởi hệ thống HIL với tần số 1kHz, duty cycle 65\%}
+    \caption{PWM được tạo bởi hệ thống HIL với tần số 1kHz, duty cycle 65\%}
     \label{fig:pwm_waveform_65}
 \end{figure}
 
@@ -482,14 +481,14 @@ Hình \ref{fig:uart_hil_to_dut} và Hình \ref{fig:uart_dut_to_hil} trình bày 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/uart_hil_to_dut.png}
+    \includegraphics[width=1\textwidth]{image/uart_hil_to_dut.png}
     \caption{Kết quả truyền dữ liệu UART}
     \label{fig:uart_hil_to_dut}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/uart_dut_to_hil.png}
+    \includegraphics[width=1\textwidth]{image/uart_dut_to_hil.png}
     \caption{Kết quả nhận dữ liệu UART}
     \label{fig:uart_dut_to_hil}
 \end{figure}
@@ -547,7 +546,7 @@ Kết quả kiểm thử cho thấy hệ thống có thể truyền và nhận d
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/can_transmission.png}
+    \includegraphics[width=0.5\textwidth]{image/can_transmission.png}
     \caption{Kết quả truyền nhận dữ liệu CAN giữa DUT và hệ thống HIL}
     \label{fig:can_transmission}
 \end{figure}
@@ -580,7 +579,7 @@ Quá trình kiểm thử được thực hiện bằng cách ghi dữ liệu t�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/hil_eeprom_result.png}
+    \includegraphics[width=0.9\textwidth]{image/hil_eeprom_result.png}
     \caption{Kết quả kiểm thử EEPROM I2C mô phỏng}
     \label{fig:hil_eeprom_result}
 \end{figure}
@@ -618,7 +617,7 @@ Quá trình kiểm thử được thực hiện bằng cách ghi dữ liệu và
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/hil_spi_flash_result.png}
+    \includegraphics[width=0.98\textwidth]{image/hil_spi_flash_result.png}
     \caption{Kết quả kiểm thử SPI Flash mô phỏng}
     \label{fig:hil_spi_flash_result}
 \end{figure}
@@ -878,8 +877,8 @@ Hệ thống kiểm thử được xây dựng dựa trên Robot Framework kết
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/robot_folder_structure.png}
-    \caption{Lưu đồ giải thuật kiểm tra kết nối HIL và DUT}
+    \includegraphics[width=0.5\textwidth]{image/robot_folder_structure.png}
+    \caption{Cấu trúc thư mục tổng quát của hệ thống}
     \label{fig:robot_folder_structure}
 \end{figure}
 
@@ -1311,11 +1310,9 @@ Các tập tin kết quả được lưu trong thư mục \textit{results/} củ
     \item \textbf{output.xml}: File dữ liệu kết quả ở định dạng XML phục vụ cho việc lưu trữ hoặc tích hợp với các hệ thống CI/CD trong tương lai.
 \end{itemize}
 
-Hình \ref{fig:robot_report_success} trình bày giao diện báo cáo khi toàn bộ bài kiểm thử thực hiện thành công.
-
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/robot_report_success.png}
+    \includegraphics[width=0.9\textwidth]{image/robot_report_success.png}
     \caption{Báo cáo kiểm thử khi toàn bộ test case đạt}
     \label{fig:robot_report_success}
 \end{figure}
@@ -1333,7 +1330,7 @@ Ngược lại, khi xuất hiện lỗi trong quá trình kiểm thử hoặc k�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/robot_report_fail.png}
+    \includegraphics[width=1\textwidth]{image/robot_report_fail.png}
     \caption{Báo cáo kiểm thử khi toàn bộ test case không đạt}
     \label{fig:robot_report_fail}
 \end{figure}
@@ -1344,7 +1341,7 @@ Ngoài báo cáo tổng hợp, hệ thống còn sinh file \textit{log.html} nh�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/robot_log.png}
+    \includegraphics[width=1\textwidth]{image/robot_log.png}
     \caption{File log chi tiết của Robot Framework}
     \label{fig:robot_log_file}
 \end{figure}
@@ -1365,7 +1362,7 @@ Bên cạnh đó, Robot Framework cũng sinh file \textit{output.xml} chứa to�
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/robot_output.png}
+    \includegraphics[width=1\textwidth]{image/robot_output.png}
     \caption{File output.xml chứa kết quả kiểm thử}
     \label{fig:robot_output_xml}
 \end{figure}
@@ -1384,11 +1381,9 @@ File log này lưu lại các lệnh điều khiển đã gửi đến HIL, dữ
 
 Ví dụ, khi thực hiện kiểm thử CAN, file log sẽ ghi lại quá trình gửi dữ liệu CAN buffer, phản hồi nhận được từ DUT cũng như dữ liệu truyền nhận thực tế trên bus CAN. Tương tự, đối với các bài kiểm thử ADC, UART, GPIO hoặc I2C, file log cũng lưu lại toàn bộ nội dung giao tiếp tương ứng.
 
-Hình \ref{fig:hil_serial_log} trình bày một phần nội dung của file log giao tiếp giữa Robot Framework và HIL.
-
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{image/hil_serial_log.png}
+    \includegraphics[width=0.5\textwidth]{image/hil_serial_log.png}
     \caption{File log giao tiếp serial giữa Robot Framework và HIL}
     \label{fig:hil_serial_log}
 \end{figure}
