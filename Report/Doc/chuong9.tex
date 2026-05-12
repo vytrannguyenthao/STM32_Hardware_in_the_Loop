@@ -310,7 +310,7 @@ Sóng tam giác
 \end{tabular}
 \end{table}
 
-Kết quả thực nghiệm cho thấy các tín hiệu sóng sine và sóng tam giác được tạo bởi hệ thống HIL có tần số và biên độ gần với giá trị thiết lập. Điều này cho thấy hệ thống có khả năng tạo tín hiệu tương tự ổn định và đáp ứng tốt yêu cầu kiểm thử các chức năng xử lý tín hiệu tương tự trên DUT.s
+Kết quả thực nghiệm cho thấy các tín hiệu sóng sine và sóng tam giác được tạo bởi hệ thống HIL có tần số và biên độ gần với giá trị thiết lập. Điều này cho thấy hệ thống có khả năng tạo tín hiệu tương tự ổn định và đáp ứng tốt yêu cầu kiểm thử các chức năng xử lý tín hiệu tương tự trên DUT.
 
 \subsubsection{Kết quả mô phỏng PWM}
 
@@ -631,6 +631,65 @@ SPI3
 \end{table}
 
 \section{Kết quả thực hiện phần mềm Logic Analyzer trên HIL}
+Như đã trình bày trong mục \ref{subsec:la_process_data} (\nameref{subsec:la_process_data}), khối Logic Analyzer hỗ trợ tối đa 7 kênh digital và 1 kênh analog để thu thập tín hiệu.
+Bên cạnh đó, hệ thống được thiết kế với tốc độ lấy mẫu tối đa 300 kHz nhằm đảm bảo dữ liệu được thu thập và truyền đi liên tục, hạn chế tình trạng mất mẫu hoặc dữ liệu bị ghi đè trong quá trình xử lý và truyền nhận.
+
+\begin{table}[H]
+\centering
+\caption{Các ngoại vi và chân tín hiệu trong hệ thống Logic Analyzer}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{|l|c|X|} 
+\hline
+\textbf{Tín hiệu} & \textbf{Mô tả} & \textbf{Chân tín hiệu}\\ 
+\hline
+Digital Channel & Thu thập tín hiệu số từ DUT & GPIO2 -- 8\\ 
+\hline
+Analog Channel & Thu thập tín hiệu analog từ DUT & GPIO26\\
+\hline
+UART & Debug UART & GPIO0 (TX), GPIO1 (RX)\\
+\hline
+\end{tabularx}
+\label{tab:logic_analyzer_pins}
+\end{table}
+
+Dữ liệu được truyền từ Logic Analyzer lên máy tính chỉ là các mẫu dữ liệu thô, chưa thể trực tiếp sử dụng để quan sát và phân tích tín hiệu.
+Vì vậy, hệ thống cần thực hiện quá trình xử lý và chuyển đổi dữ liệu nhằm tái tạo lại dạng sóng tương ứng của các tín hiệu thu thập được.
+Kết quả phía dưới sẽ sử dụng phần mềm mà nhóm thiết kế để có thể hiển thị dạng sóng trực quan.
+
+Sử dụng các tín hiệu (sine, tam giác, pwm) đã đo bằng oscilloscope ở các Hình: \ref{fig:dac_sine_wave}, \ref{fig:dac_triangle_wave}, \ref{fig:pwm_waveform_30}, \ref{fig:pwm_waveform_65} để kiểm tra kết quả của Logic analyzer.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_sine_wave.jpg}
+    \caption{Sóng sine hiển thị trên phần mềm}
+    \label{fig:power_app}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_triangle_wave.jpg}
+    \caption{Sóng tam giác hiển thị trên phần mềm}
+    \label{fig:power_app}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_pwm_30.jpg}
+    \caption{PWM với tần số 200Hz, duty cycle 30\%}
+    \label{fig:power_app}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_pwm_65.jpg}
+    \caption{PWM với tần số 200Hz, duty cycle 65\%}
+    \label{fig:power_app}
+\end{figure}
+Kết quả thu được cho thấy đối với các tín hiệu digital, Logic Analyzer có kết quả chính xác hơn đo bằng oscilloscope.
+Nguyên nhân do phần mềm đo tần số và độ rộng xung dựa trên các mẫu tín hiệu số nên các thông số này chính xác hơn.
+Với sóng sine, $V_{pp}$ đo được là 3.2V, sai số khoảng 4\% so với 3.33V đo được trên oscilloscope.
+Với sóng tam giác, $V_{pp}$ đo được là 3.22V, sai số khoảng 4.7\%. Sai số này đến từ việc dịch bit của tín hiệu analog.
+Sai số nhỏ hơn 5\% cho thấy Logic Analyzer vẫn hoạt động ổn định để thực hiện các bài kiểm thử cho DUT. 
 
 \section{Kết quả thực hiện phần mềm trên máy tính}
 Giao diện chính của phần mềm được tổ chức dưới dạng các tab riêng biệt nhằm tăng tính trực quan và thuận tiện trong quá trình sử dụng, bao gồm:

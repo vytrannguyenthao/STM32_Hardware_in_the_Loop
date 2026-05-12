@@ -91,6 +91,7 @@ Tuy nhiên, hiện tượng tràn bộ đệm vẫn sẽ xảy ra khi có sự m
 Khi đó phần cứng sẽ ghi đè lên nửa bộ đệm mà CPU vẫn chưa kịp xử lý, dẫn đến dữ liệu trong bộ đệm không còn chính xác. Để giải quyết vấn đề này, Logic analyzer sẽ chuyển sang trạng thái \texttt{ABORTED} và gửi thông báo lỗi về máy tính, đồng thời tắt ADC, PIO, DMA để ngăn chặn việc thu thập dữ liệu sai lệch.
 
 \subsection{Cơ chế xử lý dữ liệu}
+\label{subsec:la_process_data}
 Khi phần cứng chỉ có duy nhất một đường truyền vật lý để gửi lệnh điều khiển và dữ liệu thô, việc phân biệt giữa các loại dữ liệu trở nên rất quan trọng.
 Nhằm giải quyết bài toán này, Logic analyzer sẽ sử dụng một mốc giá trị là 0x80 để phân loại dữ liệu. Cụ thể, bảng mã ASCII chuẩn chỉ sử dụng 7 bit để biểu diễn các ký tự thông dụng.
 Do đó, tất cả các ký tự dùng làm lệnh giao tiếp, phản hồi giữa phần cứng và phần mềm đều có giá trị từ 0x00 đến 0x7F, tức là luôn nhỏ hơn 0x80.
