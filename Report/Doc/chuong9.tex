@@ -529,13 +529,77 @@ Kết quả kiểm thử cho thấy hệ thống có thể truyền và nhận d
 \end{figure}
 
 \subsection{Kết quả mô phỏng thiết bị}
+
+
+Hệ thống mô phỏng ngoại vi hỗ trợ mô phỏng các thiết bị giao tiếp phổ biến gồm EEPROM giao tiếp I2C, đồng hồ thời gian thực RTC giao tiếp I2C và bộ nhớ Flash giao tiếp SPI. 
+
+Đối với giao tiếp I2C, hệ thống cho phép khởi tạo nhiều thiết bị EEPROM mô phỏng với các địa chỉ khác nhau trên cùng một bus I2C. Tuy nhiên, tại một thời điểm chỉ có một thiết bị được kích hoạt để giao tiếp. Việc lựa chọn thiết bị được thực hiện thông qua lệnh từ máy tính gửi xuống hệ thống mô phỏng. Khi địa chỉ thiết bị trên bus I2C được thay đổi, thiết bị tương ứng với địa chỉ đó sẽ trở thành thiết bị hoạt động và phản hồi các yêu cầu đọc/ghi dữ liệu từ DUT.
+
+Hệ thống hỗ trợ mô phỏng:
+\begin{itemize}
+    \item Nhiều EEPROM I2C với kích thước bộ nhớ và kích thước trang ghi khác nhau.
+    \item Một thiết bị RTC giao tiếp I2C theo cơ chế thanh ghi tương tự DS1307.
+    \item Một bộ nhớ Flash SPI với tập lệnh đọc, ghi và xóa cơ bản.
+\end{itemize}
+
+Tốc độ giao tiếp được hệ thống hỗ trợ gồm:
+\begin{itemize}
+    \item I2C: Standard Mode (100 kHz).
+    \item SPI: hỗ trợ giao tiếp SPI mode 2 chế độ slave với tốc độ kiểm thử lên đến 234.375 kBits/s.
+\end{itemize}
+
 \subsubsection{Kết quả mô phỏng I2C EEPROM}
-(thêm bảng kết quả kiểm thử đọc ghi dữ liệu vào I2C EEPROM mô phỏng, bao gồm địa chỉ, dữ liệu đã ghi, dữ liệu đã đọc và kết quả so sánh)
+
+Thiết bị EEPROM mô phỏng hỗ trợ cơ chế đọc và ghi dữ liệu theo từng trang nhớ, đồng thời hỗ trợ tự động tăng địa chỉ sau mỗi lần truyền dữ liệu. Dữ liệu bộ nhớ được lưu trong RAM của vi điều khiển mô phỏng và được khởi tạo mặc định với giá trị \texttt{0xFF}.
+
+Quá trình kiểm thử được thực hiện bằng cách ghi dữ liệu từ DUT đến EEPROM mô phỏng, sau đó đọc lại dữ liệu tại cùng địa chỉ để đối chiếu kết quả.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{image/hil_eeprom_result.png}
+    \caption{Kết quả kiểm thử EEPROM I2C mô phỏng}
+    \label{fig:hil_eeprom_result}
+\end{figure}
+
+Kết quả kiểm thử cho thấy thiết bị EEPROM mô phỏng hoạt động ổn định, dữ liệu đọc lại hoàn toàn trùng khớp với dữ liệu đã ghi. Cơ chế chuyển đổi thiết bị theo địa chỉ I2C cũng hoạt động chính xác khi có nhiều EEPROM cùng tồn tại trên bus.
 
 \subsubsection{Kết quả mô phỏng I2C RTC}
-(thêm bảng kết quả kiểm thử thiết lập và đọc thời gian từ RTC mô phỏng, bao gồm thời gian đã thiết lập, thời gian đã đọc và kết quả so sánh)
+
+Thiết bị RTC mô phỏng được xây dựng theo cơ chế thanh ghi thời gian tương tự DS1307, hỗ trợ lưu trữ giây, phút, giờ, ngày, tháng và năm theo định dạng BCD. Thời gian được cập nhật định kỳ thông qua bộ định thời của vi điều khiển.
+
+Quá trình kiểm thử được thực hiện bằng cách thiết lập thời gian từ DUT, sau đó đọc lại dữ liệu thời gian từ RTC mô phỏng để so sánh.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm thử RTC I2C mô phỏng}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Thời gian thiết lập} & \textbf{Thời gian đọc sau 5s} & \textbf{Thời gian mong đợi} & \textbf{Kết quả} \\ \hline
+12:30:15 & 12:30:20 & 12:30:20 & Đạt \\ \hline
+08:45:59 & 08:46:04 & 08:46:04 & Đạt \\ \hline
+23:59:58 & 00:00:03 & 00:00:03 & Đạt \\ \hline
+31/12/25 23:59:58 & 01/01/26 00:00:03 & 01/01/26 00:00:03 & Đạt \\ \hline
+28/02/24 23:59:58 & 29/02/24 00:00:03 & 29/02/24 00:00:03 & Đạt \\ \hline
+30/04/26 23:59:58 & 01/05/26 00:00:03 & 01/05/26 00:00:03 & Đạt \\ \hline
+\end{tabular}
+\end{table}
+
+Kết quả cho thấy RTC mô phỏng có khả năng lưu trữ và cập nhật thời gian chính xác, đồng thời phản hồi đúng dữ liệu khi DUT thực hiện thao tác đọc thanh ghi thời gian thông qua giao tiếp I2C.
+
 \subsubsection{Kết quả mô phỏng SPI Flash}
-(thêm bảng kết quả kiểm thử đọc ghi dữ liệu vào SPI Flash mô phỏng, bao gồm địa chỉ, dữ liệu đã ghi, dữ liệu đã đọc và kết quả so sánh)
+
+Thiết bị Flash SPI mô phỏng hỗ trợ các lệnh cơ bản gồm đọc mã định danh thiết bị, đọc dữ liệu, ghi dữ liệu theo trang và xóa toàn bộ bộ nhớ. Dữ liệu bộ nhớ được lưu trực tiếp trong vùng nhớ RAM của hệ thống mô phỏng.
+
+Quá trình kiểm thử được thực hiện bằng cách ghi dữ liệu vào Flash mô phỏng từ DUT, sau đó đọc lại dữ liệu tại cùng địa chỉ để kiểm tra tính chính xác.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{image/hil_spi_flash_result.png}
+    \caption{Kết quả kiểm thử SPI Flash mô phỏng}
+    \label{fig:hil_spi_flash_result}
+\end{figure}
+
+Kết quả kiểm thử cho thấy Flash SPI mô phỏng có thể phản hồi chính xác các lệnh đọc và ghi từ DUT. Dữ liệu sau khi đọc lại hoàn toàn trùng khớp với dữ liệu đã ghi, đáp ứng yêu cầu mô phỏng bộ nhớ Flash trong hệ thống HIL.
 
 \subsection{Tổng hợp khả năng hỗ trợ ngoại vi của hệ thống HIL}
 \begin{table}[H]
