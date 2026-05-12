@@ -48,7 +48,7 @@ Phần mềm trên máy tính được thiết kế theo mô hình đa luồng (
 Qua đó đảm bảo việc cập nhật giao diện luôn mượt mà và không bị gián đoạn khi hệ thống phải xử lý các tác vụ truyền nhận serial.
 
 Quá trình khởi động ứng dụng bắt đầu bằng việc khởi tạo cửa sổ chính \texttt{QMainWindow}. Để tối ưu hóa không gian hiển thị và phân tách logic điều khiển cho người dùng, bộ quản lý không gian làm việc \texttt{QTabWidget} được triển khai, đóng vai trò như một bộ định tuyến cho phép chuyển đổi linh hoạt giữa các tab khác nhau bằng cách chọn vào tab tương ứng.
-Trong đó Serial Tab chịu trách nhiệm cấu hình các thông số cho cổng giao tiếp trước khi kết nối. Các tab chức năng như Memory EMU, Peripherals, Logic Analyzer có nhiệm vụ tiếp nhận các lệnh điều khiển thông qua cổng serial, đồng thời xử lý và cập nhật kết quả lên giao diện người dùng.
+Trong đó Serial Tab chịu trách nhiệm cấu hình các thông số cho cổng giao tiếp trước khi kết nối. Các tab chức năng như Generator, Logic Analyzer, Memory EMU có nhiệm vụ tiếp nhận các lệnh điều khiển thông qua cổng serial, đồng thời xử lý và cập nhật kết quả lên giao diện người dùng.
 Riêng Terminal Tab được thiết kế để người dùng có thể tương tác với phần cứng bằng cách gửi các lệnh thủ công.
 
 Nhằm đáp ứng yêu cầu giao tiếp đồng thời với nhiều thiết bị phần cứng, Serial Thread sẽ có 3 luồng chuyên biệt, hoạt động song song. Cụ thể, luồng HIL quản lý lệnh điều khiển và giám sát thiết bị giả lập phần cứng; luồng Logic Analyzer chịu trách nhiệm giao tiếp, thu thập chuỗi dữ liệu từ Logic analyzer; luồng DUT đảm nhận việc truyền nhận dữ liệu với phần cứng đang được kiểm thử.
@@ -175,15 +175,15 @@ Cuối cùng là bước tính toán tần số. Đầu tiên thuật toán sẽ
 Sau đó tính toán khoảng thời gian thực tế thông qua tần số lấy mẫu. Tần số của tín hiệu lúc này sẽ được tính bằng công thức: $f = \dfrac{\text{Số chu kỳ}}{\text{Thời gian}}$.
 Kết thúc quá trình, toàn bộ tập thông số bao gồm Tần số, Duty Cycle và $V_{p-p}$ sẽ được định dạng và cập nhật trực tiếp lên nhãn hiển thị tại Vùng quét trên giao diện phần mềm.
 
-\subsection{Peripherals Tab}
+\subsection{Generator Tab}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{image/App_per_tab.jpg}
-    \caption{Sơ đồ khối các chức năng mô phỏng và giao tiếp trong Peripherals Tab}
+    \caption{Sơ đồ khối các chức năng mô phỏng và giao tiếp trong Generator Tab}
     \label{fig:App_per_tab}
 \end{figure}
 
-Peripherals Tab được thiết kế để cung cấp một giao diện trực quan cho người dùng trong việc điều khiển và giám sát DUT.
+Generator Tab được thiết kế để cung cấp một giao diện trực quan cho người dùng trong việc điều khiển và giám sát DUT.
 Cấu trúc của giao diện được tổ chức thành 5 khối chức năng độc lập giúp HIL mô phỏng phần cứng và giao tiếp với DUT.
 
 Khối \textbf{PWM Generator} và \textbf{Waveform Generator} đóng vai trò điều khiển DUT tạo ra các xung tín hiệu, cho phép người dùng cài đặt tần số, tinh chỉnh độ rộng xung để điều khiển 4 kênh PWM, cũng như phát các dạng sóng analog như sine, tam giác.
@@ -197,7 +197,7 @@ Khối \textbf{CAN Controller \& Monitor} hỗ trợ người dùng thao tác tr
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{image/App_per_ui.jpg}
-    \caption{Giao diện của Peripherals Tab}
+    \caption{Giao diện của Generator Tab}
     \label{fig:App_per_ui}
 \end{figure}
 
