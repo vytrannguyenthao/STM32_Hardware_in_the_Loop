@@ -652,14 +652,14 @@ Giao diện chính của phần mềm được tổ chức dưới dạng các t
 Người dùng sẽ được cung cấp các nút nhấn trên giao diện để điều khiển nguồn cho DUT.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/power_on.png}
+    \includegraphics[width=0.5\textwidth]{image/power_on.png}
     \caption{Bật nguồn DUT}
     \label{fig:power_on}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/power_off.png}
+    \includegraphics[width=0.5\textwidth]{image/power_off.png}
     \caption{Tắt nguồn DUT}
     \label{fig:power_off}
 \end{figure}
@@ -672,9 +672,55 @@ Người dùng sẽ được cung cấp các nút nhấn trên giao diện để
 \end{figure}
 \textbf{Nhận xét:} Dựa trên các kết quả từ giao diện UI và giao diện dòng lệnh, có thể thấy nguồn của DUT đã được bật/tắt và trạng thái nguồn được cập nhật qua led trên phần mềm.
 
-\subsection{Kết quả giao diện Memory EMU Tab}
-Người dùng có thể dùng giao diện dòng lệnh để gửi các command thủ công cho DUT để thực hiện các thao tác đọc ghi dữ liệu vào SPI Flash mô phỏng. Ngoài ra, phần mềm trên máy tính được thiết kế để thực hiện 1 bài kiểm thử tự động để kiểm tra chức năng đọc/ghi dữ liệu của DUT với thiết bị SPI Flash mô phỏng trên hệ thống HIL. Các bước thực hiện bao gồm:
+\subsection{Kết quả giao diện Generator Tab}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/app_per_pwm_wave.jpg}
+    \caption{Điều khiển PWM và Waveform generator bằng phần mềm}
+    \label{fig:power_app}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{image/app_per_gpio_result.jpg}
+    \caption{Điều khiển đọc/ghi GPIO bằng phần mềm}
+    \label{fig:power_app}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{image/app_per_dac_result.jpg}
+    \caption{Điều khiển DAC Output (Potentiometer) bằng phần mềm}
+    \label{fig:power_app}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_per_can_result.jpg}
+    \caption{Điều khiển CAN bằng phần mềm}
+    \label{fig:power_app}
+\end{figure}
+\textbf{Nhận xét:} Các khối điều khiển tạo tín hiệu trên phần mềm đã hoạt động đúng với thiết kế, hỗ trợ người dùng dử dụng những ngoại vi cần thiết cho quá tình kiểm thử cho thiết bị DUT.
+
+\subsection{Kết quả giao diện Logic Analyzer Tab}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_la_result.jpg}
+    \caption{Logic thu thập dữ liệu và hiển thị lên giao diện}
+    \label{fig:power_app}
+\end{figure}
+\textbf{Nhận xét:} Phần mềm đã thu thập dữ liệu từ Logic analyzer sau đó vẽ lại dạng sóng tương ứng với các kênh tín hiệu.
+Đối với kênh digital đã đo được tần số và độ rộng xung. Đối với kênh analog, đã đo được tần số, $V_{pp}$ và điện áp tại vị trí con trỏ.
+
+\subsection{Kết quả giao diện Memory EMU Tab}
+Memory EMU Tab hỗ trợ giao diện đêr cập nhật dữ liệu cho SPI Flash và I2C EEPROM lên bảng giúp người dùng có thể quan sát, kiểm tra dữ liệu dễ dàng hơn.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{image/app_mem_emu.jpg}
+    \caption{Dữ liệu của SPI Flash và I2C EEPROM Emu}
+    \label{fig:app_mem_emu}
+\end{figure}
+\textbf{Nhận xét:} Phần mềm có thể cập nhật dữ liệu đọc được từ các thiết bị nhớ mô phỏng (Flash, EEPROM) lên giao diện.
 
 \section{Kết quả thực hiện phần mềm kiểm thử tự động trên máy tính}
 
