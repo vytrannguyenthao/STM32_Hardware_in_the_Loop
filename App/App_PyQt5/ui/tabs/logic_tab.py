@@ -50,9 +50,9 @@ class LogicTab(QWidget):
         self.time_arr = np.array([])
         self.a0_arr = np.array([])
 
-        # --- BIẾN QUẢN LÝ CÔNG CỤ ĐO TẦN SỐ ---
-        self.active_measure_ch = None
-        self.current_measure_plot = None
+        # --- BIẾN QUẢN LÝ CÔNG CỤ ĐO TẦN SỐ ĐỘC LẬP CHO TỪNG KÊNH ---
+        self.measure_regions = {}
+        self.measure_texts = {}
 
         self.plot_timer = QTimer()
         self.plot_timer.timeout.connect(self.update_plots)
@@ -190,24 +190,25 @@ class LogicTab(QWidget):
             p.addItem(v_line)
             self.v_lines.append(v_line)
 
+            # --- KHỞI TẠO CÔNG CỤ ĐO CHO TỪNG KÊNH ĐỘC LẬP ---
+            region = pg.LinearRegionItem(values=[0, 0], movable=True)
+            region.setBrush(QColor(255, 215, 0, 50)) 
+            region.hide()
+            p.addItem(region)
+            self.measure_regions[ch] = region
+            
+            txt = pg.TextItem(text="", color='#000000', fill='#FFD700', anchor=(0.5, 0))
+            txt.hide()
+            p.addItem(txt)
+            self.measure_texts[ch] = txt
+            
+            region.sigRegionChanged.connect(self.update_measurement)
+
             self.plots[ch] = p
             self.plot_widget.nextRow()
             
         self.proxy = pg.SignalProxy(self.plot_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouseMoved)
 
-        # --- KHỞI TẠO CÔNG CỤ ĐO TẦN SỐ ---
-        # Vùng chọn (màu vàng trong suốt)
-        self.measure_region = pg.LinearRegionItem(values=[0, 0], movable=True)
-        self.measure_region.setBrush(QColor(255, 215, 0, 50)) 
-        self.measure_region.hide()
-        
-        # Nhãn hiển thị Tần số neo từ trên chúc xuống
-        self.measure_text = pg.TextItem(text="", color='#000000', fill='#FFD700', anchor=(0.5, 0))
-        self.measure_text.hide()
-        
-        # Kết nối sự kiện khi người dùng kéo giãn vùng đo
-        self.measure_region.sigRegionChanged.connect(self.update_measurement)
-        
         # Bắt sự kiện Click chuột lên biểu đồ
         self.plot_widget.scene().sigMouseClicked.connect(self.on_mouse_clicked)
         # ------------------------------------------
@@ -224,151 +225,144 @@ class LogicTab(QWidget):
                 mousePoint = p.vb.mapSceneToView(pos)
                 x_val = mousePoint.x()
 
-                # Nếu Double-Click: Mở vùng đo tại kênh này
+                region = self.measure_regions[ch]
+                txt = self.measure_texts[ch]
+
+                # Nếu Double-Click: Mở/Tắt vùng đo tại kênh ĐƯỢC CLICK
                 if evt.double():
-                    # Xóa vùng đo khỏi kênh cũ (nếu có)
-                    if self.current_measure_plot is not None and self.current_measure_plot != p:
-                        self.current_measure_plot.removeItem(self.measure_region)
-                        self.current_measure_plot.removeItem(self.measure_text)
-                    
-                    # Gắn vùng đo vào kênh mới
-                    if self.current_measure_plot != p:
-                        p.addItem(self.measure_region)
-                        p.addItem(self.measure_text)
-                        self.current_measure_plot = p
+                    if region.isVisible():
+                        region.hide()
+                        txt.hide()
+                    else:
+                        # Mở rộng vùng đo bằng 10% khung hình hiện tại
+                        view_range = p.viewRange()[0]
+                        w = (view_range[1] - view_range[0]) * 0.1 
+                        region.setRegion([x_val - w/2, x_val + w/2])
+                        region.show()
+                        txt.show()
+                        self.update_measurement()
                         
-                    # Mở rộng vùng đo bằng 10% khung hình hiện tại
-                    view_range = p.viewRange()[0]
-                    w = (view_range[1] - view_range[0]) * 0.1 
-                    self.measure_region.setRegion([x_val - w/2, x_val + w/2])
-                    
-                    self.measure_region.show()
-                    self.measure_text.show()
-                    self.active_measure_ch = ch
-                    self.update_measurement()
-                    
                 # Nếu Single-Click chuột trái: Kiểm tra xem có click ra ngoài vùng đo để Hủy không
                 elif evt.button() == Qt.LeftButton:
-                    if self.measure_region.isVisible() and self.active_measure_ch == ch:
-                        r_min, r_max = self.measure_region.getRegion()
+                    if region.isVisible():
+                        r_min, r_max = region.getRegion()
                         if x_val < r_min or x_val > r_max:
-                            # Click ra ngoài -> Ẩn công cụ đo
-                            self.measure_region.hide()
-                            self.measure_text.hide()
-                            self.active_measure_ch = None
+                            region.hide()
+                            txt.hide()
                 break
 
     # ==================================================
     # HÀM TÍNH TOÁN TẦN SỐ VÀ DUTY CYCLE
     # ==================================================
     def update_measurement(self):
-        if not self.active_measure_ch or not self.measure_region.isVisible():
-            return
-            
-        minX, maxX = self.measure_region.getRegion()
-        if minX >= maxX: return
-        
-        ch = self.active_measure_ch
-        arr = getattr(self, f"{ch.lower()}_arr", None)
-        
-        # Kiểm tra mảng data hợp lệ
-        if arr is None or len(arr) == 0 or self.current_idx == 0:
-            if ch == 'A0':
-                self.measure_text.setText(" Freq: -- Hz | Vpp: --V")
-            else:
-                self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
-            return
+        # Lặp qua tính toán cho TẤT CẢ các kênh
+        for ch, p in self.plots.items():
+            region = self.measure_regions.get(ch)
+            txt_item = self.measure_texts.get(ch)
 
-        # Quy đổi thời gian (minX, maxX) ra Index của mảng Data
-        start_idx = max(0, int(minX * self.current_sample_rate))
-        end_idx = min(self.current_idx, int(maxX * self.current_sample_rate))
-        
-        if end_idx - start_idx < 2:
-            if ch == 'A0':
-                self.measure_text.setText(" Freq: -- Hz | Vpp: --V")
-            else:
-                self.measure_text.setText(" Freq: -- Hz | Duty: -- % ")
-            return
-            
-        data_slice = arr[start_idx:end_idx]
-        duty_cycle_val = None # Biến lưu Duty cycle cho Digital
-        vpp_val = None
-        
-        # --- THUẬT TOÁN ĐO TẦN SỐ CHỐNG NHIỄU (HYSTERESIS) ---
-        if ch == 'A0':
-            _min = np.min(data_slice)
-            _max = np.max(data_slice)
-            vpp_val = _max - _min
-            
-            # Khử nhiễu: Nếu sóng quá phẳng (biên độ < 0.1V), coi như không có dao động
-            if _max - _min < 0.1:
-                edge_indices = []
-            else:
-                # Áp dụng Hysteresis (ngưỡng 20% trên/dưới) để loại bỏ nhiễu răng cưa của DAC
-                threshold_high = _min + (_max - _min) * 0.6
-                threshold_low  = _min + (_max - _min) * 0.4
-                
-                states = np.zeros_like(data_slice, dtype=np.int8)
-                states[data_slice > threshold_high] = 1
-                states[data_slice < threshold_low] = -1
-                
-                valid_states_idx = np.where(states != 0)[0]
-                if len(valid_states_idx) > 0:
-                    valid_states = states[valid_states_idx]
-                    transitions = np.diff(valid_states) > 0 # Tìm cạnh lên (-1 -> 1)
-                    edge_indices = valid_states_idx[:-1][transitions]
-                else:
-                    edge_indices = []
-        else:
-            # Digital hoàn hảo không có nhiễu, tìm cạnh lên (0 chuyển sang 1)
-            # Cộng 1 để con trỏ lấy đúng vào index của điểm bắt đầu mức 1
-            edge_indices = np.where(np.diff(data_slice) > 0)[0] + 1
-            
-            # TÍNH TOÁN DUTY CYCLE CHUẨN XÁC DỰA TRÊN CHU KỲ TRỌN VẸN
-            if len(edge_indices) >= 2:
-                # Cắt bỏ phần rác ở hai đầu vùng chọn màu vàng
-                # Chỉ lấy dữ liệu từ cạnh lên đầu tiên đến cạnh lên cuối cùng
-                start_cycle = edge_indices[0]
-                end_cycle = edge_indices[-1]
-                
-                perfect_cycles_data = data_slice[start_cycle:end_cycle]
-                
-                high_samples = np.sum(perfect_cycles_data == 1)
-                total_samples = len(perfect_cycles_data)
-                
-                duty_cycle_val = (high_samples / total_samples) * 100.0 if total_samples > 0 else 0.0
-            else:
-                # Vùng bôi vàng quá nhỏ, không chứa đủ 1 chu kỳ trọn vẹn
-                duty_cycle_val = None
+            # Bỏ qua nếu kênh này không bật thước đo
+            if not region or not txt_item or not region.isVisible():
+                continue
 
-        # ==========================================================
-        # TÍNH TOÁN TẦN SỐ (Dùng chung cho cả A0 và D0)
-        # ==========================================================
-        if len(edge_indices) >= 2:
-            num_cycles = len(edge_indices) - 1
-            actual_time_span = (edge_indices[-1] - edge_indices[0]) / self.current_sample_rate
-            freq = num_cycles / actual_time_span if actual_time_span > 0 else 0
-        else:
+            minX, maxX = region.getRegion()
+            if minX >= maxX: continue
+            
+            # Quy đổi thời gian (minX, maxX) ra Index của mảng Data
+            start_idx = max(0, int(minX * self.current_sample_rate))
+            end_idx = min(self.current_idx, int(maxX * self.current_sample_rate))
+            text_x_pos = minX + (maxX - minX) / 2
+
+            arr = getattr(self, f"{ch.lower()}_arr", None)
+            
+            # Canh chỉnh vị trí nhãn: D0-D6 để ở 1.1, A0 để ở 3.1
+            y_pos = 1.1 if ch.startswith('D') else 3.1
+            txt_item.setPos(text_x_pos, y_pos)
+
+            # CHỐNG LƯU DỮ LIỆU CŨ: Ép reset các thông số về mặc định mỗi lần cập nhật
+            duty_cycle_val = None 
+            vpp_val = None
             freq = 0
-            vpp_val = 0
             
-        # Định dạng chuỗi hiển thị Tần số
-        if freq >= 1000000:
-            freq_str = f"{freq/1000000:.2f} MHz"
-        elif freq >= 1000:
-            freq_str = f"{freq/1000:.2f} kHz"
-        else:
-            freq_str = f"{freq:.2f} Hz"
+            # Kiểm tra mảng data hợp lệ
+            if arr is None or len(arr) == 0 or self.current_idx == 0 or (end_idx - start_idx < 2):
+                if ch == 'A0':
+                    txt_item.setText(" Freq: 0.00 Hz | Vpp: -- V ")
+                else:
+                    txt_item.setText(" Freq: 0.00 Hz | Duty: -- % ")
+                continue
+                
+            data_slice = arr[start_idx:end_idx]
             
-        # Nối thêm Duty Cycle nếu là kênh Digital
-        if ch != 'A0' and duty_cycle_val is not None:
-            self.measure_text.setText(f" Freq: {freq_str} | Duty: {duty_cycle_val:.1f}% ")
-        elif ch == 'A0' and vpp_val is not None:
-            self.measure_text.setText(f" Freq: {freq_str} | Vpp: {vpp_val:.2f}V")
-        
-        # Canh chỉnh vị trí nhãn: D0-D6 để ở 1.1, A0 để ở 3.1
-        y_pos = 1.1 if ch.startswith('D') else 3.1
-        self.measure_text.setPos(minX + (maxX-minX)/2, y_pos)
+            # --- THUẬT TOÁN ĐO TẦN SỐ CHỐNG NHIỄU (HYSTERESIS) ---
+            if ch == 'A0':
+                _min = np.min(data_slice)
+                _max = np.max(data_slice)
+                vpp_val = _max - _min
+                
+                # Khử nhiễu: Nếu sóng quá phẳng (biên độ < 0.1V), coi như không có dao động
+                if _max - _min < 0.1:
+                    edge_indices = []
+                else:
+                    # Áp dụng Hysteresis để loại bỏ nhiễu răng cưa của DAC
+                    threshold_high = _min + (_max - _min) * 0.6
+                    threshold_low  = _min + (_max - _min) * 0.4
+                    
+                    states = np.zeros_like(data_slice, dtype=np.int8)
+                    states[data_slice > threshold_high] = 1
+                    states[data_slice < threshold_low] = -1
+                    
+                    valid_states_idx = np.where(states != 0)[0]
+                    if len(valid_states_idx) > 0:
+                        valid_states = states[valid_states_idx]
+                        transitions = np.diff(valid_states) > 0 # Tìm cạnh lên (-1 -> 1)
+                        edge_indices = valid_states_idx[:-1][transitions]
+                    else:
+                        edge_indices = []
+            else:
+                # Digital hoàn hảo không có nhiễu, tìm cạnh lên (0 chuyển sang 1)
+                edge_indices = np.where(np.diff(data_slice) > 0)[0] + 1
+                
+                # TÍNH TOÁN DUTY CYCLE CHUẨN XÁC DỰA TRÊN CHU KỲ TRỌN VẸN
+                if len(edge_indices) >= 2:
+                    start_cycle = edge_indices[0]
+                    end_cycle = edge_indices[-1]
+                    
+                    perfect_cycles_data = data_slice[start_cycle:end_cycle]
+                    
+                    high_samples = np.sum(perfect_cycles_data == 1)
+                    total_samples = len(perfect_cycles_data)
+                    
+                    duty_cycle_val = (high_samples / total_samples) * 100.0 if total_samples > 0 else 0.0
+
+            # ==========================================================
+            # TÍNH TOÁN TẦN SỐ
+            # ==========================================================
+            if len(edge_indices) >= 2:
+                num_cycles = len(edge_indices) - 1
+                actual_time_span = (edge_indices[-1] - edge_indices[0]) / self.current_sample_rate
+                freq = num_cycles / actual_time_span if actual_time_span > 0 else 0
+            else:
+                freq = 0
+                
+            # Định dạng chuỗi hiển thị Tần số
+            if freq >= 1000000:
+                freq_str = f"{freq/1000000:.2f} MHz"
+            elif freq >= 1000:
+                freq_str = f"{freq/1000:.2f} kHz"
+            else:
+                freq_str = f"{freq:.2f} Hz"
+                
+            # Cập nhật Nội dung Text dựa theo từng kênh (Analog vs Digital)
+            if ch == 'A0':
+                if vpp_val is not None:
+                    txt_item.setText(f" Freq: {freq_str} | Vpp: {vpp_val:.2f} V ")
+                else:
+                    txt_item.setText(f" Freq: {freq_str} | Vpp: -- V ")
+            else:
+                if duty_cycle_val is not None:
+                    txt_item.setText(f" Freq: {freq_str} | Duty: {duty_cycle_val:.1f}% ")
+                else:
+                    txt_item.setText(f" Freq: {freq_str} | Duty: -- % ")
 
     # ==================================================
     # SỰ KIỆN RÊ CHUỘT CROSSHAIR 
@@ -523,12 +517,11 @@ class LogicTab(QWidget):
                 # Khóa cờ lại, để các hàm cuộn/zoom chuột tự do mà không bị vẽ lại
                 self._has_rendered_full = True
 
-                # Cập nhật công cụ đo tần số nếu đang bật
-                if self.measure_region.isVisible():
-                    self.update_measurement()
+                # Cập nhật các công cụ đo tần số nếu đang bật
+                self.update_measurement()
 
     # ==================================================
-    # [UPDATE] HÀM HỖ TRỢ XỬ LÝ LỆNH START/STOP
+    # HÀM HỖ TRỢ XỬ LÝ LỆNH START/STOP
     # ==================================================
     def parse_number_value(self, text, multipliers):
         """Chuyển đổi text combobox ('1 M', '100 kHz') thành số thực tế"""
@@ -550,11 +543,11 @@ class LogicTab(QWidget):
         if hasattr(self, 'a0_voltage_label'):
             self.a0_voltage_label.setText("")
             
-        # Reset (Ẩn) công cụ đo khi Start lại
-        if hasattr(self, 'measure_region'):
-            self.measure_region.hide()
-            self.measure_text.hide()
-            self.active_measure_ch = None
+        # Reset (Ẩn) công cụ đo của tất cả các kênh khi Start lại
+        if hasattr(self, 'measure_regions'):
+            for ch in self.measure_regions:
+                self.measure_regions[ch].hide()
+                self.measure_texts[ch].hide()
 
     # ==================================================
     # SỰ KIỆN NÚT BẤM (GỬI LỆNH)
