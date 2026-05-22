@@ -77,11 +77,11 @@ Khác với cấu trúc tổng quan của Robot Framework đã trình bày ở p
 
 Các test case được xây dựng dưới dạng các file \texttt{.robot}, trong đó mỗi bài kiểm thử tương ứng với một chức năng ngoại vi như GPIO, PWM, UART, I2C, SPI hoặc CAN. Mỗi test case bao gồm các bước cấu hình môi trường kiểm thử, điều khiển DUT thực hiện tác vụ cần kiểm tra, thu thập dữ liệu phản hồi và đánh giá kết quả cuối cùng.
 
-Robot Framework đóng vai trò điều phối trung tâm, thực thi tuần tự các test case và gọi các keyword tương ứng trong các thư viện kiểm thử. Đối với hệ thống HIL và Logic Analyzer, các keyword được xây dựng sẵn và lưu trữ trong thư viện hệ thống. Các keyword này tương ứng trực tiếp với toàn bộ tập lệnh được hỗ trợ bởi HIL và Logic Analyzer, cho phép thực hiện các thao tác gửi lệnh, nhận phản hồi và cấu hình môi trường mô phỏng. Bên cạnh đó, hệ thống cũng cung cấp thêm các keyword tiện ích phục vụ kiểm thử như kiểm tra trạng thái thiết bị, so sánh giá trị phản hồi với giá trị mong đợi và xác nhận kết quả PASS/FAIL.
+Robot Framework đóng vai trò điều phối trung tâm, thực thi tuần tự các test case và gọi các keyword tương ứng trong các thư viện kiểm thử. Đối với hệ thống HIL Generator và HIL Collector, các keyword được xây dựng sẵn và lưu trữ trong thư viện hệ thống. Các keyword này tương ứng trực tiếp với toàn bộ tập lệnh được hỗ trợ bởi HIL Generator và HIL Collector, cho phép thực hiện các thao tác gửi lệnh, nhận phản hồi và cấu hình môi trường mô phỏng. Bên cạnh đó, hệ thống cũng cung cấp thêm các keyword tiện ích phục vụ kiểm thử như kiểm tra trạng thái thiết bị, so sánh giá trị phản hồi với giá trị mong đợi và xác nhận kết quả PASS/FAIL.
 
 Đối với DUT, thư viện kiểm thử được xây dựng riêng tùy theo từng thiết bị cần kiểm tra, dựa trên tập lệnh và yêu cầu chức năng cụ thể của firmware và sẽ do người dùng xây dựng. Cách tổ chức này giúp hệ thống có tính linh hoạt cao, dễ dàng mở rộng cho nhiều loại DUT khác nhau mà không ảnh hưởng đến kiến trúc tổng thể của hệ thống kiểm thử.
 
-Tầng giao tiếp vật lý sử dụng thư viện \texttt{pyserial} để kết nối với DUT, HIL và Logic Analyzer thông qua cổng USB serial. Thư viện này chịu trách nhiệm thực hiện truyền nhận dữ liệu, đồng bộ quá trình kiểm thử và đảm bảo luồng giao tiếp ổn định giữa các thiết bị trong suốt quá trình thực thi test case.
+Tầng giao tiếp vật lý sử dụng thư viện \texttt{pyserial} để kết nối với DUT, HIL Generator và HIL Collector thông qua cổng USB serial. Thư viện này chịu trách nhiệm thực hiện truyền nhận dữ liệu, đồng bộ quá trình kiểm thử và đảm bảo luồng giao tiếp ổn định giữa các thiết bị trong suốt quá trình thực thi test case.
 
 Sau khi quá trình kiểm thử hoàn tất, Robot Framework tự động sinh ra các tệp báo cáo như \texttt{report.html}, \texttt{log.html} và \texttt{output.xml}. Trong đó, \texttt{report.html} cung cấp kết quả tổng quan của toàn bộ quá trình kiểm thử với trạng thái PASS/FAIL của từng test case, \texttt{log.html} ghi lại chi tiết từng bước thực thi, các lệnh đã gửi, dữ liệu phản hồi và thông tin debug trong quá trình kiểm thử, còn \texttt{output.xml} được sử dụng để lưu trữ dữ liệu kết quả dưới dạng có cấu trúc phục vụ cho việc phân tích hoặc tích hợp với các hệ thống kiểm thử khác. Việc tự động ghi nhận log và sinh báo cáo giúp kỹ sư dễ dàng truy vết lỗi, đánh giá chất lượng firmware và thực hiện kiểm thử hồi quy một cách hiệu quả.
 
@@ -90,7 +90,7 @@ Nhờ cấu trúc phân lớp này, hệ thống kiểm thử vừa đảm bảo
 
 \section{Thiết kế các kịch bản kiểm thử}
 
-Dựa trên kiến trúc hệ thống kiểm thử đã xây dựng cùng tập các keyword hỗ trợ cho HIL và Logic Analyzer, bước tiếp theo là thiết kế các kịch bản kiểm thử cụ thể cho từng chức năng ngoại vi của DUT. Các keyword được sử dụng như những khối chức năng cơ bản để xây dựng quy trình kiểm thử hoàn chỉnh, bao gồm thiết lập môi trường kiểm thử, điều khiển DUT và HIL, thu thập dữ liệu phản hồi cũng như đánh giá kết quả theo tiêu chí PASS/FAIL.
+Dựa trên kiến trúc hệ thống kiểm thử đã xây dựng cùng tập các keyword hỗ trợ cho HIL Generator và HIL Collector, bước tiếp theo là thiết kế các kịch bản kiểm thử cụ thể cho từng chức năng ngoại vi của DUT. Các keyword được sử dụng như những khối chức năng cơ bản để xây dựng quy trình kiểm thử hoàn chỉnh, bao gồm thiết lập môi trường kiểm thử, điều khiển DUT và HIL, thu thập dữ liệu phản hồi cũng như đánh giá kết quả theo tiêu chí PASS/FAIL.
 
 Mỗi kịch bản kiểm thử được xây dựng nhằm xác minh tính đúng đắn của firmware khi thực hiện giao tiếp với các thiết bị ngoại vi được mô phỏng bởi hệ thống HIL.
 

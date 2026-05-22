@@ -38,9 +38,9 @@ Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông
 \begin{itemize}
     \item \textbf{Phạm vi kỹ thuật:}
     \begin{itemize}
-        \item[-] Tập trung vào việc thiết kế phần cứng gồm khối HIL để phát tín hiệu, khối Logic analyzer để thu thập các sóng thu thập từ DUT.
+        \item[-] Tập trung vào việc thiết kế phần cứng gồm khối HIL Generator để phát tín hiệu, khối HIL Collector để thu thập các sóng thu thập từ DUT.
         \item[-] Phát triển firmware sử dụng hệ điều hành thời gian thực quản lý đa nhiệm để mô phỏng các thiết bị ngoại vi, môi trường hoạt động và các giao thức truyền thông phổ biến.
-        \item[-] Xây dựng phần mềm trên máy tính để cấu hình, giám sát truyền thông và tích hợp nền tảng Robot Framework nhằm thực thi, theo dõi các kịch bản kiểm thử tự động.
+        \item[-] Xây dựng phần mềm trên máy tính để cấu hình, giám sát hệ thống và tích hợp nền tảng Robot Framework nhằm thực thi, theo dõi các kịch bản kiểm thử tự động.
         \item[-] Hệ thống tập trung chủ yếu vào việc kiểm thử chức năng và hành vi của firmware trên DUT, không đi sâu vào kiểm thử các giới hạn vật lý hay độ bền của linh kiện phần cứng.
     \end{itemize}
 
@@ -72,9 +72,9 @@ Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông
         \item[-] Đảm bảo khả năng tương thích và các header mở rộng để linh hoạt kiểm thử thiết bị.
     \end{itemize}
 
-    \item Tiến hành thi công, lắp ráp hoàn chỉnh. Thực hiện firmware cho HIL và Logic Analyzer để thử nghiệm các chức năng.
+    \item Tiến hành thi công, lắp ráp hoàn chỉnh. Thực hiện firmware cho HIL Generator và HIL Collector để thử nghiệm các chức năng.
 
-    \item Xây dựng bộ thư viện điều khiển HIL và Logic Analyzer bằng Robot Framework để hỗ trợ người dùng có thể sử dụng cho việc kiểm thử cho firmware DUT.
+    \item Xây dựng bộ thư viện điều khiển HIL Generator và HIL Collector bằng Robot Framework để hỗ trợ người dùng có thể sử dụng cho việc kiểm thử cho firmware DUT.
 
     \item Thiết kế phần mềm trên máy tính có giao diện trực quan để người dùng cấu hình tham số, gửi lệnh điều khiển và giám sát dữ liệu phản hồi.
 
@@ -118,17 +118,17 @@ Tại Việt Nam, các hệ thống HIL chủ yếu được tiếp cận thông
     \hline
     
     - Thiết kế phần cứng, sơ đồ khối, sơ đồ nguyên lý, lựa chọn linh kiện và lắp ráp mạch PCB hoàn chỉnh.\newline
-    - Phát triển firmware cho Logic Analyzer để phục vụ công tác đo lường và bắt xung tín hiệu.\newline
-    - Lập trình firmware HIL: Xử lý cấu hình ngoại vi CAN, ADC, DAC và mô phỏng hoạt động của SPI FLASH.\newline
+    - Phát triển firmware cho HIL Collector để phục vụ công tác đo lường và bắt xung tín hiệu.\newline
+    - Lập trình firmware HIL Generator: Xử lý cấu hình ngoại vi CAN, ADC, DAC và mô phỏng hoạt động của SPI FLASH.\newline
     - Thiết kế tính năng xuất tín hiệu Analog (phát dạng sóng sin, sóng tam giác).\newline
     - Triển khai thuật toán Biến đổi Fourier nhanh (FFT) để phân tích phổ tín hiệu số và nhận diện sóng sin.\newline
     - Cập nhật giao diện trên PC: Tích hợp module cấu hình, gửi lệnh và hiển thị dữ liệu trực quan cho CAN, ADC, SPI. \newline
-    - Vẽ dạng sóng thu thập từ Logic Analyzer lên App. &
+    - Vẽ dạng sóng thu thập từ HIL Collector lên App. &
     \textbf{Ve Samy} \\
     \hline
 
     - Kiểm tra bản vẽ thiết kế phần cứng trước khi tiến hành gia công.\newline
-    - Lập trình firmware HIL: Xử lý ngoại vi UART, I2C, mô phỏng các thiết bị EEPROM và module thời gian thực (RTC).\newline
+    - Lập trình firmware HIL Generator: Xử lý ngoại vi UART, I2C, mô phỏng các thiết bị EEPROM và module thời gian thực (RTC).\newline
     - Triển khai tính năng điều khiển I/O: Tạo xung PWM, cấu hình các chân GPIO phục vụ đọc/xuất tín hiệu Digital.\newline
     - Triển khai thuật toán Biến đổi Fourier nhanh (FFT) để phân tích phổ tín hiệu số và nhận diện sóng tam giác.\newline
     - Xây dựng cơ chế điều khiển phần cứng để kích hoạt tự động chế độ Boot, hỗ trợ nạp firmware cho DUT qua USB.\newline

@@ -31,10 +31,10 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
 
 \begin{itemize}
     \item \textbf{Khối nguồn:} Cung cấp nguồn điện điện áp và dòng điện ổn định cho toàn bộ hệ thống.
-    \item \textbf{Khối HIL (MCU1 và MCU2):} Bao gồm 2 vi điều khiển đảm nhiệm việc mô phỏng phần cứng như SPI Flash, I2C EEPROM, giao tiếp với DUT và PC.
+    \item \textbf{Khối HIL (Generator và Collector):}
         \begin{itemize}
-            \item \textbf{MCU1:} Tập trung giao tiếp, xử lý dữ liệu với DUT bằng cách ngoại vi thông dụng như UART, SPI, I2C, CAN, GPIO, DAC. Đồng thời gửi những dữ liệu này lên PC qua giao tiếp USB.
-            \item \textbf{MCU2:} Tập trung xử lý dữ liệu analog và digital từ DUT, hoạt động như một logic analyzer hoặc oscilloscope và hiển thị dạng sóng lên PC qua giao tiếp USB.
+            \item \textbf{Generator:} Tập trung giao tiếp, xử lý dữ liệu với DUT bằng cách ngoại vi thông dụng như UART, SPI, I2C, CAN, GPIO, DAC. Tạo các dạng sóng như sóng sine, sóng tam giác, PWM. Đồng thời mô phỏng một số phần cứng phổ biến như EEPROM, Flash, RTC.
+            \item \textbf{Collector:} Tập trung xử lý dữ liệu analog và digital từ DUT, hoạt động như một logic analyzer hoặc oscilloscope và hiển thị dạng sóng lên PC qua giao tiếp USB.
         \end{itemize}
     \item \textbf{Khối DUT:} Chạy chương trình thực thi cần kiểm thử.
     \item \textbf{Khối điều khiển nguồn cho DUT:} Cho phép HIL có thể điều khiển nguồn điện cấp cho DUT và nhận thông tin về trạng thái nguồn từ DUT.
@@ -52,8 +52,8 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
 
 \begin{itemize}
     \item \textbf{Khối nguồn:} Nguồn điện được cấp từ jack DC, sau đó hạ áp xuống mức 3.3V.
-    \item \textbf{Vi điều khiển 1:} Sử dụng vi điều khiển STM32F407VET6 hoạt động với nguồn 3.3V, có tích hợp các ngoại vi như CAN, DAC, UART, SPI,... phù hợp để mô phỏng các phần cứng và giao tiếp với DUT, PC.
-    \item \textbf{Vi điều khiển 2:} Sử dụng module Raspberry Pi Pico, hoạt động với nguồn 3.3V thực hiện các chức năng để thu thâp, xử lý tín hiệu analog và digital từ DUT.
+    \item \textbf{HIL Generator:} Sử dụng vi điều khiển STM32F407VET6 hoạt động với nguồn 3.3V, có tích hợp các ngoại vi như CAN, DAC, UART, SPI,... phù hợp để mô phỏng các phần cứng và giao tiếp với DUT, PC.
+    \item \textbf{HIL Collector:} Sử dụng module Raspberry Pi Pico, hoạt động với nguồn 3.3V thực hiện các chức năng để thu thâp, xử lý tín hiệu analog và digital từ DUT.
     \item \textbf{Khối DUT:} Sử dụng module STM32F407VET6 Dev kit, được bán phổ biến trên thị trường, để thực hiện chương trình cần kiểm thử.
     \item \textbf{Khối giao tiếp CAN:} Sử dụng IC Transciever CAN SN65HVD230DR hoạt động với nguồn 3.3V để thực hiện giao tiếp CAN giữa HIL và DUT.
 \end{itemize}
@@ -109,11 +109,11 @@ Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở
     \label{fig:power}
 \end{figure}
 
-\subsection{Khối vi điều khiển 1}
+\subsection{Khối HIL Generator}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{image/hil_block.jpg}
-    \caption{Sơ đồ mạch của vi điều khiển 1}
+    \caption{Sơ đồ mạch của HIL Generator}
     \label{fig:hil_block}
 \end{figure}
 
@@ -160,11 +160,11 @@ khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...\\
 % \label{tab:hil_peripherals_pins}
 % \end{table}
 
-\subsection{Khối vi điều khiển 2}
+\subsection{Khối HIL Collector}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{image/hw_pi.jpg}
-    \caption{Sơ đồ mạch của vi điều khiển 2}
+    \caption{Sơ đồ mạch của HIL Collector}
     \label{fig:hw_pi}
 \end{figure}
 

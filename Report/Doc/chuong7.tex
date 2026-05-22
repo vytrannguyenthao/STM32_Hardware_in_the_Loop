@@ -67,9 +67,9 @@ Các luồng nền này tiến hành giao tiếp vật lý với phần cứng v
 Lưu đồ minh họa quy trình khởi tạo, phân loại và thiết lập kết nối với cổng COM trong Serial Tab. Quá trình bắt đầu bằng việc quét và trích xuất danh sách các cổng COM khả dụng trên máy tính.
 Người dùng sẽ chọn cổng COM mong muốn từ danh sách này, nếu có thay đổi khi có thiết bị được cắm vào hoặc rút ra, ứng dụng sẽ cho phép cập nhật lại danh sách bằng cách nhấn nút "Refresh COM".
 Tiếp theo, phần mềm sẽ phân nhánh logic dựa trên đặc điểm của thiết bị để tránh việc kết nối nhầm lẫn giữa HIL, Logic Analyzer và DUT. Nếu cổng đang được cấu hình là cổng dành cho DUT thì ứng dụng sẽ mở khóa nút "Connect".
-Lý do là vì DUT là thiết bị đang được kiểm thử, được điều khiển nguồn thông qua HIL, nên việc kết nối với DUT sẽ là bước cuối cùng sau khi đã thiết lập xong các kết nối cần thiết với HIL và Logic Analyzer.
+Lý do là vì DUT là thiết bị đang được kiểm thử, được điều khiển nguồn thông qua HIL, nên việc kết nối với DUT sẽ là bước cuối cùng sau khi đã thiết lập xong các kết nối cần thiết với HIL Generator và HIL Collector.
 
-Ngược lại, đối với các thiết bị đóng vai trò hỗ trợ như HIL và Logic Analyzer cần có cơ chế kết nối nghiêm ngặt hơn để đảm bảo các thiết bị đã được kết nối chính xác trước khi kết nối với DUT.
+Ngược lại, đối với các thiết bị đóng vai trò hỗ trợ như HIL Generator và HIL Collector cần có cơ chế kết nối nghiêm ngặt hơn để đảm bảo các thiết bị đã được kết nối chính xác trước khi kết nối với DUT.
 Vì thế nút "Connect" sẽ mặc định bị vô hiệu hóa và chờ sự kiện "Scan device" từ người dùng. Khi quá trình quét được thực hiện, phần mềm sẽ tạm thời mở cổng COM trong khoảng 0.5 giây và truyền đi lệnh "i" để yêu cầu thiết bị trả về ID của thiết bị.
 Chỉ khi chuỗi dữ liệu phản hồi trùng khớp với ID đã được định nghĩa, phần mềm mới xác nhận thiết bị hợp lệ và cho phép tiến hành các bước tiếp theo.\\
 \begin{figure}[H]

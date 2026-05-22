@@ -873,7 +873,7 @@ Memory EMU Tab hỗ trợ giao diện đêr cập nhật dữ liệu cho SPI Fla
 \subsection{Tổ chức thư mục}
 Để thuận tiện cho việc phát triển, mở rộng và bảo trì hệ thống kiểm thử tự động, cấu trúc thư mục của dự án được tổ chức theo hướng phân tách rõ ràng giữa các thành phần kiểm thử, thư viện keyword, tài nguyên dùng chung và kết quả thực thi. 
 
-Hệ thống kiểm thử được xây dựng dựa trên Robot Framework kết hợp với các thư viện Python nhằm hỗ trợ giao tiếp với HIL và Logic Analyzer. Cấu trúc thư mục tổng quát của hệ thống được trình bày như Hình \ref{fig:robot_folder_structure}.
+Hệ thống kiểm thử được xây dựng dựa trên Robot Framework kết hợp với các thư viện Python nhằm hỗ trợ giao tiếp với HIL Generator và HIL Collector. Cấu trúc thư mục tổng quát của hệ thống được trình bày như Hình \ref{fig:robot_folder_structure}.
 
 \begin{figure}[H]
     \centering
@@ -886,7 +886,7 @@ Trong đó, các thư mục chính của hệ thống HIL bao gồm:
 
 \begin{itemize}
     \item \textbf{hil\_logs/}: Ghi lại các log chi tiết của quá trình giao tiếp giữa Robot Framework với hệ thống HIL, bao gồm các lệnh đã gửi, phản hồi nhận được và trạng thái hoạt động của HIL trong suốt quá trình kiểm thử mỗi lần chạy.
-    \item \textbf{libraries/}: Chứa các tập tin định nghĩa keyword dùng chung trong Robot Framework. Các keyword này được sử dụng để xây dựng các bước kiểm thử ở mức cao, giúp test case trở nên trực quan và thân thiện với người dùng hơn. Các thư viện này cũng đóng vai trò là lớp giao tiếp trung gian giữa Robot Framework với hệ thống HIL và Logic Analyzer, giúp ẩn đi các chi tiết mức thấp và cung cấp các thao tác đơn giản để điều khiển hệ thống.
+    \item \textbf{libraries/}: Chứa các tập tin định nghĩa keyword dùng chung trong Robot Framework. Các keyword này được sử dụng để xây dựng các bước kiểm thử ở mức cao, giúp test case trở nên trực quan và thân thiện với người dùng hơn. Các thư viện này cũng đóng vai trò là lớp giao tiếp trung gian giữa Robot Framework với hệ thống HIL Generator và HIL Collector, giúp ẩn đi các chi tiết mức thấp và cung cấp các thao tác đơn giản để điều khiển hệ thống.
     \item \textbf{resources/}: Chứa các tài nguyên dùng chung như biến cấu hình, thông số giao tiếp,... cho HIL, được sử dụng trong nhiều bài kiểm thử khác nhau.
     \item \textbf{results/}: Chứa kết quả sau khi thực hiện kiểm thử bao gồm file báo cáo tổng hợp, file log chi tiết và các dữ liệu phục vụ cho việc đánh giá kết quả kiểm thử.
     \item \textbf{tests/}: Chứa các tập tin kiểm thử được xây dựng bằng Robot Framework. Hệ thống hiện đã cung cấp sẵn các bài kiểm thử mẫu cho các ngoại vi và thiết bị mô phỏng được hỗ trợ trên HIL nhằm giúp người dùng tham khảo và phát triển thêm các kịch bản kiểm thử mới.
@@ -905,7 +905,7 @@ Với cách tổ chức này, các thành phần trong hệ thống được ph�
 
 \subsection{Các keyword hỗ trợ trong hệ thống kiểm thử}
 
-Các keyword được xây dựng trong hệ thống kiểm thử tự động đóng vai trò là lớp giao tiếp trung gian giữa Robot Framework với hệ thống HIL và Logic Analyzer. Thay vì thao tác trực tiếp với các lệnh điều khiển mức thấp, người phát triển chỉ cần sử dụng các keyword tương ứng để xây dựng các test case theo dạng mô tả hành vi kiểm thử.
+Các keyword được xây dựng trong hệ thống kiểm thử tự động đóng vai trò là lớp giao tiếp trung gian giữa Robot Framework với hệ thống HIL Generator và HIL Collector. Thay vì thao tác trực tiếp với các lệnh điều khiển mức thấp, người phát triển chỉ cần sử dụng các keyword tương ứng để xây dựng các test case theo dạng mô tả hành vi kiểm thử.
 
 Bảng \ref{tab:hil_keywords} và Bảng \ref{tab:la_keywords} trình bày các keyword tiêu biểu được hỗ trợ trong hệ thống kiểm thử.
 

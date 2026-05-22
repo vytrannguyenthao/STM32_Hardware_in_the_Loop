@@ -17,7 +17,7 @@ Cụ thể, môi trường mô phỏng sẽ tạo ra các tín hiệu đầu và
 
 Quá trình trao đổi này diễn ra liên tục theo thời gian thực hoặc gần thời gian thực, tạo thành một vòng lặp tương tác giữa phần cứng và mô phỏng. Nhờ nguyên lý này, HIL cho phép kiểm thử các kịch bản phức tạp, các tình huống lỗi và các điều kiện biên mà việc kiểm thử trên hệ thống thực gặp nhiều khó khăn hoặc rủi ro.
 
-\section{Các giao thức giao tiếp ngoại vi trong hệ thống mô phỏng}
+\section{Các giao thức giao tiếp ngoại vi trong khối HIL Generator}
 \subsection{Giao thức UART}
 UART (Universal Asynchronous Receiver Transmitter) là giao thức truyền thông nối tiếp không đồng bộ, sử dụng hai đường tín hiệu chính là TX (Transmit) và RX (Receive). Không giống như các giao thức đồng bộ, UART không sử dụng xung clock chung mà thay vào đó hai thiết bị phải thống nhất trước các tham số truyền thông như tốc độ truyền nhận (baud rate), số bit dữ liệu (Data Bits), bit kiểm tra chẵn lẻ (Parity Bit) và bit dừng (Stop Bit).
 
@@ -364,7 +364,7 @@ Nhờ có bộ lập lịch, chúng ta có thể kiểm soát việc thực thi 
 %         \label{fig:dequeue}
 %     \end{minipage}
 % \end{figure}
-\subsection{Semaphore và Mutex}
+\subsection{Semaphore}
 \textbf{Semaphore} trong hệ điều hành thời gian thực (RTOS) là một cơ chế đồng bộ hóa dùng để kiểm soát truy cập vào các tài nguyên chung hoặc quản lý giao tiếp giữa các thread. Semaphore có thể là \textbf{binary semaphore} chỉ có hai trạng thái 0 hoặc 1 tương tự như khóa hoặc \textbf{counting semaphore} cho phép quản lý nhiều tài nguyên với giá trị đếm lớn hơn. Ví dụ nếu có 1 tài nguyên như buffer và có 3 task có thể truy cập vào buffer đó, counting semaphore lúc này được khởi tạo giá trị là 2 thì semaphore sẽ như 2 chiếc “chìa khóa”, thread nào lấy được sẽ được phép truy cập
 \begin{figure}[H]
     \centering
