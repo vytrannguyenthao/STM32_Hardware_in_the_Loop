@@ -24,10 +24,10 @@ class UARTThread(QThread):
         self.ser = None
         self.spi_parser = SPIParser(self.spi_data.emit, self.log_signal.emit, self.spi_clear.emit, self.pc_log_signal.emit, self.test_completed.emit)
         self.i2c_parser = I2CParser(self.i2c_data.emit, self.log_signal.emit, self.i2c_clear.emit, self.test_completed.emit)
-        self.uart_parser = UARTParser(
-            byte_cb=self.handle_uart_byte,
-            log_cb=self.log_signal.emit
-        )
+        # self.uart_parser = UARTParser(
+        #     byte_cb=self.handle_uart_byte,
+        #     log_cb=self.log_signal.emit
+        # )
     def open(self, port, baud):
         self.port = port
         self.baud = baud
@@ -110,7 +110,7 @@ class UARTThread(QThread):
 
         if self.spi_parser.feed(line): return
         if self.i2c_parser.feed(line): return
-        if self.uart_parser.feed(line): return
+    #     if self.uart_parser.feed(line): return
 
-    def handle_uart_byte(self, byte):
-        self.pc_log_signal.emit(f"UART_BYTE:{byte}")
+    # def handle_uart_byte(self, byte):
+    #     self.pc_log_signal.emit(f"UART_BYTE:{byte}")
