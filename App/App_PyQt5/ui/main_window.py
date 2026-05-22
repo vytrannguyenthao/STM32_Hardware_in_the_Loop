@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
 
         lay_term.addWidget(term_splitter)
 
-        left_tabs.addTab(tab_com, "COM")
+        left_tabs.addTab(tab_com, "Serial")
         left_tabs.addTab(tab_term, "Terminal")
         return left_tabs
 
