@@ -97,7 +97,7 @@ class PeripheralTab(QWidget):
         freq_layout = QHBoxLayout()
         freq_layout.addWidget(QLabel("Common Frequency (Hz):"))
         self.spin_pwm_freq = QSpinBox()
-        self.spin_pwm_freq.setRange(1, 1000000)
+        self.spin_pwm_freq.setRange(1, 5000000)
         self.spin_pwm_freq.setValue(1000)
         
         self.btn_set_freq = QPushButton("Set Freq")
