@@ -31,7 +31,7 @@ Các trạng thái chính của HIL Collector gồm:
 \subsection{Lưu đồ giải thuật của HIL Collector}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/LA_flow_chart.jpg}
+    \includegraphics[width=1.15\textwidth]{image/LA_flow_chart.jpg}
     \caption{Lưu đồ giải thuật của HIL Collector}
     \label{fig:LA_flow_chart}
 \end{figure}
@@ -70,7 +70,7 @@ Thứ hai, mỗi phân vùng Digital và Analog lại được chia thành hai p
 Lợi ích của việc sử dụng kỹ thuật này được thể hiện rõ khi so sánh với bộ đệm đơn (Single Buffering) truyền thống. Với một vùng nhớ duy nhất, khi DMA ghi đầy bộ đệm, quá trình lấy mẫu bắt buộc phải tạm ngừng để chờ CPU đọc và truyền dữ liệu.
 Khoảng thời gian CPU xử lý dữ liệu này sẽ tạo ra thời gian chết. Hậu quả là tín hiệu trong thời gian chết bị bỏ sót, gây đứt gãy luồng dữ liệu và giới hạn tần số lấy mẫu của HIL Collector.
 Ngược lại, với kỹ thuật Ping-Pong Buffering, hệ thống sẽ duy trì được tính liên tục của dữ liệu. Trong quá trình vận hành, khi luồng dữ liệu đang được DMA ghi vào một nửa bộ đệm thứ nhất (Ping), trong khi đó CPU có thể truy cập vào một nửa bộ đệm thứ hai (Pong) để xử lý và truyền khối dữ liệu thu thập trước đó.
-Ngay thời điểm bộ đệm Ping đầy, DMA sẽ chuyển sang ghi vào bộ đệm Pong và quá trình được lặp lại liên tục. Việc cấp phát và phân chia bộ đệm này giúp triệt tiêu thời gian chết, tách biệt hoàn toàn tiến trình thu thập dữ liệu của phần cứng và xử lý của phần mềm, từ đó đảm bảo HIL Collector có thể lấy mẫu liên tục ở tần số cao mà không xảy ra hiện tượng mất dữ liệu.\\
+Ngay thời điểm bộ đệm Ping đầy, DMA sẽ chuyển sang ghi vào bộ đệm Pong và quá trình được lặp lại liên tục. Việc cấp phát và phân chia bộ đệm này giúp triệt tiêu thời gian chết, tách biệt hoàn toàn tiến trình thu thập dữ liệu của phần cứng và xử lý của phần mềm, từ đó đảm bảo HIL Collector có thể lấy mẫu liên tục ở tần số cao mà không xảy ra hiện tượng mất dữ liệu.
 
 \begin{figure}[H]
     \centering
@@ -101,8 +101,8 @@ Chính vì thế, đối với tín hiệu số, số kênh được lấy mẫu
 Tuy nhiên bit MSB phải được set lên 1, do đó vi điều khiển cần dịch phải 1 bit, loại bỏ bit LSB và chỉ gửi 7 bit còn lại.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{image/LA_analog.jpg}
-    \caption{Xử lý dữ liệu tín hiệu tương tự}
+    \includegraphics[width=0.8\textwidth]{image/LA_analog.jpg}
+    \caption{Khung dữ liệu gửi lên PC cho 1 mẫu Digital và Analog}
     \label{fig:LA_analog}
 \end{figure}
 
