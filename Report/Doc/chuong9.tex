@@ -5,6 +5,14 @@ Chương này trình bày các kết quả đạt được sau quá trình thi�
 \section{Kết quả thực hiện phần cứng}
 \begin{figure}[H]
     \centering
+    \includegraphics[width=1\textwidth]{image/pcb_layout.jpg}
+    \caption{Vị trí các chân ngoại vi trên hệ thống}
+    \label{fig:pcb_layout}
+\end{figure}
+\vspace{1cm}
+
+\begin{figure}[H]
+    \centering
     \begin{minipage}{0.49\textwidth}
         \centering
         \captionsetup{width=6cm, justification=centering}
@@ -21,12 +29,12 @@ Chương này trình bày các kết quả đạt được sau quá trình thi�
 \vspace{1cm}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/pcb_final.jpg}
+    \includegraphics[width=0.7\textwidth]{image/pcb_final.jpg}
     \caption{PCB sau khi gia công}
-    \label{fig:dac_triangle_wave}
+    \label{fig:pcb_final}
 \end{figure}
 
-\section{Kết quả thực hiện phần mềm HIL}
+\section{Kết quả thực hiện phần mềm HIL Generator}
 
 \subsection{Kết quả mô phỏng ngoại vi}
 
@@ -56,11 +64,6 @@ Số lượng GPIO Input
 Số lượng GPIO Output 
 & 12 chân 
 & Hỗ trợ xuất tín hiệu số điều khiển DUT thông qua các chân PB0 -- PB5 và PB10 -- PB15 \\
-\hline
-
-Mức điện áp hoạt động 
-& 3.3V 
-& \\
 \hline
 
 Chế độ hỗ trợ 
@@ -100,12 +103,12 @@ Vùng chuyển mức
 
 \end{table}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.65\textwidth]{image/gpio_pcb.png}
-    \caption{Vị trí các chân GPIO trên hệ thống HIL}
-    \label{fig:gpio_pcb}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.65\textwidth]{image/gpio_pcb.png}
+%     \caption{Vị trí các chân GPIO trên hệ thống HIL}
+%     \label{fig:gpio_pcb}
+% \end{figure}
 
 \subsubsection{Kết quả mô phỏng ADC}
 
@@ -717,13 +720,13 @@ SPI3
 \label{tab:hil_peripherals_pins}
 \end{table}
 
-\section{Kết quả thực hiện phần mềm Logic Analyzer trên HIL}
-Như đã trình bày trong mục \ref{subsec:la_process_data} (\nameref{subsec:la_process_data}), khối Logic Analyzer hỗ trợ tối đa 7 kênh digital và 1 kênh analog để thu thập tín hiệu.
+\section{Kết quả thực hiện phần mềm HIL Collector}
+Như đã trình bày trong mục \ref{subsec:la_process_data} (\nameref{subsec:la_process_data}), khối HIL Collector hỗ trợ tối đa 7 kênh digital và 1 kênh analog để thu thập tín hiệu.
 Bên cạnh đó, hệ thống được thiết kế với tốc độ lấy mẫu tối đa 300 kHz nhằm đảm bảo dữ liệu được thu thập và truyền đi liên tục, hạn chế tình trạng mất mẫu hoặc dữ liệu bị ghi đè trong quá trình xử lý và truyền nhận.
 
 \begin{table}[H]
 \centering
-\caption{Các ngoại vi và chân tín hiệu trong hệ thống Logic Analyzer}
+\caption{Các ngoại vi và chân tín hiệu trong khối HIL Collector}
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{|l|c|X|} 
 \hline
@@ -739,11 +742,11 @@ UART & Debug UART & GPIO0 (TX), GPIO1 (RX)\\
 \label{tab:logic_analyzer_pins}
 \end{table}
 
-Dữ liệu được truyền từ Logic Analyzer lên máy tính chỉ là các mẫu dữ liệu thô, chưa thể trực tiếp sử dụng để quan sát và phân tích tín hiệu.
+Dữ liệu được truyền từ HIL Collector lên máy tính chỉ là các mẫu dữ liệu thô, chưa thể trực tiếp sử dụng để quan sát và phân tích tín hiệu.
 Vì vậy, hệ thống cần thực hiện quá trình xử lý và chuyển đổi dữ liệu nhằm tái tạo lại dạng sóng tương ứng của các tín hiệu thu thập được.
 Kết quả phía dưới sẽ sử dụng phần mềm mà nhóm thiết kế để có thể hiển thị dạng sóng trực quan.
 
-Sử dụng các tín hiệu (sine, tam giác, pwm) đã đo bằng oscilloscope ở các Hình: \ref{fig:dac_sine_wave}, \ref{fig:dac_triangle_wave}, \ref{fig:pwm_waveform_30}, \ref{fig:pwm_waveform_65} để kiểm tra kết quả của Logic analyzer.
+Sử dụng các tín hiệu (sine, tam giác, pwm) đã đo bằng oscilloscope ở các Hình: \ref{fig:dac_sine_wave}, \ref{fig:dac_triangle_wave}, \ref{fig:pwm_waveform_30}, \ref{fig:pwm_waveform_65} để kiểm tra kết quả của HIL Collector.
 
 \begin{figure}[H]
     \centering
@@ -772,24 +775,23 @@ Sử dụng các tín hiệu (sine, tam giác, pwm) đã đo bằng oscilloscope
     \caption{PWM với tần số 200Hz, duty cycle 65\%}
     \label{fig:power_app}
 \end{figure}
-Kết quả thu được cho thấy đối với các tín hiệu digital, Logic Analyzer có kết quả chính xác hơn đo bằng oscilloscope.
+Kết quả thu được cho thấy đối với các tín hiệu digital, HIL Collector có kết quả chính xác hơn đo bằng oscilloscope.
 Nguyên nhân do phần mềm đo tần số và độ rộng xung dựa trên các mẫu tín hiệu số nên các thông số này chính xác hơn.
 Với sóng sine, $V_{pp}$ đo được là 3.2V, sai số khoảng 4\% so với 3.33V đo được trên oscilloscope.
 Với sóng tam giác, $V_{pp}$ đo được là 3.22V, sai số khoảng 4.7\%. Sai số này đến từ việc dịch bit của tín hiệu analog.
-Sai số nhỏ hơn 5\% cho thấy Logic Analyzer vẫn hoạt động ổn định để thực hiện các bài kiểm thử cho DUT. 
+Sai số nhỏ hơn 5\% cho thấy HIL Collector vẫn hoạt động ổn định để thực hiện các bài kiểm thử cho DUT. 
 
 \section{Kết quả thực hiện phần mềm trên máy tính}
 Giao diện chính của phần mềm được tổ chức dưới dạng các tab riêng biệt nhằm tăng tính trực quan và thuận tiện trong quá trình sử dụng, bao gồm:
 \begin{itemize}
     \item \textbf{Serial Tab}: Cấu hình các  thông số cho Serial port (cổng COM, baudrate).
     \item \textbf{Terminal Tab}: Hỗ trợ giao diện dòng lệnh cho người dùng nhập lệnh thủ công.
-    \item \textbf{Memory EMU Tab}: Hỗ trợ người dùng thao tác với thiết bị bộ nhớ mô phỏng trên HIL như SPI Flash và I2C EEPROM.
-    \item \textbf{Logic Analyzer Tab}: Hiển thị tín hiệu digital, analog giúp người dùng có thể quan sát và phân tích các tín hiệu như tần số, dạng sóng,...
-    \item \textbf{Generator Tab}: Hỗ trợ người dùng thao tác với các thiết bị ngoại vi khác như GPIO, ADC, DAC,... để kiểm thử DUT.
+    \item \textbf{Generator Tab}: Hỗ trợ người dùng thao tác với các thiết bị ngoại vi khác như PWM, GPIO, DAC,... để kiểm thử DUT.
+    \item \textbf{Collector Tab}: Hiển thị tín hiệu digital, analog giúp người dùng có thể quan sát và phân tích các tín hiệu như tần số, dạng sóng,...
 \end{itemize}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/PC_GUI.png}
+    \includegraphics[angle=90, height=0.96\textheight, keepaspectratio]{image/PC_GUI.png}
     \caption{Giao diện chính của phần mềm trên máy tính}
     \label{fig:PC_GUI}
 \end{figure}
@@ -842,31 +844,21 @@ Người dùng sẽ được cung cấp các nút nhấn trên giao diện để
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/app_per_can_result.jpg}
+    \includegraphics[width=1.1\textwidth]{image/app_per_can_result.jpg}
     \caption{Điều khiển CAN bằng phần mềm}
     \label{fig:power_app}
 \end{figure}
 \textbf{Nhận xét:} Các khối điều khiển tạo tín hiệu trên phần mềm đã hoạt động đúng với thiết kế, hỗ trợ người dùng dử dụng những ngoại vi cần thiết cho quá tình kiểm thử cho thiết bị DUT.
 
-\subsection{Kết quả giao diện Logic Analyzer Tab}
+\subsection{Kết quả giao diện Collector Tab}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/app_la_result.jpg}
-    \caption{Logic thu thập dữ liệu và hiển thị lên giao diện}
+    \includegraphics[angle=90, width=0.8\textwidth]{image/app_la_result.jpg}
+    \caption{Collector thu thập dữ liệu và hiển thị lên giao diện}
     \label{fig:power_app}
 \end{figure}
-\textbf{Nhận xét:} Phần mềm đã thu thập dữ liệu từ Logic analyzer sau đó vẽ lại dạng sóng tương ứng với các kênh tín hiệu.
+\textbf{Nhận xét:} Phần mềm đã thu thập dữ liệu từ HIL Collector sau đó vẽ lại dạng sóng tương ứng với các kênh tín hiệu.
 Đối với kênh digital đã đo được tần số và độ rộng xung. Đối với kênh analog, đã đo được tần số, $V_{pp}$ và điện áp tại vị trí con trỏ.
-
-\subsection{Kết quả giao diện Memory EMU Tab}
-Memory EMU Tab hỗ trợ giao diện đêr cập nhật dữ liệu cho SPI Flash và I2C EEPROM lên bảng giúp người dùng có thể quan sát, kiểm tra dữ liệu dễ dàng hơn.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{image/app_mem_emu.jpg}
-    \caption{Dữ liệu của SPI Flash và I2C EEPROM Emu}
-    \label{fig:app_mem_emu}
-\end{figure}
-\textbf{Nhận xét:} Phần mềm có thể cập nhật dữ liệu đọc được từ các thiết bị nhớ mô phỏng (Flash, EEPROM) lên giao diện.
 
 \section{Kết quả thực hiện phần mềm kiểm thử tự động trên máy tính}
 
@@ -912,7 +904,7 @@ Bảng \ref{tab:hil_keywords} và Bảng \ref{tab:la_keywords} trình bày các 
 \renewcommand{\arraystretch}{1.3}
 
 \begin{longtable}{|p{4.8cm}|p{8.7cm}|}
-\caption{Các keyword hỗ trợ bởi thư viện HIL}
+\caption{Các keyword hỗ trợ bởi thư viện HIL Generator}
 \label{tab:hil_keywords} \\
 
 \hline
@@ -1085,7 +1077,7 @@ HIL Stop Triangle Wave
 
 \begin{table}[H]
 \centering
-\caption{Các keyword hỗ trợ bởi thư viện Logic Analyzer}
+\caption{Các keyword hỗ trợ bởi thư viện HIL Collector}
 \label{tab:la_keywords}
 \renewcommand{\arraystretch}{1.3}
 

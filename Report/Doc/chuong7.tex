@@ -48,10 +48,10 @@ Phần mềm trên máy tính được thiết kế theo mô hình đa luồng (
 Qua đó đảm bảo việc cập nhật giao diện luôn mượt mà và không bị gián đoạn khi hệ thống phải xử lý các tác vụ truyền nhận serial.
 
 Quá trình khởi động ứng dụng bắt đầu bằng việc khởi tạo cửa sổ chính \texttt{QMainWindow}. Để tối ưu hóa không gian hiển thị và phân tách logic điều khiển cho người dùng, bộ quản lý không gian làm việc \texttt{QTabWidget} được triển khai, đóng vai trò như một bộ định tuyến cho phép chuyển đổi linh hoạt giữa các tab khác nhau bằng cách chọn vào tab tương ứng.
-Trong đó Serial Tab chịu trách nhiệm cấu hình các thông số cho cổng giao tiếp trước khi kết nối. Các tab chức năng như Generator, Logic Analyzer, Memory EMU có nhiệm vụ tiếp nhận các lệnh điều khiển thông qua cổng serial, đồng thời xử lý và cập nhật kết quả lên giao diện người dùng.
+Trong đó Serial Tab chịu trách nhiệm cấu hình các thông số cho cổng giao tiếp trước khi kết nối. Các tab chức năng như Generator, Collector có nhiệm vụ tiếp nhận các lệnh điều khiển thông qua cổng serial, đồng thời xử lý và cập nhật kết quả lên giao diện người dùng.
 Riêng Terminal Tab được thiết kế để người dùng có thể tương tác với phần cứng bằng cách gửi các lệnh thủ công.
 
-Nhằm đáp ứng yêu cầu giao tiếp đồng thời với nhiều thiết bị phần cứng, Serial Thread sẽ có 3 luồng chuyên biệt, hoạt động song song. Cụ thể, luồng HIL quản lý lệnh điều khiển và giám sát thiết bị giả lập phần cứng; luồng Logic Analyzer chịu trách nhiệm giao tiếp, thu thập chuỗi dữ liệu từ Logic analyzer; luồng DUT đảm nhận việc truyền nhận dữ liệu với phần cứng đang được kiểm thử.
+Nhằm đáp ứng yêu cầu giao tiếp đồng thời với nhiều thiết bị phần cứng, Serial Thread sẽ có 3 luồng chuyên biệt, hoạt động song song. Cụ thể, luồng \textbf{Generator} quản lý lệnh điều khiển và giám sát thiết bị giả lập phần cứng; luồng \textbf{Collector} chịu trách nhiệm giao tiếp, thu thập chuỗi dữ liệu từ HIL Collector; luồng DUT đảm nhận việc truyền nhận dữ liệu với phần cứng đang được kiểm thử.
 
 Khối giao diện người dùng và luồng xử lý giao tiếp được liên kết với nhau theo cơ chế hướng sự kiện (Event-driven). Khi có thao tác điều khiển từ người dùng tại các tab, khối giao diện sẽ phát tín hiệu kích hoạt các tác vụ tương ứng trong các luồng Serial.
 Các luồng nền này tiến hành giao tiếp vật lý với phần cứng và ngay sau khi quá trình thực thi hoàn tất, chúng sẽ gửi tín hiệu mang theo dữ liệu trả về cho khối giao diện người dùng để tiến hành thực hiện các cập nhật cần thiết lên ứng dụng.
@@ -66,7 +66,7 @@ Các luồng nền này tiến hành giao tiếp vật lý với phần cứng v
 \end{figure}
 Lưu đồ minh họa quy trình khởi tạo, phân loại và thiết lập kết nối với cổng COM trong Serial Tab. Quá trình bắt đầu bằng việc quét và trích xuất danh sách các cổng COM khả dụng trên máy tính.
 Người dùng sẽ chọn cổng COM mong muốn từ danh sách này, nếu có thay đổi khi có thiết bị được cắm vào hoặc rút ra, ứng dụng sẽ cho phép cập nhật lại danh sách bằng cách nhấn nút "Refresh COM".
-Tiếp theo, phần mềm sẽ phân nhánh logic dựa trên đặc điểm của thiết bị để tránh việc kết nối nhầm lẫn giữa HIL, Logic Analyzer và DUT. Nếu cổng đang được cấu hình là cổng dành cho DUT thì ứng dụng sẽ mở khóa nút "Connect".
+Tiếp theo, phần mềm sẽ phân nhánh logic dựa trên đặc điểm của thiết bị để tránh việc kết nối nhầm lẫn giữa HIL Generator, HIL Collector và DUT. Nếu cổng đang được cấu hình là cổng dành cho DUT thì ứng dụng sẽ mở khóa nút "Connect".
 Lý do là vì DUT là thiết bị đang được kiểm thử, được điều khiển nguồn thông qua HIL, nên việc kết nối với DUT sẽ là bước cuối cùng sau khi đã thiết lập xong các kết nối cần thiết với HIL Generator và HIL Collector.
 
 Ngược lại, đối với các thiết bị đóng vai trò hỗ trợ như HIL Generator và HIL Collector cần có cơ chế kết nối nghiêm ngặt hơn để đảm bảo các thiết bị đã được kết nối chính xác trước khi kết nối với DUT.
@@ -81,21 +81,21 @@ Chỉ khi chuỗi dữ liệu phản hồi trùng khớp với ID đã được 
 
 % \subsection{Xử lý Memory Tab}
 % Tạm thời ẩn do tab này cũng chỉ là update UI
-\subsection{Logic Analyzer Tab}
+\subsection{Collector Tab}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.3\textwidth]{image/App_la_overview.jpg}
-    \caption{Mô hình xử lý tác vụ trong Logic Analyzer Tab}
+    \caption{Mô hình xử lý tác vụ trong Collector Tab}
     \label{fig:App_la_overview}
 \end{figure}
-Logic Analyzer Tab đưuọc xây dựng theo kiến trúc phân lớp chức năng. Lớp \textbf{Xử lý giao diện} đóng vai trò khởi tạo và quản lý các thành phần hiển thị của ứng dụng.
-Tiếp theo là lớp \textbf{Nhận dữ liệu Serial}, đây là tầng có nhiệm vụ nhận các sự kiện truyền nhận dữ liệu từ Thread Serial, sau đó thu thập và quản lý các dữ liệu thô được gửi từ Logic Analyzer.
+Collector Tab được xây dựng theo kiến trúc phân lớp chức năng. Lớp \textbf{Xử lý giao diện} đóng vai trò khởi tạo và quản lý các thành phần hiển thị của ứng dụng.
+Tiếp theo là lớp \textbf{Nhận dữ liệu Serial}, đây là tầng có nhiệm vụ nhận các sự kiện truyền nhận dữ liệu từ Thread Serial, sau đó thu thập và quản lý các dữ liệu thô được gửi từ HIL Collector.
 Lớp \textbf{Vẽ biểu đồ} sẽ xử lý việc chuyển đổi dữ liệu thô thành các dạng sóng trực quan. Cuối cùng là lớp \textbf{Xử lý thao tác chuột} giúp người dùng có thể tương tác với biểu đồ sóng.
 Sự phân cấp này giúp tách biệt giữa các chức năng khác nhau, tối ưu hóa hiệu suất.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{image/App_la.jpg}
-    \caption{Giao diện của Logic Analyzer Tab}
+    \caption{Giao diện của Collector Tab}
     \label{fig:App_la}
 \end{figure}
 
@@ -109,11 +109,11 @@ Sự phân cấp này giúp tách biệt giữa các chức năng khác nhau, t�
 Lưu đồ giải thuật trên mô tả chi tiết quá trình thực hiện và phối hợp giữa hai lớp \textbf{Xử lý giao diện} và \textbf{Nhận dữ liệu Serial}.
 Quá trình bắt đầu tại khối giao diện, nơi hệ thống khởi tạo các thành phần hiển thị như nút nhấn, các lựa chọn cấu hình thông số (Số mẫu, Tốc độ lấy mẫu) và khu vực hiển thị biểu đồ sóng.
 Khi nút "Start" được nhấn, phần mềm sẽ thay đổi trạng thái của nút thành "Stop", đồng thời tiến hành dọn dẹp bộ đệm cũ và khởi động timer chịu trách nhiệm cập nhật biểu đồ.
-Ngay sau đó phần mềm sẽ gửi các thông số cấu hình gồm số mẫu và tốc độ lấy mẫu cùng với lệnh "F" đến Logic Analyzer để bắt đầu quá trình lấy mẫu.
+Ngay sau đó phần mềm sẽ gửi các thông số cấu hình gồm số mẫu và tốc độ lấy mẫu cùng với lệnh "F" đến HIL Collector để bắt đầu quá trình lấy mẫu.
 
 Sau khi lệnh khởi chạy được gửi đi, phần mềm sẽ thu thập dữ liệu. Khi có dữ liệu, phần mềm sẽ tiến hành lọc và chỉ lưu các giá trị $\ge$ 0x80 vào bộ đệm \texttt{raw\_buffer}.
-Vòng lặp thu thập này hoạt động liên tục cho đến khi nhận được cờ báo kết thúc "+" từ Logic Analyzer. Song song với quá trình này, lớp \textbf{Xử lý giao diện} vẫn giám sát trạng thái từ người dùng.
-Nếu người dùng nhấn nút "Stop", phần mềm sẽ khôi phục nút về trạng thái "Start", dừng timer cập nhật biểu đồ và gửi "+" đến Logic Analyzer để kết thúc quá trình lấy mẫu.
+Vòng lặp thu thập này hoạt động liên tục cho đến khi nhận được cờ báo kết thúc "+" từ HIL Collector. Song song với quá trình này, lớp \textbf{Xử lý giao diện} vẫn giám sát trạng thái từ người dùng.
+Nếu người dùng nhấn nút "Stop", phần mềm sẽ khôi phục nút về trạng thái "Start", dừng timer cập nhật biểu đồ và gửi "+" đến HIL Collector để kết thúc quá trình lấy mẫu.
 \subsubsection{Lớp Vẽ biểu đồ}
 \begin{figure}[H]
     \centering
@@ -135,11 +135,11 @@ Khi đã dừng nhận dữ liệu, phần mềm sẽ hiển thị toàn bộ d�
 \subsubsection{Lớp Xử lý thao tác chuột}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{image/App_la_mouse.jpg}
+    \includegraphics[width=0.9\textwidth]{image/App_la_mouse.jpg}
     \caption{Lưu đồ giải thuật Xử lý thao tác chuột}
     \label{fig:App_la_mouse}
 \end{figure}
-Logic Analyzer Tab cho phép người dùng thao tác trực tiếp trên không gian đồ thị thông qua các thao tác chuột:
+Collector Tab cho phép người dùng thao tác trực tiếp trên không gian đồ thị thông qua các thao tác chuột:
 \begin{itemize}
     \item[-] \textbf{Thao tác rê chuột:} Khi người dùng di chuyển con trỏ qua không gian đồ thị, hệ thống sẽ điều khiển một đường gióng dọc di chuyển đồng bộ theo tọa độ con trỏ.
     Cùng lúc đó, phần mềm sẽ truy xuất mảng dữ liệu và hiển thị trực tiếp mức điện áp ngay tại thời điểm tương ứng của kênh tín hiệu Analog. Tính năng này giúp người dùng dễ dàng kiểm tra nhanh dữ liệu tại từng điểm lấy mẫu.
@@ -153,7 +153,7 @@ Logic Analyzer Tab cho phép người dùng thao tác trực tiếp trên không
 Lưu đồ giải thuật bên dưới sẽ làm rõ cách tính toán tần số, độ rộng xung và $V_{p-p}$.\\
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/App_la_mouse_pull.jpg}
+    \includegraphics[width=1.1\textwidth]{image/App_la_mouse_pull.jpg}
     \caption{Lưu đồ giải thuật tính toán tần số, độ rộng xung}
     \label{fig:App_la_mouse_pull}
 \end{figure}
@@ -178,7 +178,7 @@ Kết thúc quá trình, toàn bộ tập thông số bao gồm Tần số, Duty
 \subsection{Generator Tab}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/App_per_tab.jpg}
+    \includegraphics[width=0.9\textwidth]{image/App_per_tab.jpg}
     \caption{Sơ đồ khối các chức năng mô phỏng và giao tiếp trong Generator Tab}
     \label{fig:App_per_tab}
 \end{figure}
@@ -196,7 +196,7 @@ Khối \textbf{CAN Controller \& Monitor} hỗ trợ người dùng thao tác tr
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{image/App_per_ui.jpg}
+    \includegraphics[width=1.1\textwidth]{image/App_per_ui.jpg}
     \caption{Giao diện của Generator Tab}
     \label{fig:App_per_ui}
 \end{figure}
@@ -204,7 +204,7 @@ Khối \textbf{CAN Controller \& Monitor} hỗ trợ người dùng thao tác tr
 \subsubsection{Khối PWM Generator}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{image/App_per_pwm.jpg}
+    \includegraphics[width=0.7\textwidth]{image/App_per_pwm.jpg}
     \caption{Lưu đồ giải thuật khối PWM Generator}
     \label{fig:App_per_pwm}
 \end{figure}
@@ -258,7 +258,7 @@ Sau khi lệnh được gửi thành công, trạng thái nút trên giao diện
 \subsubsection{Khối Potentiometer Simulation}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.25\textwidth]{image/App_per_dac.jpg}
+    \includegraphics[width=0.3\textwidth]{image/App_per_dac.jpg}
     \caption{Lưu đồ giải thuật khối Potentiometer Simulation}
     \label{fig:App_per_dac}
 \end{figure}
@@ -276,20 +276,20 @@ Trong trường hợp người dùng chưa nhấn nút xác nhận, hệ thống
 \subsubsection{Khối CAN Controller \& Monitor}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{image/App_per_can.jpg}
+    \includegraphics[width=0.62\textwidth]{image/App_per_can.jpg}
     \caption{Sơ đồ khối chức năng CAN Controller \& Monitor}
     \label{fig:App_per_can}
 \end{figure}
 Sơ đồ minh họa cho quá trình giao tiếp của mạng CAN được chia thành ba đoạn riêng biệt:
 
-Giai đoạn truyền dữ liệu: quá trình sẽ được kích hoạt khi người dùng tương tác trên giao diện thông qua việc nhập chuỗi và nhấn "Send String", hoặc chọn gửi gói dữ liệu định sẵn bằng nút "Send 256 Byte buffer".
+\textbf{Giai đoạn truyền dữ liệu:} quá trình sẽ được kích hoạt khi người dùng tương tác trên giao diện thông qua việc nhập chuỗi và nhấn "Send String", hoặc chọn gửi gói dữ liệu định sẵn bằng nút "Send 256 Byte buffer".
 Sau đó phần mềm sẽ ghi nhận tác vụ và hiển thị sự kiện này lên bảng giám sát Monitor. Đồng thời phần mềm sẽ truyền lệnh xuống hệ thống HIL để yêu cầu đóng gói dữ liệu.
 Tại đây, HIL sẽ tiến hành gửi gói dữ liệu đến thiết bị kiểm thử DUT thông qua bus CAN.
 
-Giai đoạn DUT phản hồi và HIL lưu trữ: Khi DUT nhận được dữ liệu từ bus CAN, thiết bị sẽ thực hiện cơ chế phản hồi vòng lặp (echo), gửi lại gói dữ liệu đó lên mạng CAN.
+\textbf{Giai đoạn DUT phản hồi và HIL lưu trữ:} Khi DUT nhận được dữ liệu từ bus CAN, thiết bị sẽ thực hiện cơ chế phản hồi vòng lặp (echo), gửi lại gói dữ liệu đó lên mạng CAN.
 HIL sẽ nhận gói tin và tiến hành lưu trữ cục bộ vào bộ nhớ đệm nội bộ của hệ thống.
 
-Giai đoạn truy xuất dữ liệu từ HIL: Quá trình gửi dữ liệu lên phần mềm chỉ thực sự diễn ra khi người dùng chủ động nhấn nút "Read CAN buffer".
+\textbf{Giai đoạn truy xuất dữ liệu từ HIL:} Quá trình gửi dữ liệu lên phần mềm chỉ thực sự diễn ra khi người dùng chủ động nhấn nút "Read CAN buffer".
 Khi đó phần mềm sẽ gửi lệnh yêu cầu HIL gửi những dữ liệu đã lưu. Hệ thống HIL sẽ lần lượt gửi ID của DUT và các byte dữ liệu thô dưới định dạng mã HEX.
 Phần mềm sẽ lưu trữ dữ liệu này đến khi nhận được tín hiệu xác nhận hoàn tất "OK" từ HIL. Sau đó phần mềm sẽ thực hiện chuyển đổi mã HEX sang định dạng ký tự ASCII.
 Cuối cùng, giao diện sẽ hiển thị toàn bộ gói tin cả định dạng HEX và ASCII lên bảng Monitor.

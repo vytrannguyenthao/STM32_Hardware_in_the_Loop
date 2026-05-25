@@ -34,7 +34,7 @@ Các thư viện kiểm thử có thể là các thư viện có sẵn của Rob
 
 Trong phương pháp keyword-driven testing, mỗi thao tác kiểm thử được xây dựng dưới dạng các keyword có ý nghĩa rõ ràng như gửi lệnh, đọc phản hồi, kiểm tra dữ liệu hoặc xác nhận trạng thái hệ thống. Nhờ đó, các test case được biểu diễn dưới dạng các bước kiểm thử trực quan, dễ đọc và gần với quy trình kiểm thử thực tế hơn so với việc viết hoàn toàn bằng mã nguồn Python.
 
-Ưu điểm lớn nhất của Robot Framework là khả năng chuẩn hóa cấu trúc test case và tách biệt rõ ràng giữa phần logic kiểm thử với phần xử lý giao tiếp phần cứng. Các thao tác phức tạp như gửi lệnh UART, cấu hình EEPROM giả lập, điều khiển RTC, đọc dữ liệu Logic Analyzer hoặc kiểm tra tín hiệu PWM có thể được xây dựng trong các thư viện Python tự phát triển, sau đó đóng gói thành các keyword đơn giản để tái sử dụng trong nhiều test case khác nhau. Điều này giúp hệ thống vừa giữ được tính linh hoạt của Python, vừa đảm bảo khả năng quản lý tập trung và dễ bảo trì.
+Ưu điểm lớn nhất của Robot Framework là khả năng chuẩn hóa cấu trúc test case và tách biệt rõ ràng giữa phần logic kiểm thử với phần xử lý giao tiếp phần cứng. Các thao tác phức tạp như gửi lệnh UART, cấu hình EEPROM giả lập, điều khiển RTC, đọc dữ liệu HIL Collector hoặc kiểm tra tín hiệu PWM có thể được xây dựng trong các thư viện Python tự phát triển, sau đó đóng gói thành các keyword đơn giản để tái sử dụng trong nhiều test case khác nhau. Điều này giúp hệ thống vừa giữ được tính linh hoạt của Python, vừa đảm bảo khả năng quản lý tập trung và dễ bảo trì.
 
 Bên cạnh đó, Robot Framework hỗ trợ tự động sinh báo cáo kiểm thử dưới dạng log, report và thống kê kết quả PASS/FAIL sau mỗi lần thực thi. Đây là một ưu điểm rất quan trọng trong kiểm thử firmware vì giúp kỹ sư dễ dàng theo dõi kết quả, phân tích lỗi và thực hiện kiểm thử hồi quy sau mỗi lần cập nhật firmware mà không cần xây dựng thêm hệ thống báo cáo riêng.
 
@@ -270,17 +270,17 @@ Hệ thống kiểm thử sẽ so sánh giá trị điện áp DUT đo được 
 
 Mục đích của bài kiểm thử này là xác minh khả năng tạo tín hiệu analog của DUT thông qua bộ chuyển đổi số sang tương tự (DAC). Bài kiểm thử nhằm đảm bảo firmware cấu hình đúng chức năng DAC, đồng thời tín hiệu analog đầu ra thực tế của DUT đáp ứng đúng dạng sóng và tần số theo yêu cầu thiết kế.
 
-Trong bài kiểm thử này, DUT đóng vai trò chủ động phát sinh tín hiệu analog dưới dạng sóng sine và sóng tam giác với tần số xác định trước. Hệ thống Logic Analyzer được sử dụng để thu thập trực tiếp tín hiệu analog tại chân DAC, sau đó dữ liệu được xử lý và phân tích bằng thuật toán FFT nhằm xác minh đặc tính của dạng sóng đầu ra.
+Trong bài kiểm thử này, DUT đóng vai trò chủ động phát sinh tín hiệu analog dưới dạng sóng sine và sóng tam giác với tần số xác định trước. Hệ thống HIL Collector được sử dụng để thu thập trực tiếp tín hiệu analog tại chân DAC, sau đó dữ liệu được xử lý và phân tích bằng thuật toán FFT nhằm xác minh đặc tính của dạng sóng đầu ra.
 
 Quy trình kiểm thử tổng quát bao gồm các bước sau:
 
 \begin{itemize}
-    \item Bước 1: Thiết lập môi trường kiểm thử bằng cách kết nối HIL, Logic Analyzer, cấp nguồn cho DUT và thiết lập kết nối với DUT.
+    \item Bước 1: Thiết lập môi trường kiểm thử bằng cách kết nối HIL Generator, HIL Collector, cấp nguồn cho DUT và thiết lập kết nối với DUT.
     \item Bước 2: DUT thực hiện phát tín hiệu sóng sine với tần số xác định trước.
-    \item Bước 3: Logic Analyzer thu thập dữ liệu tín hiệu analog tại chân DAC và hệ thống thực hiện phân tích để xác minh tín hiệu có đúng dạng sóng sine và đúng tần số mong đợi hay không.
+    \item Bước 3: HIL Collector thu thập dữ liệu tín hiệu analog tại chân DAC và hệ thống thực hiện phân tích để xác minh tín hiệu có đúng dạng sóng sine và đúng tần số mong đợi hay không.
     \item Bước 4: DUT tiếp tục phát tín hiệu sóng tam giác với tần số xác định trước.
-    \item Bước 5: Logic Analyzer tiếp tục thu thập dữ liệu và hệ thống thực hiện phân tích để xác minh tín hiệu có đúng dạng sóng tam giác và đúng tần số mong đợi hay không.
-    \item Bước 6: Kết thúc môi trường kiểm thử bằng cách ngắt kết nối DUT, tắt nguồn DUT, ngắt kết nối Logic Analyzer và HIL.
+    \item Bước 5: HIL Collector tiếp tục thu thập dữ liệu và hệ thống thực hiện phân tích để xác minh tín hiệu có đúng dạng sóng tam giác và đúng tần số mong đợi hay không.
+    \item Bước 6: Kết thúc môi trường kiểm thử bằng cách ngắt kết nối DUT, tắt nguồn DUT, ngắt kết nối HIL Collector và HIL Generator.
 \end{itemize}
 
 Điều kiện đánh giá:
@@ -299,7 +299,7 @@ Lưu đồ giải thuật tổng quát của bài kiểm thử được trình b
     \label{fig:dac_test_flowchart}
 \end{figure}
 
-Đối với bài kiểm tra sóng sine, dữ liệu analog thu được từ Logic Analyzer sẽ được chuyển đổi sang miền tần số bằng thuật toán FFT. Hệ thống tiến hành xác định đỉnh năng lượng chính và tính tỷ lệ năng lượng giữa thành phần tín hiệu chính với phần nhiễu còn lại trong phổ tần.
+Đối với bài kiểm tra sóng sine, dữ liệu analog thu được từ HIL Collector sẽ được chuyển đổi sang miền tần số bằng thuật toán FFT. Hệ thống tiến hành xác định đỉnh năng lượng chính và tính tỷ lệ năng lượng giữa thành phần tín hiệu chính với phần nhiễu còn lại trong phổ tần.
 
 Nếu tỷ lệ năng lượng này (SNR ratio) lớn hơn ngưỡng thực nghiệm đã xác định trước (300), tín hiệu được phân loại là sóng sine. Sau đó, hệ thống tiếp tục kiểm tra tần số đỉnh phổ có nằm trong khoảng sai số cho phép so với tần số mong đợi hay không.
 
@@ -329,16 +329,16 @@ Lưu đồ giải thuật chi tiết của quá trình xác minh sóng tam giác
 
 Mục đích của bài kiểm thử này là xác minh khả năng tạo tín hiệu điều chế độ rộng xung của DUT, đảm bảo firmware cấu hình đúng tần số và duty cycle của tín hiệu đầu ra theo yêu cầu thiết kế.
 
-Trong bài kiểm thử này, DUT đóng vai trò chủ động phát sinh tín hiệu PWM tại chân đầu ra được chỉ định. Hệ thống Logic Analyzer được sử dụng để thu thập trực tiếp tín hiệu số tại chân PWM, sau đó dữ liệu được xử lý để xác định tần số thực tế và độ rộng xung nhằm so sánh với giá trị mong đợi.
+Trong bài kiểm thử này, DUT đóng vai trò chủ động phát sinh tín hiệu PWM tại chân đầu ra được chỉ định. Hệ thống HIL Collector được sử dụng để thu thập trực tiếp tín hiệu số tại chân PWM, sau đó dữ liệu được xử lý để xác định tần số thực tế và độ rộng xung nhằm so sánh với giá trị mong đợi.
 
 Quy trình kiểm thử tổng quát bao gồm các bước sau:
 
 \begin{itemize}
-    \item Bước 1: Thiết lập môi trường kiểm thử bằng cách kết nối HIL, Logic Analyzer, cấp nguồn cho DUT và thiết lập kết nối với DUT.
+    \item Bước 1: Thiết lập môi trường kiểm thử bằng cách kết nối HIL Generator, HIL Collector, cấp nguồn cho DUT và thiết lập kết nối với DUT.
     \item Bước 2: DUT được cấu hình tần số PWM mong muốn thông qua lệnh thiết lập tần số.
     \item Bước 3: DUT được cấu hình duty cycle tương ứng cho kênh PWM cần kiểm tra.
     \item Bước 4: DUT bắt đầu phát tín hiệu PWM tại chân đầu ra.
-    \item Bước 5: Logic Analyzer thu thập dữ liệu tín hiệu số tại chân PWM trong khoảng thời gian xác định.
+    \item Bước 5: HIL Collector thu thập dữ liệu tín hiệu số tại chân PWM trong khoảng thời gian xác định.
     \item Bước 6: Hệ thống thực hiện phân tích dữ liệu thu được để xác định tần số thực tế và duty cycle của tín hiệu PWM.
     \item Bước 7: So sánh kết quả đo với giá trị mong đợi trong khoảng sai số cho phép.
     \item Bước 8: DUT dừng phát tín hiệu PWM sau khi hoàn tất kiểm tra.
@@ -361,7 +361,7 @@ Lưu đồ giải thuật tổng quát của bài kiểm thử được trình b
     \label{fig:pwm_test_flowchart}
 \end{figure}
 
-Trong bài kiểm thử này, Logic Analyzer thực hiện thu thập dữ liệu số tại chân PWM và tách riêng kênh digital tương ứng để phân tích. Thuật toán kiểm tra được xây dựng dựa trên phương pháp phát hiện cạnh lên nhằm xác định chu kỳ tín hiệu.
+Trong bài kiểm thử này, HIL Collector thực hiện thu thập dữ liệu số tại chân PWM và tách riêng kênh digital tương ứng để phân tích. Thuật toán kiểm tra được xây dựng dựa trên phương pháp phát hiện cạnh lên nhằm xác định chu kỳ tín hiệu.
 
 Từ vị trí các cạnh lên liên tiếp, hệ thống tính toán thời gian của nhiều chu kỳ PWM để xác định tần số thực tế của tín hiệu. Đồng thời, tỷ lệ thời gian mức logic cao trên toàn bộ chu kỳ được sử dụng để tính duty cycle thực tế.
 
