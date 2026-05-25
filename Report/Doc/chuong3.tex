@@ -24,7 +24,7 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{image/hw_block_diagram.jpg}
+    \includegraphics[width=1\textwidth]{image/hw_block_diagram.jpg}
     \caption{Sơ đồ khối tổng quát phần cứng của hệ thống}
     \label{fig:hw_block_diagram}
 \end{figure}
@@ -45,7 +45,7 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{image/hw_detail.jpg}
+    \includegraphics[width=1\textwidth]{image/hw_detail.jpg}
     \caption{Sơ đồ khối chi tiết phần cứng của hệ thống}
     \label{fig:hw_detail}
 \end{figure}
@@ -65,7 +65,7 @@ Bên cạnh đó cần đảm bảo khả năng vận hành và xử lý dữ li
     \caption{PCB của hệ thống HIL}
     \label{fig:pcb}
 \end{figure}
-Những khối chức năng chính trên chính trên hệ thống được thiết kế chi tiết như sau.
+Những khối chức năng chính trên chính trên hệ thống được thiết kế chi tiết như sau:
 \subsection{Khối nguồn}
 
 \begin{figure}[H]
@@ -84,7 +84,7 @@ Những khối chức năng chính trên chính trên hệ thống được thi�
 
 Vì HIL điều khiển nguồn cấp cho DUT nên cần thiết kế hai khối nguồn riêng biệt cho HIL và DUT.
 
-- Hệ thống được cấp nguồn với điện áp đầu vào 5V DC qua jack DC và được hạ xuống 3.3V để cung cấp cho khối HIL và các module khác.\\
+Hệ thống được cấp nguồn với điện áp đầu vào 5V DC qua jack DC và được hạ xuống 3.3V để cung cấp cho khối HIL gồm Generator và Collector và các module khác.\\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{image/hw_source_hil.jpg}
@@ -92,7 +92,7 @@ Vì HIL điều khiển nguồn cấp cho DUT nên cần thiết kế hai khối
     \label{fig:hw_source_hil}
 \end{figure}
 
-- Nguồn cung cấp cho DUT và các module liên quan cũng được hạ áp từ nguồn 5V đầu vào. Để HIL có thể điều khiển nguồn cho DUT, cần kết hợp mạch hạ áp với 1 khóa điện tử dùng MOSFET.\\
+Nguồn cung cấp cho DUT và các module liên quan cũng được hạ áp từ nguồn 5V đầu vào. Để HIL có thể điều khiển nguồn cho DUT, cần kết hợp mạch hạ áp với khóa điện tử dùng MOSFET.\\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{image/hw_source_dut.jpg}
@@ -104,7 +104,7 @@ Lúc này, $V_{GS}$ xấp xỉ 0V nên MOSFET ở trạng thái tắt, nguồn k
 Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở, nguồn được cấp cho DUT.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.3\textwidth]{image/power.jpg}
+    \includegraphics[width=0.32\textwidth]{image/power.jpg}
     \caption{Khối nguồn thực tế}
     \label{fig:power}
 \end{figure}
@@ -112,7 +112,7 @@ Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở
 \subsection{Khối HIL Generator}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{image/hil_block.jpg}
+    \includegraphics[width=0.8\textwidth]{image/hil_block.jpg}
     \caption{Sơ đồ mạch của HIL Generator}
     \label{fig:hil_block}
 \end{figure}
@@ -120,7 +120,7 @@ Lúc này, $V_{GS}$ xấp xỉ -5V < $V_{th}$ nên MOSFET ở trạng thái mở
 Vi điều khiển được sử dụng là STM32F407VET6 có tích hợp nhiều ngoại vi, phù hợp để mô phỏng các phần cứng cho mục đích kiểm thử DUT và giao tiếp với PC.
 
 Mạch bao gồm các tụ lọc nguồn nhằm ổn định điện áp hoạt động cho vi điều khiển. Bên cạnh đó, mạch còn bao gồm các khối cơ bản như DEBUGGER hỗ trợ lập trình và gỡ lỗi,
-khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...\\
+khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...
 
 % \begin{table}[H]
 % \centering
@@ -169,8 +169,7 @@ khối USB giao tiếp với PC, nút nhấn RESET, thạch anh,...\\
 \end{figure}
 
 Vi điều khiển được sử dụng là module Rasberry Pi Pico hoạt động như một logic analyzer hoặc oscilloscope, có nhiệm vụ thu thập và xử lý tín hiệu analog, digital từ DUT. Sau đó gửi dữ liệu thu được lên PC qua giao tiếp USB để 
-thực hiện các test case liên quan đến việc xử lý tín hiệu như kiểm tra tần số,...
-
+thực hiện các test case liên quan đến việc xử lý tín hiệu như kiểm tra tần số, độ rộng xung,\dots
 Mạch cũng được bao gồm nút nhấn RESET, debug led, các tụ lọc nguồn nhằm ổn định điện áp hoạt động cho module. \\
 
 % \begin{table}[H]
@@ -194,24 +193,22 @@ Mạch cũng được bao gồm nút nhấn RESET, debug led, các tụ lọc ng
 \subsection{Khối giao tiếp CAN}
 \begin{figure}[H]
     \centering
-    \begin{minipage}[t]{0.48\textwidth}
+    \begin{minipage}[t]{0.49\textwidth}
         \centering
-        \captionsetup{width=6cm, justification=centering}
         \includegraphics[width=\textwidth]{image/can_hil.jpg}
-        \caption{Sơ đồ mạch giao tiếp CAN của HIL}
         \label{fig:can_hil}
     \end{minipage}
     \hfill
-    \begin{minipage}[t]{0.48\textwidth}
+    \begin{minipage}[t]{0.49\textwidth}
         \centering
-        \captionsetup{width=6cm, justification=centering}
         \includegraphics[width=\textwidth]{image/can_dut.jpg}
-        \caption{Sơ đồ mạch giao tiếp CAN của DUT}
         \label{fig:can_dut}
     \end{minipage}
+    \vspace{-10pt}
+    \caption{Sơ đồ mạch giao tiếp CAN của HIL và DUT}
 \end{figure}
 
-Vi điều khiển 1 của HIL và DUT đều sử dụng giao tiếp CAN để trao đổi dữ liệu. 
+HIL Generator và DUT đều sử dụng giao tiếp CAN để trao đổi dữ liệu. 
 Vì vậy, cần thiết kế mạch giao tiếp CAN sử dụng IC Transciever CAN SN65HVD230DR để chuyển đổi tín hiệu CAN từ mức logic của vi điều khiển sang mức tín hiệu CAN vi sai CANH/CANL.
 
 Tín hiệu từ mỗi vi điều khiển được kết nối với các điện trở hạn dòng 22$\Omega$ giúp ổn định tín hiệu. Bên cạnh đó, hai transciever được kết nối qua cặp dây CANH và CANL với các điện trở matching 120$\Omega$ giúp đảm bảo trở kháng đường truyền và hạn chế phản xạ tín hiệu.
