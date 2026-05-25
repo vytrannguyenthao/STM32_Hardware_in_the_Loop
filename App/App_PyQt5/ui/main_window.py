@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QIcon
 
 from core.uart_thread import UARTThread
-from ui.tabs.memory_tab import MemoryTab
+# from ui.tabs.memory_tab import MemoryTab
 from ui.tabs.logic_tab import LogicTab
 from ui.tabs.peripheral_tab import PeripheralTab
 
@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(splitter)
 
         # Setup Tabs
-        self.memory_tab = MemoryTab(self.uart_dut, self.uart_hil)
+        # self.memory_tab = MemoryTab(self.uart_dut, self.uart_hil)
         self.logic_tab = LogicTab(self.uart_logic)
         self.peripheral_tab = PeripheralTab(self.uart_dut, self.uart_hil)
 
@@ -116,8 +116,8 @@ class MainWindow(QMainWindow):
     def build_center(self):
         tabs = QTabWidget()
         tabs.addTab(self.peripheral_tab, "Generator")
-        tabs.addTab(self.logic_tab, "Logic Analyzer")
-        tabs.addTab(self.memory_tab, "Memory Emu")
+        tabs.addTab(self.logic_tab, "Collector")
+        # tabs.addTab(self.memory_tab, "Memory Emu")
         return tabs
 
     # ================== UI HELPER WIDGETS ==================
