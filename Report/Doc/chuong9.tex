@@ -769,7 +769,7 @@ SPI3
 & Thiết lập trạng thái chân BOOT0 của DUT. \\
 \hline
 
-\multicolumn{3}{|c|}{\textbf{Flash SPI}} \\
+\multicolumn{3}{|c|}{\textbf{SPI Flash}} \\
 \hline
 
 6
@@ -1084,14 +1084,12 @@ Người dùng sẽ được cung cấp các nút nhấn trên giao diện để
 \textbf{Nhận xét:} Các khối điều khiển tạo tín hiệu trên phần mềm đã hoạt động đúng với thiết kế, hỗ trợ người dùng dử dụng những ngoại vi cần thiết cho quá tình kiểm thử cho thiết bị DUT.
 
 \subsection{Kết quả giao diện Collector Tab}
-\clearpage
-\begin{sidewaysfigure}
+\begin{figure}[H]
     \centering
-    \includegraphics[width=\textheight]{image/app_la_result.jpg}
+    \includegraphics[angle=90, width=0.8\textwidth]{image/app_la_result.jpg}
     \caption{Collector thu thập dữ liệu và hiển thị lên giao diện}
     \label{fig:app_la_result}
-\end{sidewaysfigure}
-\clearpage
+\end{figure}
 \textbf{Nhận xét:} Phần mềm đã thu thập dữ liệu từ HIL Collector sau đó vẽ lại dạng sóng tương ứng với các kênh tín hiệu.
 Đối với kênh digital đã đo được tần số và độ rộng xung. Đối với kênh analog, đã đo được tần số, $V_{pp}$ và điện áp tại vị trí con trỏ.
 
