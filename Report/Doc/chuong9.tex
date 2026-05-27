@@ -1019,12 +1019,15 @@ Giao diện chính của phần mềm được tổ chức dưới dạng các t
     \item \textbf{Generator Tab}: Hỗ trợ người dùng thao tác với các thiết bị ngoại vi khác như PWM, GPIO, DAC,... để kiểm thử DUT.
     \item \textbf{Collector Tab}: Hiển thị tín hiệu digital, analog giúp người dùng có thể quan sát và phân tích các tín hiệu như tần số, dạng sóng,...
 \end{itemize}
-\begin{figure}[H]
+
+\clearpage
+\begin{sidewaysfigure}
     \centering
-    \includegraphics[angle=90, height=0.96\textheight, keepaspectratio]{image/PC_GUI.png}
+    \includegraphics[width=\textheight]{image/PC_GUI.png}
     \caption{Giao diện chính của phần mềm trên máy tính}
     \label{fig:PC_GUI}
-\end{figure}
+\end{sidewaysfigure}
+\clearpage
 
 \subsection{Kết quả điều khiển nguồn cho DUT}
 Người dùng sẽ được cung cấp các nút nhấn trên giao diện để điều khiển nguồn cho DUT.
@@ -1081,12 +1084,14 @@ Người dùng sẽ được cung cấp các nút nhấn trên giao diện để
 \textbf{Nhận xét:} Các khối điều khiển tạo tín hiệu trên phần mềm đã hoạt động đúng với thiết kế, hỗ trợ người dùng dử dụng những ngoại vi cần thiết cho quá tình kiểm thử cho thiết bị DUT.
 
 \subsection{Kết quả giao diện Collector Tab}
-\begin{figure}[H]
+\clearpage
+\begin{sidewaysfigure}
     \centering
-    \includegraphics[angle=90, width=0.8\textwidth]{image/app_la_result.jpg}
+    \includegraphics[width=\textheight]{image/app_la_result.jpg}
     \caption{Collector thu thập dữ liệu và hiển thị lên giao diện}
     \label{fig:app_la_result}
-\end{figure}
+\end{sidewaysfigure}
+\clearpage
 \textbf{Nhận xét:} Phần mềm đã thu thập dữ liệu từ HIL Collector sau đó vẽ lại dạng sóng tương ứng với các kênh tín hiệu.
 Đối với kênh digital đã đo được tần số và độ rộng xung. Đối với kênh analog, đã đo được tần số, $V_{pp}$ và điện áp tại vị trí con trỏ.
 
@@ -1130,176 +1135,176 @@ Với cách tổ chức này, các thành phần trong hệ thống được ph�
 Các keyword được xây dựng trong hệ thống kiểm thử tự động đóng vai trò là lớp giao tiếp trung gian giữa Robot Framework với hệ thống HIL Generator và HIL Collector. Thay vì thao tác trực tiếp với các lệnh điều khiển mức thấp, người phát triển chỉ cần sử dụng các keyword tương ứng để xây dựng các test case theo dạng mô tả hành vi kiểm thử.
 
 Bảng \ref{tab:hil_keywords} và Bảng \ref{tab:la_keywords} trình bày các keyword tiêu biểu được hỗ trợ trong hệ thống kiểm thử.
-
+\renewcommand{\arraystretch}{1.3}
 \renewcommand{\arraystretch}{1.3}
 
-\begin{longtable}{|p{4.8cm}|p{8.7cm}|}
+\begin{longtable}{|c|p{4.8cm}|p{7.8cm}|}
 \caption{Các keyword hỗ trợ bởi thư viện HIL Generator}
 \label{tab:hil_keywords} \\
 
 \hline
-\textbf{Keyword} & \textbf{Chức năng} \\
+\textbf{STT} & \textbf{Keyword} & \textbf{Chức năng} \\
 \hline
 \endfirsthead
 
 \hline
-\textbf{Keyword} & \textbf{Chức năng} \\
+\textbf{STT} & \textbf{Keyword} & \textbf{Chức năng} \\
 \hline
 \endhead
 
-\multicolumn{2}{|c|}{\textbf{Kết nối và điều khiển DUT}} \\
+\multicolumn{3}{|c|}{\textbf{Kết nối và điều khiển DUT}} \\
 \hline
 
-Connect HIL
+1 & Connect HIL
 & Thiết lập kết nối giữa PC và hệ thống HIL thông qua USB serial. \\
 \hline
 
-Disconnect HIL
+2 & Disconnect HIL
 & Ngắt kết nối giữa PC và hệ thống HIL. \\
 \hline
 
-Verify HIL Alive
+3 & Verify HIL Alive
 & Kiểm tra khả năng phản hồi và trạng thái hoạt động của HIL. \\
 \hline
 
-HIL Power DUT On
+4 & HIL Power DUT On
 & Cấp nguồn cho DUT thông qua HIL. \\
 \hline
 
-HIL Power DUT Off
+5 & HIL Power DUT Off
 & Ngắt nguồn DUT thông qua HIL. \\
 \hline
 
-HIL Power DUT Cycle
+6 & HIL Power DUT Cycle
 & Thực hiện reset nguồn DUT bằng cách tắt và cấp nguồn lại. \\
 \hline
 
-HIL Flash Firmware for DUT
+7 & HIL Flash Firmware for DUT
 & Nạp firmware cho DUT thông qua chế độ DFU sử dụng STM32CubeProgrammer CLI. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{GPIO}} \\
+\multicolumn{3}{|c|}{\textbf{GPIO}} \\
 \hline
 
-HIL Set GPIO
+8 & HIL Set GPIO
 & Thiết lập trạng thái logic cho chân GPIO mô phỏng. \\
 \hline
 
-HIL Read GPIO
+9 & HIL Read GPIO
 & Đọc trạng thái logic của chân GPIO từ DUT. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{UART}} \\
+\multicolumn{3}{|c|}{\textbf{UART}} \\
 \hline
 
-HIL Init UART
+10 & HIL Init UART
 & Khởi tạo giao tiếp UART trên HIL. \\
 \hline
 
-HIL Send UART String
+11 & HIL Send UART String
 & Gửi chuỗi dữ liệu UART đến DUT. \\
 \hline
 
-HIL Read UART Data
+12 & HIL Read UART Data
 & Đọc dữ liệu UART phản hồi từ DUT. \\
 \hline
 
-HIL Verify UART String
+13 & HIL Verify UART String
 & Kiểm tra tính đúng đắn của chuỗi UART nhận được. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{CAN}} \\
+\multicolumn{3}{|c|}{\textbf{CAN}} \\
 \hline
 
-HIL Send CAN Buffer
+14 & HIL Send CAN Buffer
 & Gửi dữ liệu CAN dạng buffer đến DUT. \\
 \hline
 
-HIL Send CAN String
+15 & HIL Send CAN String
 & Gửi chuỗi dữ liệu thông qua giao tiếp CAN. \\
 \hline
 
-HIL Read CAN Data
+16 & HIL Read CAN Data
 & Đọc dữ liệu phản hồi từ giao tiếp CAN. \\
 \hline
 
-HIL Verify CAN String Data
+17 & HIL Verify CAN String Data
 & Kiểm tra tính đúng đắn của chuỗi dữ liệu CAN nhận được. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{I2C EEPROM}} \\
+\multicolumn{3}{|c|}{\textbf{I2C EEPROM}} \\
 \hline
 
-HIL Init EEPROM
+18 & HIL Init EEPROM
 & Khởi tạo EEPROM mô phỏng trên bus I2C. \\
 \hline
 
-HIL Deinit EEPROM
+19 & HIL Deinit EEPROM
 & Giải phóng EEPROM mô phỏng khỏi hệ thống HIL. \\
 \hline
 
-HIL Find EEPROM
+20 & HIL Find EEPROM
 & Kiểm tra sự tồn tại của EEPROM trên bus I2C. \\
 \hline
 
-HIL Activate I2C Device
+21 & HIL Activate I2C Device
 & Kích hoạt thiết bị I2C mô phỏng trên HIL. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{I2C RTC}} \\
+\multicolumn{3}{|c|}{\textbf{I2C RTC}} \\
 \hline
 
-HIL Init RTC
+22 & HIL Init RTC
 & Khởi tạo RTC mô phỏng trên bus I2C. \\
 \hline
 
-HIL Prepare RTC Time
+23 & HIL Prepare RTC Time
 & Thiết lập thời gian cho RTC mô phỏng. \\
 \hline
 
-HIL Get RTC Time
+24 & HIL Get RTC Time
 & Đọc giá trị thời gian hiện tại từ RTC mô phỏng. \\
 \hline
 
-HIL Set RTC Date
+25 & HIL Set RTC Date
 & Thiết lập ngày tháng cho RTC mô phỏng. \\
 \hline
 
-HIL Get RTC Date
+26 & HIL Get RTC Date
 & Đọc ngày tháng hiện tại từ RTC mô phỏng. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{SPI Flash}} \\
+\multicolumn{3}{|c|}{\textbf{SPI Flash}} \\
 \hline
 
-HIL Prepare SPI Flash Data
+27 & HIL Prepare SPI Flash Data
 & Chuẩn bị dữ liệu mẫu trong SPI Flash để DUT thực hiện đọc dữ liệu. \\
 \hline
 
-\multicolumn{2}{|c|}{\textbf{ADC/DAC}} \\
+\multicolumn{3}{|c|}{\textbf{ADC/DAC}} \\
 \hline
 
-HIL Read ADC Voltage
+28 & HIL Read ADC Voltage
 & Đọc giá trị điện áp ADC đo được từ HIL. \\
 \hline
 
-HIL Set DAC Voltage
+29 & HIL Set DAC Voltage
 & Thiết lập điện áp DAC đầu ra của HIL. \\
 \hline
 
-HIL Generate Sine Wave
+30 & HIL Generate Sine Wave
 & Tạo tín hiệu sóng sine phục vụ kiểm thử DAC hoặc ADC. \\
 \hline
 
-HIL Stop Sine Wave
+31 & HIL Stop Sine Wave
 & Dừng phát tín hiệu sóng sine. \\
 \hline
 
-HIL Generate Triangle Wave
+32 & HIL Generate Triangle Wave
 & Tạo tín hiệu tam giác phục vụ kiểm thử DAC hoặc ADC. \\
 \hline
 
-HIL Stop Triangle Wave
+33 & HIL Stop Triangle Wave
 & Dừng phát tín hiệu tam giác. \\
 \hline
 
@@ -1309,34 +1314,39 @@ HIL Stop Triangle Wave
 \centering
 \caption{Các keyword hỗ trợ bởi thư viện HIL Collector}
 \label{tab:la_keywords}
-\renewcommand{\arraystretch}{1.3}
 
-\begin{tabular}{|p{5cm}|p{8.5cm}|}
+\begin{tabular}{|c|p{5cm}|p{7.5cm}|}
 \hline
-\textbf{Keyword} & \textbf{Chức năng} \\
+\textbf{STT} & \textbf{Keyword} & \textbf{Chức năng} \\
 \hline
 
-Connect Logic Analyzer
+1
+& Connect Logic Analyzer
 & Thiết lập kết nối với Logic Analyzer thông qua USB serial. \\
 \hline
 
-Disconnect Logic Analyzer
+2
+& Disconnect Logic Analyzer
 & Ngắt kết nối với Logic Analyzer. \\
 \hline
 
-LA Read Data
+3
+& LA Read Data
 & Thu thập dữ liệu tín hiệu từ Logic Analyzer. \\
 \hline
 
-LA Verify Sine Wave
+4
+& LA Verify Sine Wave
 & Phân tích FFT để xác minh tín hiệu tương tự dạng sóng sine và kiểm tra tần số tín hiệu. \\
 \hline
 
-LA Verify Pulse Wave
+5
+& LA Verify Pulse Wave
 & Phân tích tín hiệu số nhằm xác định tần số và duty cycle của tín hiệu PWM hoặc sóng vuông. \\
 \hline
 
-LA Verify Triangle Wave
+6
+& LA Verify Triangle Wave
 & Phân tích phổ hài để xác minh tín hiệu tương tự dạng sóng tam giác. \\
 \hline
 
