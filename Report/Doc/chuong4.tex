@@ -229,9 +229,9 @@ Khi hệ thống hoạt động, chương trình sẽ kiểm tra lệnh cần x�
 Đối với dữ liệu dạng buffer, HIL Generator sẽ gửi toàn bộ khối dữ liệu có kích thước 256 byte thông qua giao thức UART hoặc CAN với các giá trị tăng dần từ 0x00 $\rightarrow$ 0xFF và lặp lại.
 Trong trường hợp dữ liệu cần truyền là chuỗi ký tự, hệ thống sẽ gửi chuỗi được nhập đó đến DUT. Sau khi hoàn tất quá trình truyền, hệ thống chuyển sang trạng thái kết thúc truyền và sẵn sàng cho các yêu cầu tiếp theo.
 
-Đối với lệnh truyền dữ liệu, chương trình sẽ kiểm tra trạng thái của buffer nhận để xác định có dữ liệu mới hay không. Nếu buffer chưa có dữ liệu, quá trình đọc sẽ kết thúc.
+Đối với lệnh đọc dữ liệu, chương trình sẽ kiểm tra trạng thái của buffer nhận để xác định có dữ liệu mới hay không. Nếu buffer chưa có dữ liệu, quá trình đọc sẽ kết thúc.
 Nếu buffer đã chứa dữ liệu, chương trình sẽ lấy dữ liệu từ buffer và hiển thị ra console nhằm phục vụ cho mục đích giám sát.
-Dữ liệu sẽ được ghi vào buffer trong quá trinh ngắt. Nếu buffer chưa đầy, dữ liệu mới sẽ được lưu vào buffer đồng thời cập nhật các pointer quản lý vị trí đọc và ghi.
+Dữ liệu sẽ được ghi vào buffer trong quá trình ngắt. Nếu buffer chưa đầy, dữ liệu mới sẽ được lưu vào buffer đồng thời cập nhật các pointer quản lý vị trí đọc và ghi.
 Trong trường hợp buffer bị tràn, hệ thống sẽ ghi đè dữ liệu cũ của buffer.
 
 Cơ chế ngắt nhận dữ liệu sẽ được phần cứng tự động kích hoạt mỗi khi có một khung truyền được gửi đến. Tuy nhiên dựa vào Hình \ref{fig:uart_frame} và Hình \ref{fig:can_frame} có thể thấy UART và CAN có khung truyền khác nhau.
